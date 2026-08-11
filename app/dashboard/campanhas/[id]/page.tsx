@@ -44,9 +44,15 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
     getCampaignRegionBreakdown(campaign.id),
   ]);
 
+  const taxaConversaoMeetime =
+    summary.total_empresas > 0
+      ? Math.round((summary.criados_meetime / summary.total_empresas) * 100)
+      : 0;
+
   const tiles = [
     { label: "Empresas submetidas", value: summary.total_empresas },
     { label: "Criados na Meetime", value: summary.criados_meetime },
+    { label: "Taxa de conversão para Meetime", value: `${taxaConversaoMeetime}%` },
     { label: "Perdidas", value: summary.perdidos },
   ];
 
@@ -62,7 +68,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         </p>
       </div>
 
-      <section className="grid gap-4 sm:grid-cols-3">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {tiles.map((tile) => (
           <div
             key={tile.label}
