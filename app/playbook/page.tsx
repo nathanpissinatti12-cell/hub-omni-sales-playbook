@@ -32,6 +32,27 @@ const PRODUCT = {
   ],
 };
 
+// Passo a passo público em web.takeflow.com.br (seção "Como Funciona") — use
+// para explicar ao prospect o que acontece depois da assinatura, sem
+// prometer prazo específico (não há prazo publicado).
+const IMPLEMENTATION_STEPS = [
+  { title: "Conecte seus canais", detail: "Adicione os números de WhatsApp via QR Code ou API oficial." },
+  { title: "Configure setores", detail: "Organize a equipe em departamentos com horários de atendimento." },
+  { title: "Crie seus fluxos", detail: "Use o editor visual drag-and-drop com os 30+ nós disponíveis." },
+  { title: "Escale seu atendimento", detail: "Acompanhe métricas em tempo real e ajuste o fluxo conforme o volume cresce." },
+];
+
+// O site não publica tabela de preço — a frase oficial é usada de propósito
+// aqui para o vendedor citar com segurança em vez de improvisar.
+const PRICING_MODEL = {
+  quote: "“Seu plano sai do seu processo, não de uma tabela.”",
+  explainer:
+    "O TakeFlow não vende por plano fixo. O preço é definido depois do Diagnóstico, com base no fluxo desenhado e no escopo de implantação. Nunca estime valor antes do diagnóstico — a chamada correta é “falar com um especialista”.",
+};
+
+const NO_PUBLIC_PROOF_WARNING =
+  "O site não divulga nomes de clientes, estudos de caso com números específicos, nem selo oficial de parceria Meta/WhatsApp — apenas a integração com a API oficial. Não afirme ter certificação oficial da Meta nem cite cliente específico sem confirmar antes com o time de marketing/comercial.";
+
 const SEGMENTS = [
   {
     name: "Serviços profissionais",
@@ -241,6 +262,49 @@ export default function PlaybookPage() {
             ))}
           </dl>
         </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Como funciona a implantação</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          O que acontece depois que o contrato é assinado — use para responder "e depois que eu
+          fechar, como funciona?" sem prometer prazo específico (o site não publica prazo).
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {IMPLEMENTATION_STEPS.map((step, i) => (
+            <div
+              key={step.title}
+              className="rounded-lg border p-4"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              <span
+                className="flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold text-white"
+                style={{ background: "var(--accent)" }}
+              >
+                {i + 1}
+              </span>
+              <h3 className="mt-2 font-medium">{step.title}</h3>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>{step.detail}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section
+        className="space-y-2 rounded-lg border p-4"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        <h2 className="text-lg font-semibold">Como funciona o preço</h2>
+        <p className="text-sm font-medium" style={{ color: "var(--accent)" }}>{PRICING_MODEL.quote}</p>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>{PRICING_MODEL.explainer}</p>
+      </section>
+
+      <section
+        className="space-y-2 rounded-lg border p-4 text-sm"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        <h2 className="font-semibold">Atenção ao usar prova social</h2>
+        <p style={{ color: "var(--text-muted)" }}>{NO_PUBLIC_PROOF_WARNING}</p>
       </section>
 
       <section

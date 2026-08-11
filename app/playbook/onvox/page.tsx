@@ -30,6 +30,88 @@ const PRODUCT = {
   ],
 };
 
+// Site oficial é onvox.com.br (a landing lp.onvox.com.br usada na primeira
+// pesquisa saiu do ar) — as três soluções abaixo vêm de onvox.com.br/solucoes/.
+const SOLUTIONS = [
+  {
+    name: "Telefonia em Nuvem (UCaaS)",
+    features: [
+      "Ramais móveis para comunicação remota",
+      "Autoatendimento com URA (resposta automática)",
+      "Relatórios e gravação de chamadas",
+      "Mais de 100 funcionalidades avançadas",
+      "Qualidade de áudio HD com alta disponibilidade",
+    ],
+    fit: "Empresas que precisam de flexibilidade para trabalho remoto, querem eliminar custo de equipamento físico e precisam escalar ramais conforme crescem.",
+  },
+  {
+    name: "Omnichannel",
+    features: [
+      "Gestão integrada de WhatsApp, redes sociais e chat online",
+      "Transição entre canais sem perder o contexto da conversa",
+      "Histórico de atendimento centralizado",
+      "Monitoramento de desempenho em tempo real",
+      "Automação com chatbots",
+    ],
+    fit: "Empresas que atendem em vários canais hoje (WhatsApp, redes sociais, SMS) espalhados em ferramentas diferentes e querem centralizar tudo em um painel só.",
+  },
+  {
+    name: "Módulo Call Center",
+    features: [
+      "Filas de espera inteligentes com priorização",
+      "Relatórios detalhados em tempo real",
+      "Gravação de chamadas para auditoria",
+      "Dashboard ao vivo do fluxo de atendimento",
+      "Distribuição automática de chamadas (ACD)",
+    ],
+    fit: "Centrais de atendimento e times de suporte que precisam de controle rígido de qualidade, métricas de performance e conformidade — não é só \"telefonia\", é gestão de operação.",
+  },
+];
+
+// Valores publicados em onvox.com.br/planos-precos/ — confirmar condição
+// final (descontos por volume, fidelidade, setup) com o time comercial antes
+// de fechar, a página só cita "condições especiais para times maiores".
+const PRICING = [
+  {
+    name: "Enterprise",
+    price: "a partir de R$ 70/usuário/mês",
+    description: "Telefonia empresarial completa e escalável.",
+    includes: [
+      "Ligações internas ilimitadas via UCaaS (sem infraestrutura física)",
+      "SIP Trunking com integração a sistemas de PABX IP",
+      "URA inteligente para roteamento automático de chamadas",
+      "Call Center completo com filas e monitoramento em tempo real",
+      "Tarifas nacionais e internacionais",
+      "Atendimento omnichannel (WhatsApp, e-mail, chat, redes sociais)",
+      "Chamadas criptografadas com monitoramento contínuo",
+    ],
+  },
+  {
+    name: "Ultimate",
+    price: "a partir de R$ 84/usuário/mês",
+    description: "Tudo do Enterprise + videoconferência profissional para comunicação unificada.",
+    includes: [
+      "Videoconferência HD ilimitada",
+      "Compartilhamento de tela para apresentações",
+      "Gravação de chamadas e reuniões",
+      "Integração com agenda corporativa (Google Calendar, Outlook)",
+      "Links de acesso personalizados para convidados",
+    ],
+  },
+];
+
+const COMPANY = {
+  history:
+    "A Onvox nasceu de mais de uma década de experiência no setor de telecomunicações — foram 7 anos como parceira de grandes players internacionais antes de desenvolver a solução própria, adaptada ao mercado brasileiro, há cerca de 7 anos.",
+  numbers: [
+    { label: "Países com presença", value: "120+" },
+    { label: "Usuários", value: "450 mil+" },
+    { label: "Canais globais", value: "9 mil+" },
+    { label: "PABX instalados", value: "25 mil+" },
+  ],
+  why: "Números publicados pela própria Onvox em onvox.com.br (seção \"Nossos números\") — use como prova de escala real da operação ao apresentar a plataforma, principalmente para prospects preocupados com a solidez do fornecedor de telefonia (é uma migração de infraestrutura crítica, o prospect quer saber se a empresa por trás é sólida).",
+};
+
 const SEGMENTS = [
   {
     name: "Call centers e centrais de atendimento",
@@ -177,7 +259,7 @@ const OBJECTIONS = [
   {
     question: "Qual o investimento mensal para o nosso número de ramais?",
     answer:
-      "Não há tabela de preços pública — o caminho é levar para demonstração e proposta personalizada, nunca tentar estimar valor de cabeça.",
+      "A partir de R$ 70/usuário/mês no plano Enterprise, ou R$ 84/usuário/mês no Ultimate (com videoconferência). Há condições especiais para times maiores — confirmar desconto por volume com o comercial antes de prometer valor fechado.",
   },
 ];
 
@@ -235,6 +317,79 @@ export default function OnvoxPlaybookPage() {
               </div>
             ))}
           </dl>
+        </div>
+      </section>
+
+      <section
+        className="space-y-4 rounded-lg border p-4"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        <h2 className="text-lg font-semibold">Por que confiar na Onvox (use na abertura ou em objeção de credibilidade)</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>{COMPANY.history}</p>
+        <div className="grid gap-4 sm:grid-cols-4">
+          {COMPANY.numbers.map((n) => (
+            <div key={n.label}>
+              <p className="text-xl font-semibold" style={{ color: "var(--accent)" }}>{n.value}</p>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>{n.label}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>{COMPANY.why}</p>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">As 3 soluções Onvox</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          O Onvox não é só "PABX em nuvem" — são três frentes que podem ser vendidas juntas ou
+          separadas, dependendo da dor do prospect. Identifique qual delas resolve o problema
+          principal antes de tentar vender as três de uma vez.
+        </p>
+        <div className="grid gap-4 lg:grid-cols-3">
+          {SOLUTIONS.map((s) => (
+            <div
+              key={s.name}
+              className="rounded-lg border p-4"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              <h3 className="font-medium">{s.name}</h3>
+              <ul className="mt-2 list-disc space-y-1 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
+                {s.features.map((f) => (
+                  <li key={f}>{f}</li>
+                ))}
+              </ul>
+              <p className="mt-3 text-sm">
+                <span className="font-medium">Indicado para: </span>
+                <span style={{ color: "var(--text-muted)" }}>{s.fit}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Planos e preços</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Diferente do que constava numa versão anterior deste playbook, o Onvox publica preço
+          de tabela — use como âncora inicial na conversa, mas confirme sempre condições de
+          volume/desconto com o comercial antes de fechar.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {PRICING.map((p) => (
+            <div
+              key={p.name}
+              className="rounded-lg border p-4"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              <h3 className="font-medium">{p.name}</h3>
+              <p className="mt-1 text-lg font-semibold" style={{ color: "var(--accent)" }}>{p.price}</p>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>{p.description}</p>
+              <ul className="mt-3 list-disc space-y-1 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
+                {p.includes.map((i) => (
+                  <li key={i}>{i}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
       </section>
 

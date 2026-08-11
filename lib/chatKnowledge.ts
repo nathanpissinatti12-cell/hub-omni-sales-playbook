@@ -19,6 +19,23 @@ Diferenciais:
 - Interface 100% visual, sem código
 - Integrações: N8N, webhooks, OpenAI, bancos de dados
 
+## Como funciona a implantação (depois do contrato assinado)
+1. Conecte seus canais — adicione os números de WhatsApp via QR Code ou API oficial.
+2. Configure setores — organize a equipe em departamentos com horários de atendimento.
+3. Crie seus fluxos — editor visual drag-and-drop com 30+ nós.
+4. Escale seu atendimento — acompanhe métricas em tempo real e ajuste o fluxo conforme o volume cresce.
+Não há prazo de implantação publicado — não prometer prazo específico sem confirmar com o time técnico.
+
+## Como funciona o preço
+O TakeFlow NÃO tem tabela de planos fixa. Frase oficial do site: "Seu plano sai do seu
+processo, não de uma tabela." O preço é definido depois do Diagnóstico, com base no fluxo
+desenhado e no escopo de implantação. Nunca estimar valor antes do diagnóstico.
+
+## Atenção ao usar prova social
+O site não divulga nomes de clientes, estudos de caso com números específicos, nem selo
+oficial de parceria Meta/WhatsApp (só integração com a API oficial). Não afirmar ter
+certificação oficial da Meta nem citar cliente específico sem confirmar antes.
+
 ## Gatilho de urgência: nova cobrança da Meta (out/2026)
 A partir de outubro de 2026, a Meta passa a cobrar por mensagem em conversas de suporte
 no WhatsApp Business API — hoje isso é gratuito. Mensagem recebida do cliente continua
@@ -81,6 +98,37 @@ Diferenciais:
 - Integração com CRMs, ERPs e Microsoft Teams
 - Painel de gestão online com métricas em tempo real
 
+## Por que confiar na Onvox (credibilidade da empresa)
+A Onvox nasceu de mais de uma década de experiência em telecomunicações — 7 anos como
+parceira de grandes players internacionais antes de desenvolver solução própria adaptada
+ao mercado brasileiro, há cerca de 7 anos. Números publicados pela própria Onvox (seção
+"Nossos números" do site): presença em mais de 120 países, mais de 450 mil usuários, mais
+de 9 mil canais globais, mais de 25 mil PABX instalados.
+
+## As 3 soluções Onvox
+O Onvox não é só "PABX em nuvem" — são 3 frentes que podem ser vendidas juntas ou
+separadas, dependendo da dor do prospect:
+1. Telefonia em Nuvem (UCaaS): ramais móveis, URA (autoatendimento), relatórios e
+   gravação de chamadas, 100+ funcionalidades avançadas, áudio HD com alta
+   disponibilidade. Indicado para quem precisa de flexibilidade remota e quer eliminar
+   custo de equipamento físico.
+2. Omnichannel: gestão integrada de WhatsApp, redes sociais e chat online, transição
+   entre canais sem perder contexto, histórico centralizado, automação com chatbots.
+   Indicado para quem atende em vários canais espalhados hoje e quer centralizar.
+3. Módulo Call Center: filas inteligentes com priorização, relatórios em tempo real,
+   gravação para auditoria, dashboard ao vivo, distribuição automática de chamadas (ACD).
+   Indicado para centrais de atendimento que precisam de controle rígido de qualidade.
+
+## Planos e preços
+- Enterprise: a partir de R$ 70/usuário/mês. Inclui ligações internas ilimitadas via
+  UCaaS, SIP Trunking, URA inteligente, Call Center completo com filas e monitoramento,
+  tarifas nacionais/internacionais, atendimento omnichannel, chamadas criptografadas.
+- Ultimate: a partir de R$ 84/usuário/mês. Tudo do Enterprise + videoconferência HD
+  ilimitada, compartilhamento de tela, gravação de chamadas/reuniões, integração com
+  agenda corporativa (Google Calendar, Outlook), links de acesso para convidados.
+- Há condições especiais para times maiores — confirmar desconto por volume com o
+  comercial antes de fechar valor.
+
 ## Segmentos-alvo (ICP)
 - Call centers e centrais de atendimento: custo alto de infraestrutura física de PABX e dificuldade de escalar ramais rapidamente
 - PMEs em geral: tarifas de telefonia elevadas e falta de mobilidade — atendimento preso a uma linha física
@@ -115,7 +163,7 @@ Diferenciais:
 - "Dá para portar os números de telefone atuais?" → Ponto a confirmar com o time técnico/comercial antes da proposta — não assumir prazo ou viabilidade sem validar caso a caso.
 - "Quanto tempo leva para migrar do PABX atual para o Onvox?" → Não há prazo público — levantar com o time de implantação e comunicar prazo real na proposta, não na primeira ligação.
 - "Isso integra com o CRM/ERP que já usamos?" → A plataforma anuncia integração com CRMs, ERPs e Microsoft Teams. Validar a ferramenta específica do prospect com o time técnico antes de confirmar.
-- "Qual o investimento mensal para o nosso número de ramais?" → Não há tabela de preços pública — o caminho é levar para demonstração e proposta personalizada, nunca tentar estimar valor de cabeça.
+- "Qual o investimento mensal para o nosso número de ramais?" → A partir de R$ 70/usuário/mês (Enterprise) ou R$ 84/usuário/mês (Ultimate, com videoconferência). Há condições especiais para times maiores — confirmar desconto por volume com o comercial.
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do
