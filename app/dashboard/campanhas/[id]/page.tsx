@@ -28,9 +28,7 @@ const LEAD_STATUS_LABELS: Record<string, string> = {
   "sem contato": "Sem contato encontrado",
   "sem decisor": "Sem decisor identificado",
   "sem pessoas": "Sem pessoas na empresa",
-  "sem email valido": "Sem e-mail válido",
-  "Adicionado na Planilha": "Adicionado na planilha",
-  "Adionano na Planilha": "Adicionado na planilha (registro com erro de digitação na origem)",
+  "sem email valido": "Sem e-mail válido (inclui registros antigos marcados como \"Adicionado na Planilha\")",
   "Não classificado": "Ainda não classificado",
 };
 

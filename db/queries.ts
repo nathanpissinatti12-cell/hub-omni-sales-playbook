@@ -98,7 +98,23 @@ export type RegionRow = {
   total: number;
 };
 
-const LOSS_STATUSES = ["sem contato", "sem decisor", "sem pessoas", "sem email valido"];
+// "Adicionado na Planilha" / "Adionano na Planilha" (typo de uma versão antiga do
+// fluxo n8n) são o mesmo resultado que "sem email valido": nenhuma fonte achou um
+// e-mail válido pro decisor, então o lead foi pra planilha de acompanhamento manual.
+// O fluxo já foi corrigido para gravar só "sem email valido" daqui pra frente, mas
+// registros antigos ainda têm os dois nomes antigos — unificamos aqui na exibição.
+const EMAIL_INVALIDO_VARIANTES = ["sem email valido", "Adicionado na Planilha", "Adionano na Planilha"];
+
+const LOSS_STATUSES = ["sem contato", "sem decisor", "sem pessoas", ...EMAIL_INVALIDO_VARIANTES];
+
+// Monta a expressão SQL que normaliza lead_status, usando o parâmetro na posição
+// `paramIndex` (1-based) para a lista de variantes de "sem email valido".
+const LEAD_STATUS_NORMALIZADO = (paramIndex: number) => `
+  CASE
+    WHEN lead_status = ANY($${paramIndex}) THEN 'sem email valido'
+    ELSE COALESCE(lead_status, 'Não classificado')
+  END
+`;
 
 export async function getCampaignById(id: string): Promise<CampaignRow | null> {
   const { rows } = await pool.query(
@@ -149,13 +165,13 @@ export async function getCampaignQueueStatusBreakdown(campaignName: string): Pro
 export async function getCampaignLeadStatusBreakdown(campaignName: string): Promise<QueueStatusRow[]> {
   const { rows } = await pool.query(
     `
-    SELECT COALESCE(lead_status, 'Não classificado') AS status, count(*)::int AS total
+    SELECT ${LEAD_STATUS_NORMALIZADO(2)} AS status, count(*)::int AS total
     FROM fila_processamento
     WHERE ${NORMALIZE_NAME("campanha")} = $1
-    GROUP BY COALESCE(lead_status, 'Não classificado')
+    GROUP BY ${LEAD_STATUS_NORMALIZADO(2)}
     ORDER BY total DESC
     `,
-    [normalizeName(campaignName)]
+    [normalizeName(campaignName), EMAIL_INVALIDO_VARIANTES]
   );
   return rows;
 }
