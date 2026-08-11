@@ -1,5 +1,11 @@
 import { pool } from "./client";
 
+// fila_processamento.campanha é digitado à mão e diverge de campanhas.nome
+// em maiúsculas/espaçamento (ex.: "ICPs -imobiliaria" vs "ICPS - imobiliaria"),
+// então a comparação usa nome normalizado (minúsculas, sem espaços) nos dois lados.
+const NORMALIZE_NAME = (col: string) => `lower(regexp_replace(${col}, '\\s+', '', 'g'))`;
+const normalizeName = (s: string) => s.toLowerCase().replace(/\s+/g, "");
+
 export type CampaignPerformanceRow = {
   id: string;
   nome: string;
@@ -26,14 +32,14 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
   const { rows } = await pool.query(`
     WITH fila_stats AS (
       SELECT
-        trim(campanha) AS campanha,
+        ${NORMALIZE_NAME("campanha")} AS campanha_norm,
         count(*)::int AS total,
         count(*) FILTER (WHERE status = 'processado')::int AS processado,
         count(*) FILTER (WHERE status = 'pendente')::int AS pendente,
         count(*) FILTER (WHERE status = 'em pausa')::int AS em_pausa,
         count(*) FILTER (WHERE status = 'erro')::int AS erro
       FROM fila_processamento
-      GROUP BY trim(campanha)
+      GROUP BY campanha_norm
     ),
     empresas_stats AS (
       SELECT
@@ -66,7 +72,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
         ELSE 0
       END AS taxa_processamento
     FROM campanhas c
-    LEFT JOIN fila_stats f ON f.campanha = trim(c.nome)
+    LEFT JOIN fila_stats f ON f.campanha_norm = ${NORMALIZE_NAME("c.nome")}
     LEFT JOIN empresas_stats e ON e.campanha_id = c.id
     LEFT JOIN leads_stats l ON l.campanha_id = c.id
     ORDER BY total_fila DESC, c.criado_em DESC
@@ -122,10 +128,10 @@ export async function getCampaignSummary(
       (SELECT count(*)::int FROM empresas WHERE campanha_id = $1 AND enviado_meetime) AS enviados_meetime,
       (
         SELECT count(*)::int FROM fila_processamento
-        WHERE trim(campanha) = $2 AND lead_status = ANY($3)
+        WHERE ${NORMALIZE_NAME("campanha")} = $2 AND lead_status = ANY($3)
       ) AS perdidos
     `,
-    [campaignId, campaignName.trim(), LOSS_STATUSES]
+    [campaignId, normalizeName(campaignName), LOSS_STATUSES]
   );
   return rows[0];
 }
@@ -135,11 +141,11 @@ export async function getCampaignLossReasons(campaignName: string): Promise<Loss
     `
     SELECT lead_status AS motivo, count(*)::int AS total
     FROM fila_processamento
-    WHERE trim(campanha) = $1 AND lead_status = ANY($2)
+    WHERE ${NORMALIZE_NAME("campanha")} = $1 AND lead_status = ANY($2)
     GROUP BY lead_status
     ORDER BY total DESC
     `,
-    [campaignName.trim(), LOSS_STATUSES]
+    [normalizeName(campaignName), LOSS_STATUSES]
   );
   return rows;
 }
