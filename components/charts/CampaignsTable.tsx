@@ -12,7 +12,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-4 py-2 font-medium">Total na fila</th>
             <th className="px-4 py-2 font-medium">Taxa processado</th>
             <th className="px-4 py-2 font-medium">Empresas enriquecidas</th>
-            <th className="px-4 py-2 font-medium">Enviados Meetime</th>
+            <th className="px-4 py-2 font-medium">Criados Meetime</th>
             <th className="px-4 py-2 font-medium">Sem contato</th>
           </tr>
         </thead>
@@ -28,7 +28,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
               <td className="px-4 py-2">{c.total_fila}</td>
               <td className="px-4 py-2">{c.taxa_processamento}%</td>
               <td className="px-4 py-2">{c.empresas_enriquecidas}</td>
-              <td className="px-4 py-2">{c.enviados_meetime}</td>
+              <td className="px-4 py-2">{c.criados_meetime}</td>
               <td className="px-4 py-2">{c.leads_sem_contato}</td>
             </tr>
           ))}

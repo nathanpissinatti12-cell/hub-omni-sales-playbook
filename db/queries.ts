@@ -17,7 +17,7 @@ export type CampaignPerformanceRow = {
   em_pausa: number;
   erro: number;
   empresas_enriquecidas: number;
-  enviados_meetime: number;
+  criados_meetime: number;
   leads_sem_contato: number;
   taxa_processamento: string;
 };
@@ -26,7 +26,7 @@ export type SummaryRow = {
   campanhas_ativas: number;
   total_fila: number;
   total_processado: number;
-  total_enviados_meetime: number;
+  total_criados_meetime: number;
 };
 
 export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]> {
@@ -38,15 +38,15 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
         count(*) FILTER (WHERE status = 'processado')::int AS processado,
         count(*) FILTER (WHERE status = 'pendente')::int AS pendente,
         count(*) FILTER (WHERE status = 'em pausa')::int AS em_pausa,
-        count(*) FILTER (WHERE status = 'erro')::int AS erro
+        count(*) FILTER (WHERE status = 'erro')::int AS erro,
+        count(*) FILTER (WHERE lead_status = 'criado meetime')::int AS criados_meetime
       FROM fila_processamento
       GROUP BY campanha_norm
     ),
     empresas_stats AS (
       SELECT
         campanha_id,
-        count(*)::int AS empresas_enriquecidas,
-        count(*) FILTER (WHERE enviado_meetime)::int AS enviados_meetime
+        count(*)::int AS empresas_enriquecidas
       FROM empresas
       GROUP BY campanha_id
     ),
@@ -65,7 +65,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       COALESCE(f.em_pausa, 0) AS em_pausa,
       COALESCE(f.erro, 0) AS erro,
       COALESCE(e.empresas_enriquecidas, 0) AS empresas_enriquecidas,
-      COALESCE(e.enviados_meetime, 0) AS enviados_meetime,
+      COALESCE(f.criados_meetime, 0) AS criados_meetime,
       COALESCE(l.sem_contato, 0) AS leads_sem_contato,
       CASE
         WHEN COALESCE(f.total, 0) > 0
@@ -234,7 +234,7 @@ export async function getSummary(): Promise<SummaryRow> {
       (SELECT count(*)::int FROM campanhas WHERE status = 'ativa') AS campanhas_ativas,
       (SELECT count(*)::int FROM fila_processamento) AS total_fila,
       (SELECT count(*)::int FROM fila_processamento WHERE status = 'processado') AS total_processado,
-      (SELECT count(*) FILTER (WHERE enviado_meetime)::int FROM empresas) AS total_enviados_meetime
+      (SELECT count(*)::int FROM fila_processamento WHERE lead_status = 'criado meetime') AS total_criados_meetime
   `);
   return rows[0];
 }

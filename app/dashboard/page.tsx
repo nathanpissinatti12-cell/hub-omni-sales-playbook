@@ -14,7 +14,7 @@ export default async function DashboardPage() {
     { label: "Campanhas ativas", value: String(summary.campanhas_ativas) },
     { label: "Total na fila", value: String(summary.total_fila) },
     { label: "Taxa de processamento", value: `${globalSuccessRate}%` },
-    { label: "Enviados para o Meetime", value: String(summary.total_enviados_meetime) },
+    { label: "Criados na Meetime", value: String(summary.total_criados_meetime) },
   ];
 
   return (
