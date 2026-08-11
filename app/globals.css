@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f7f7f8;
+  --surface: #ffffff;
+  --border: #e5e5e8;
+  --text: #16161a;
+  --text-muted: #6b6b76;
+  --accent: #2f6fed;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f0f12;
+    --surface: #1a1a1f;
+    --border: #2b2b33;
+    --text: #f2f2f5;
+    --text-muted: #9a9aa5;
+    --accent: #5b8dff;
+  }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
