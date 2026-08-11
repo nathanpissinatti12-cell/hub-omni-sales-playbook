@@ -22,7 +22,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-semibold">Dashboard de Prospecção</h1>
         <p className="mt-1" style={{ color: "var(--text-muted)" }}>
-          Dados ao vivo da base de campanhas e enriquecimento de leads (Apollo). [deploy-check-9f31]
+          Dados ao vivo da base de campanhas e enriquecimento de leads (Apollo).
         </p>
       </div>
 

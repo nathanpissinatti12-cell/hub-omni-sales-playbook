@@ -39,4 +39,3 @@ processo. As tabelas usadas:
 As queries agregadas ficam em `db/queries.ts`. Não há migrations nem seed
 neste projeto — qualquer alteração de schema deve ser coordenada com quem
 mantém o banco de origem.
-<!-- deploy-check: 2026-08-11T18:14:25Z -->
