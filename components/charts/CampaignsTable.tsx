@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
@@ -18,7 +19,11 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
         <tbody>
           {data.map((c) => (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
-              <td className="px-4 py-2">{c.nome}</td>
+              <td className="px-4 py-2">
+                <Link href={`/dashboard/campanhas/${c.id}`} className="hover:underline" style={{ color: "var(--accent)" }}>
+                  {c.nome}
+                </Link>
+              </td>
               <td className="px-4 py-2" style={{ color: "var(--text-muted)" }}>{c.status}</td>
               <td className="px-4 py-2">{c.total_fila}</td>
               <td className="px-4 py-2">{c.taxa_processamento}%</td>

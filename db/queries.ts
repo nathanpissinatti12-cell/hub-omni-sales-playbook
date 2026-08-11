@@ -74,6 +74,105 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
   return rows;
 }
 
+export type CampaignRow = {
+  id: string;
+  nome: string;
+  status: string;
+};
+
+export type CampaignSummaryRow = {
+  total_empresas: number;
+  enviados_meetime: number;
+  perdidos: number;
+};
+
+export type LossReasonRow = {
+  motivo: string;
+  total: number;
+};
+
+export type CnaeRow = {
+  cnae: string;
+  total: number;
+};
+
+export type RegionRow = {
+  estado: string;
+  total: number;
+};
+
+const LOSS_STATUSES = ["sem contato", "sem decisor", "sem pessoas", "sem email valido"];
+
+export async function getCampaignById(id: string): Promise<CampaignRow | null> {
+  const { rows } = await pool.query(
+    `SELECT id, nome, status FROM campanhas WHERE id = $1`,
+    [id]
+  );
+  return rows[0] ?? null;
+}
+
+export async function getCampaignSummary(
+  campaignId: string,
+  campaignName: string
+): Promise<CampaignSummaryRow> {
+  const { rows } = await pool.query(
+    `
+    SELECT
+      (SELECT count(*)::int FROM empresas WHERE campanha_id = $1) AS total_empresas,
+      (SELECT count(*)::int FROM empresas WHERE campanha_id = $1 AND enviado_meetime) AS enviados_meetime,
+      (
+        SELECT count(*)::int FROM fila_processamento
+        WHERE trim(campanha) = $2 AND lead_status = ANY($3)
+      ) AS perdidos
+    `,
+    [campaignId, campaignName.trim(), LOSS_STATUSES]
+  );
+  return rows[0];
+}
+
+export async function getCampaignLossReasons(campaignName: string): Promise<LossReasonRow[]> {
+  const { rows } = await pool.query(
+    `
+    SELECT lead_status AS motivo, count(*)::int AS total
+    FROM fila_processamento
+    WHERE trim(campanha) = $1 AND lead_status = ANY($2)
+    GROUP BY lead_status
+    ORDER BY total DESC
+    `,
+    [campaignName.trim(), LOSS_STATUSES]
+  );
+  return rows;
+}
+
+export async function getCampaignCnaeBreakdown(campaignId: string): Promise<CnaeRow[]> {
+  const { rows } = await pool.query(
+    `
+    SELECT COALESCE(NULLIF(cnae_principal, ''), 'Não informado') AS cnae, count(*)::int AS total
+    FROM empresas
+    WHERE campanha_id = $1
+    GROUP BY cnae
+    ORDER BY total DESC
+    LIMIT 15
+    `,
+    [campaignId]
+  );
+  return rows;
+}
+
+export async function getCampaignRegionBreakdown(campaignId: string): Promise<RegionRow[]> {
+  const { rows } = await pool.query(
+    `
+    SELECT COALESCE(NULLIF(estado, ''), 'Não informado') AS estado, count(*)::int AS total
+    FROM empresas
+    WHERE campanha_id = $1
+    GROUP BY estado
+    ORDER BY total DESC
+    `,
+    [campaignId]
+  );
+  return rows;
+}
+
 export async function getSummary(): Promise<SummaryRow> {
   const { rows } = await pool.query(`
     SELECT
