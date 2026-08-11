@@ -1,6 +1,7 @@
 # Playbook de Vendas
 
-App com o playbook do funil de vendas e um dashboard com dados ao vivo do Postgres.
+App com os playbooks comerciais (TakeFlow, Onvox) e um dashboard com dados ao vivo
+da base de prospecção/enriquecimento de leads (Apollo).
 
 ## Setup
 
@@ -8,32 +9,33 @@ App com o playbook do funil de vendas e um dashboard com dados ao vivo do Postgr
    ```
    npm install
    ```
-2. Criar um banco Postgres e configurar a conexão:
+2. Configurar a conexão com o banco de prospecção:
    ```
    cp .env.example .env
    ```
-   Edite `.env` com a `DATABASE_URL` do seu banco.
-3. Rodar as migrations (cria as tabelas):
-   ```
-   npm run db:migrate
-   ```
-4. (Opcional) Popular com dados fake para testar o dashboard:
-   ```
-   npm run db:seed
-   ```
-5. Subir o app:
+   Edite `.env` com a `DATABASE_URL`. **Use um usuário somente leitura** (ex:
+   `dashboard_readonly`), nunca a credencial master do banco — o dashboard não
+   precisa (e não deve) ter permissão de escrita.
+3. Subir o app:
    ```
    npm run dev
    ```
-   - Playbook: http://localhost:3000/playbook
+   - Playbook TakeFlow: http://localhost:3000/playbook
+   - Playbook Onvox: http://localhost:3000/playbook/onvox
    - Dashboard: http://localhost:3000/dashboard
 
-## Estrutura do banco
+## Sobre o banco de dados do dashboard
 
-- `reps` — vendedores
-- `pipeline_stages` — etapas do funil (Lead, Qualificação, Reunião, Proposta, Negociação, Fechamento)
-- `deals` — oportunidades, com etapa atual, valor e status (open/won/lost)
-- `deal_stage_history` — histórico de transição de etapa (usado para tempo médio por etapa)
-- `goals` — metas mensais de receita/nº de deals por vendedor
+O dashboard **não é dono do schema** — ele lê direto do banco de produção da
+base de prospecção (`baseapollo`), que já existe e é mantido por outro
+processo. As tabelas usadas:
 
-Para conectar em um banco com um schema diferente, ajuste as queries em `db/queries.ts`.
+- `campanhas` — campanhas de prospecção
+- `fila_processamento` — fila de domínios sendo processados (status: pendente,
+  processando, processado, em pausa, erro)
+- `empresas` — empresas enriquecidas (decisor, contato, `enviado_meetime`)
+- `leads_sem_contato` — leads sem contato/dados suficientes
+
+As queries agregadas ficam em `db/queries.ts`. Não há migrations nem seed
+neste projeto — qualquer alteração de schema deve ser coordenada com quem
+mantém o banco de origem.

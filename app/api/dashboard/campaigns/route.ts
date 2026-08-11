@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getRevenueByMonth } from "@/db/queries";
+import { getCampaignPerformance } from "@/db/queries";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const data = await getRevenueByMonth();
+  const data = await getCampaignPerformance();
   return NextResponse.json(data);
 }

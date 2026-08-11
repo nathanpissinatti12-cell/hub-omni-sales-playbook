@@ -1,90 +1,86 @@
 import { pool } from "./client";
 
-export type FunnelStageRow = {
-  id: number;
-  name: string;
-  position: number;
-  deal_count: number;
-  avg_days_in_stage: string | null;
+export type CampaignPerformanceRow = {
+  id: string;
+  nome: string;
+  status: string;
+  total_fila: number;
+  processado: number;
+  pendente: number;
+  em_pausa: number;
+  erro: number;
+  empresas_enriquecidas: number;
+  enviados_meetime: number;
+  leads_sem_contato: number;
+  taxa_processamento: string;
 };
 
-export type RevenueMonthRow = {
-  month: string;
-  revenue_cents: string;
-  target_cents: string;
+export type SummaryRow = {
+  campanhas_ativas: number;
+  total_fila: number;
+  total_processado: number;
+  total_enviados_meetime: number;
 };
 
-export type RepPerformanceRow = {
-  id: number;
-  name: string;
-  deals_won: number;
-  revenue_cents: string;
-  avg_ticket_cents: string;
-};
-
-export async function getFunnel(): Promise<FunnelStageRow[]> {
+export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]> {
   const { rows } = await pool.query(`
-    SELECT
-      ps.id,
-      ps.name,
-      ps.position,
-      COUNT(DISTINCT d.id)::int AS deal_count,
-      ROUND(AVG(
-        EXTRACT(EPOCH FROM (COALESCE(h.exited_at, now()) - h.entered_at)) / 86400
-      )::numeric, 1) AS avg_days_in_stage
-    FROM pipeline_stages ps
-    LEFT JOIN deals d ON d.stage_id = ps.id
-    LEFT JOIN deal_stage_history h ON h.stage_id = ps.id
-    GROUP BY ps.id, ps.name, ps.position
-    ORDER BY ps.position
-  `);
-  return rows;
-}
-
-export async function getRevenueByMonth(): Promise<RevenueMonthRow[]> {
-  const { rows } = await pool.query(`
-    WITH months AS (
-      SELECT date_trunc('month', now()) - (n || ' months')::interval AS month
-      FROM generate_series(0, 5) AS n
+    WITH fila_stats AS (
+      SELECT
+        trim(campanha) AS campanha,
+        count(*)::int AS total,
+        count(*) FILTER (WHERE status = 'processado')::int AS processado,
+        count(*) FILTER (WHERE status = 'pendente')::int AS pendente,
+        count(*) FILTER (WHERE status = 'em pausa')::int AS em_pausa,
+        count(*) FILTER (WHERE status = 'erro')::int AS erro
+      FROM fila_processamento
+      GROUP BY trim(campanha)
     ),
-    won AS (
-      SELECT date_trunc('month', closed_at) AS month, SUM(value_cents) AS revenue_cents
-      FROM deals
-      WHERE status = 'won' AND closed_at IS NOT NULL
-      GROUP BY 1
+    empresas_stats AS (
+      SELECT
+        campanha_id,
+        count(*)::int AS empresas_enriquecidas,
+        count(*) FILTER (WHERE enviado_meetime)::int AS enviados_meetime
+      FROM empresas
+      GROUP BY campanha_id
     ),
-    target AS (
-      SELECT date_trunc('month', month) AS month, SUM(revenue_target_cents) AS target_cents
-      FROM goals
-      GROUP BY 1
+    leads_stats AS (
+      SELECT campanha_id, count(*)::int AS sem_contato
+      FROM leads_sem_contato
+      GROUP BY campanha_id
     )
     SELECT
-      to_char(m.month, 'YYYY-MM') AS month,
-      COALESCE(w.revenue_cents, 0)::bigint AS revenue_cents,
-      COALESCE(t.target_cents, 0)::bigint AS target_cents
-    FROM months m
-    LEFT JOIN won w ON w.month = m.month
-    LEFT JOIN target t ON t.month = m.month
-    ORDER BY m.month
+      c.id,
+      c.nome,
+      c.status,
+      COALESCE(f.total, 0) AS total_fila,
+      COALESCE(f.processado, 0) AS processado,
+      COALESCE(f.pendente, 0) AS pendente,
+      COALESCE(f.em_pausa, 0) AS em_pausa,
+      COALESCE(f.erro, 0) AS erro,
+      COALESCE(e.empresas_enriquecidas, 0) AS empresas_enriquecidas,
+      COALESCE(e.enviados_meetime, 0) AS enviados_meetime,
+      COALESCE(l.sem_contato, 0) AS leads_sem_contato,
+      CASE
+        WHEN COALESCE(f.total, 0) > 0
+          THEN ROUND(100.0 * COALESCE(f.processado, 0) / f.total, 1)
+        ELSE 0
+      END AS taxa_processamento
+    FROM campanhas c
+    LEFT JOIN fila_stats f ON f.campanha = trim(c.nome)
+    LEFT JOIN empresas_stats e ON e.campanha_id = c.id
+    LEFT JOIN leads_stats l ON l.campanha_id = c.id
+    ORDER BY total_fila DESC, c.criado_em DESC
   `);
   return rows;
 }
 
-export async function getRepPerformance(): Promise<RepPerformanceRow[]> {
+export async function getSummary(): Promise<SummaryRow> {
   const { rows } = await pool.query(`
     SELECT
-      r.id,
-      r.name,
-      COUNT(d.id) FILTER (WHERE d.status = 'won')::int AS deals_won,
-      COALESCE(SUM(d.value_cents) FILTER (WHERE d.status = 'won'), 0)::bigint AS revenue_cents,
-      COALESCE(
-        ROUND(AVG(d.value_cents) FILTER (WHERE d.status = 'won')::numeric, 0),
-        0
-      )::bigint AS avg_ticket_cents
-    FROM reps r
-    LEFT JOIN deals d ON d.rep_id = r.id
-    GROUP BY r.id, r.name
-    ORDER BY revenue_cents DESC
+      (SELECT count(*)::int FROM campanhas WHERE status = 'ativa') AS campanhas_ativas,
+      (SELECT count(*)::int FROM fila_processamento) AS total_fila,
+      (SELECT count(*)::int FROM fila_processamento WHERE status = 'processado') AS total_processado,
+      (SELECT count(*) FILTER (WHERE enviado_meetime)::int FROM empresas) AS total_enviados_meetime
   `);
-  return rows;
+  return rows[0];
 }
