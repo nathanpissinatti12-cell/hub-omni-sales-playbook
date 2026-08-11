@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getCampaignById,
-  getCampaignCnaeBreakdown,
+  getCampaignCnaeGroups,
   getCampaignLeadStatusBreakdown,
   getCampaignQueueStatusBreakdown,
   getCampaignRegionBreakdown,
@@ -10,6 +10,7 @@ import {
 } from "@/db/queries";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
+import { RankedList } from "@/components/charts/RankedList";
 
 export const dynamic = "force-dynamic";
 
@@ -37,11 +38,11 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const campaign = await getCampaignById(params.id);
   if (!campaign) notFound();
 
-  const [summary, queueStatus, leadStatus, cnaeBreakdown, regionBreakdown] = await Promise.all([
+  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown] = await Promise.all([
     getCampaignSummary(campaign.id, campaign.nome),
     getCampaignQueueStatusBreakdown(campaign.nome),
     getCampaignLeadStatusBreakdown(campaign.nome),
-    getCampaignCnaeBreakdown(campaign.id),
+    getCampaignCnaeGroups(campaign.id),
     getCampaignRegionBreakdown(campaign.id),
   ]);
 
@@ -108,11 +109,12 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Setores (CNAE) das empresas submetidas</h2>
-        <RankedTable
-          columns={["CNAE principal", "Empresas"]}
-          rows={cnaeBreakdown.map((r) => ({ label: r.cnae, total: r.total }))}
-        />
+        <h2 className="text-lg font-semibold">Setores das empresas submetidas</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Grupos de atividade (CNAE) que aparecem entre as empresas desta campanha,
+          do principal para os demais.
+        </p>
+        <RankedList title="Grupo de atividade" items={cnaeGroups} />
       </section>
 
       <section

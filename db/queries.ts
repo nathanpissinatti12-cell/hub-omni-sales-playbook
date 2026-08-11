@@ -1,4 +1,5 @@
 import { pool } from "./client";
+import { classifyCnae } from "./cnaeGroups";
 
 // fila_processamento.campanha é digitado à mão e diverge de campanhas.nome
 // em maiúsculas/espaçamento (ex.: "ICPs -imobiliaria" vs "ICPS - imobiliaria"),
@@ -92,11 +93,6 @@ export type CampaignSummaryRow = {
   perdidos: number;
 };
 
-export type CnaeRow = {
-  cnae: string;
-  total: number;
-};
-
 export type RegionRow = {
   estado: string;
   total: number;
@@ -164,19 +160,26 @@ export async function getCampaignLeadStatusBreakdown(campaignName: string): Prom
   return rows;
 }
 
-export async function getCampaignCnaeBreakdown(campaignId: string): Promise<CnaeRow[]> {
+// Retorna os grupos de setor (CNAE agrupado por atividade), do que mais aparece
+// para o que menos aparece, sem expor a contagem de empresas.
+export async function getCampaignCnaeGroups(campaignId: string): Promise<string[]> {
   const { rows } = await pool.query(
     `
-    SELECT COALESCE(NULLIF(cnae_principal, ''), 'Não informado') AS cnae, count(*)::int AS total
+    SELECT cnae_principal, count(*)::int AS total
     FROM empresas
     WHERE campanha_id = $1
-    GROUP BY cnae
-    ORDER BY total DESC
-    LIMIT 15
+    GROUP BY cnae_principal
     `,
     [campaignId]
   );
-  return rows;
+
+  const totals = new Map<string, number>();
+  for (const row of rows as { cnae_principal: string | null; total: number }[]) {
+    const group = classifyCnae(row.cnae_principal);
+    totals.set(group, (totals.get(group) ?? 0) + row.total);
+  }
+
+  return [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([group]) => group);
 }
 
 export async function getCampaignRegionBreakdown(campaignId: string): Promise<RegionRow[]> {
