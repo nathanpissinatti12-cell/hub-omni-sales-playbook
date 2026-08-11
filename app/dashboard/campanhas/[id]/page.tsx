@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import {
   getCampaignById,
   getCampaignCnaeBreakdown,
-  getCampaignLossReasons,
+  getCampaignLeadStatusBreakdown,
+  getCampaignQueueStatusBreakdown,
   getCampaignRegionBreakdown,
   getCampaignSummary,
 } from "@/db/queries";
@@ -12,20 +13,34 @@ import { RankedTable } from "@/components/charts/RankedTable";
 
 export const dynamic = "force-dynamic";
 
-const LOSS_LABELS: Record<string, string> = {
+const QUEUE_STATUS_LABELS: Record<string, string> = {
+  processado: "Processado",
+  pendente: "Pendente",
+  "em pausa": "Em pausa",
+  erro: "Erro",
+};
+
+const LEAD_STATUS_LABELS: Record<string, string> = {
+  "já existe na base": "Já existia na base",
+  "criado meetime": "Criado no Meetime",
+  "já existe na meetime": "Já existia no Meetime",
   "sem contato": "Sem contato encontrado",
   "sem decisor": "Sem decisor identificado",
   "sem pessoas": "Sem pessoas na empresa",
   "sem email valido": "Sem e-mail válido",
+  "Adicionado na Planilha": "Adicionado na planilha",
+  "Adionano na Planilha": "Adicionado na planilha (registro com erro de digitação na origem)",
+  "Não classificado": "Ainda não classificado",
 };
 
 export default async function CampaignDetailPage({ params }: { params: { id: string } }) {
   const campaign = await getCampaignById(params.id);
   if (!campaign) notFound();
 
-  const [summary, lossReasons, cnaeBreakdown, regionBreakdown] = await Promise.all([
+  const [summary, queueStatus, leadStatus, cnaeBreakdown, regionBreakdown] = await Promise.all([
     getCampaignSummary(campaign.id, campaign.nome),
-    getCampaignLossReasons(campaign.nome),
+    getCampaignQueueStatusBreakdown(campaign.nome),
+    getCampaignLeadStatusBreakdown(campaign.nome),
     getCampaignCnaeBreakdown(campaign.id),
     getCampaignRegionBreakdown(campaign.id),
   ]);
@@ -64,14 +79,29 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
       </section>
 
       <section className="space-y-2">
-        <h2 className="text-lg font-semibold">Motivo das perdas</h2>
+        <h2 className="text-lg font-semibold">Status de processamento na fila</h2>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          Baseado no status de processamento de cada lead na fila desta campanha.
+          Em que pé está cada item da fila desta campanha (coluna <code>status</code>).
         </p>
         <RankedTable
-          columns={["Motivo", "Quantidade"]}
-          rows={lossReasons.map((r) => ({
-            label: LOSS_LABELS[r.motivo] ?? r.motivo,
+          columns={["Status", "Quantidade"]}
+          rows={queueStatus.map((r) => ({
+            label: QUEUE_STATUS_LABELS[r.status] ?? r.status,
+            total: r.total,
+          }))}
+        />
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-lg font-semibold">Status dos leads (todos, sucesso e falha)</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Resultado de cada lead processado — se foi enviado, se já existia, ou o motivo de
+          não ter avançado (coluna <code>lead_status</code>).
+        </p>
+        <RankedTable
+          columns={["Status do lead", "Quantidade"]}
+          rows={leadStatus.map((r) => ({
+            label: LEAD_STATUS_LABELS[r.status] ?? r.status,
             total: r.total,
           }))}
         />

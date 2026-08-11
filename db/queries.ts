@@ -92,11 +92,6 @@ export type CampaignSummaryRow = {
   perdidos: number;
 };
 
-export type LossReasonRow = {
-  motivo: string;
-  total: number;
-};
-
 export type CnaeRow = {
   cnae: string;
   total: number;
@@ -136,16 +131,35 @@ export async function getCampaignSummary(
   return rows[0];
 }
 
-export async function getCampaignLossReasons(campaignName: string): Promise<LossReasonRow[]> {
+export type QueueStatusRow = {
+  status: string;
+  total: number;
+};
+
+export async function getCampaignQueueStatusBreakdown(campaignName: string): Promise<QueueStatusRow[]> {
   const { rows } = await pool.query(
     `
-    SELECT lead_status AS motivo, count(*)::int AS total
+    SELECT status, count(*)::int AS total
     FROM fila_processamento
-    WHERE ${NORMALIZE_NAME("campanha")} = $1 AND lead_status = ANY($2)
-    GROUP BY lead_status
+    WHERE ${NORMALIZE_NAME("campanha")} = $1
+    GROUP BY status
     ORDER BY total DESC
     `,
-    [normalizeName(campaignName), LOSS_STATUSES]
+    [normalizeName(campaignName)]
+  );
+  return rows;
+}
+
+export async function getCampaignLeadStatusBreakdown(campaignName: string): Promise<QueueStatusRow[]> {
+  const { rows } = await pool.query(
+    `
+    SELECT COALESCE(lead_status, 'Não classificado') AS status, count(*)::int AS total
+    FROM fila_processamento
+    WHERE ${NORMALIZE_NAME("campanha")} = $1
+    GROUP BY COALESCE(lead_status, 'Não classificado')
+    ORDER BY total DESC
+    `,
+    [normalizeName(campaignName)]
   );
   return rows;
 }
