@@ -89,7 +89,7 @@ export type CampaignRow = {
 
 export type CampaignSummaryRow = {
   total_empresas: number;
-  enviados_meetime: number;
+  criados_meetime: number;
   perdidos: number;
 };
 
@@ -132,7 +132,10 @@ export async function getCampaignSummary(
     `
     SELECT
       (SELECT count(*)::int FROM empresas WHERE campanha_id = $1) AS total_empresas,
-      (SELECT count(*)::int FROM empresas WHERE campanha_id = $1 AND enviado_meetime) AS enviados_meetime,
+      (
+        SELECT count(*)::int FROM fila_processamento
+        WHERE ${NORMALIZE_NAME("campanha")} = $2 AND lead_status = 'criado meetime'
+      ) AS criados_meetime,
       (
         SELECT count(*)::int FROM fila_processamento
         WHERE ${NORMALIZE_NAME("campanha")} = $2 AND lead_status = ANY($3)

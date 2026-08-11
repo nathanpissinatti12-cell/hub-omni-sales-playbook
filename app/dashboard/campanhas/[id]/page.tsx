@@ -46,7 +46,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
 
   const tiles = [
     { label: "Empresas submetidas", value: summary.total_empresas },
-    { label: "Enviadas para o Meetime", value: summary.enviados_meetime },
+    { label: "Criados na Meetime", value: summary.criados_meetime },
     { label: "Perdidas", value: summary.perdidos },
   ];
 
