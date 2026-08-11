@@ -160,9 +160,14 @@ export async function getCampaignLeadStatusBreakdown(campaignName: string): Prom
   return rows;
 }
 
-// Retorna os grupos de setor (CNAE agrupado por atividade), do que mais aparece
-// para o que menos aparece, sem expor a contagem de empresas.
-export async function getCampaignCnaeGroups(campaignId: string): Promise<string[]> {
+export type CnaeGroupRow = {
+  group: string;
+  percentage: number;
+};
+
+// Retorna os grupos de setor (CNAE agrupado por atividade) com o percentual
+// de empresas submetidas que cada grupo representa, do maior para o menor.
+export async function getCampaignCnaeGroups(campaignId: string): Promise<CnaeGroupRow[]> {
   const { rows } = await pool.query(
     `
     SELECT cnae_principal, count(*)::int AS total
@@ -174,12 +179,20 @@ export async function getCampaignCnaeGroups(campaignId: string): Promise<string[
   );
 
   const totals = new Map<string, number>();
+  let grandTotal = 0;
   for (const row of rows as { cnae_principal: string | null; total: number }[]) {
     const group = classifyCnae(row.cnae_principal);
     totals.set(group, (totals.get(group) ?? 0) + row.total);
+    grandTotal += row.total;
   }
+  if (grandTotal === 0) return [];
 
-  return [...totals.entries()].sort((a, b) => b[1] - a[1]).map(([group]) => group);
+  return [...totals.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .map(([group, total]) => ({
+      group,
+      percentage: Math.round((total / grandTotal) * 100),
+    }));
 }
 
 export async function getCampaignRegionBreakdown(campaignId: string): Promise<RegionRow[]> {

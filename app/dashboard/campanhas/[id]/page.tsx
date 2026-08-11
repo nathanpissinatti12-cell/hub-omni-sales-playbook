@@ -114,7 +114,10 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
           Grupos de atividade (CNAE) que aparecem entre as empresas desta campanha,
           do principal para os demais.
         </p>
-        <RankedList title="Grupo de atividade" items={cnaeGroups} />
+        <RankedList
+          title="Grupo de atividade"
+          items={cnaeGroups.map((g) => ({ label: g.group, percentage: g.percentage }))}
+        />
       </section>
 
       <section
