@@ -465,19 +465,6 @@ export const ORIGENS_M2_EXTERNAS = [
   "Estrutura de role-play semanal e shadowing: referência Salesforce/Twilio enablement programs",
 ];
 
-export const ATTENTION_M2 = [
-  "CRM dos closers não confirmado: o Meetime Flow envia oportunidades ao CRM, mas a ferramenta usada pelos closers para gestão de pipeline não foi definida neste módulo. Necessário confirmar (HubSpot, Pipedrive ou outro) para integrar com o Módulo 3.",
-  "Templates de WhatsApp por vertical: apenas o template de ISPs (provedores) foi documentado integralmente. As demais verticais (farmácias, varejo, concessionárias, energia solar, indústria) têm apenas o gancho de dor mapeado. Os templates completos precisam ser criados e carregados no Meetime.",
-  "Configuração do Fit Score no Meetime: os critérios de pontuação de leads (0–10) que a Omni usará não foram definidos. Sugestão: mapear em sessão específica com gestão (ex: cargo do decisor, vertical, número de funcionários, presença de PABX físico, tem e-mail corporativo, etc.).",
-  "SLA de resposta a leads inbound: a Omni tem 5% de volume inbound. Não foi definido o tempo máximo de resposta (SLA) para esses leads nem como o Meetime os prioriza na fila do BDR.",
-  "Critérios de perda automática na cadência: o Meetime permite configurar quantos dias após a última atividade sem contato o lead é marcado automaticamente como perdido. Esse parâmetro ainda não foi definido para a operação Omni.",
-  "Motivos de perda personalizados no Meetime: a classificação dos leads perdidos (ex: \"Sem timing\", \"Fora do ICP\", \"Decisão postergada\", \"Competidor escolhido\") precisa ser mapeada e configurada para alimentar os dados de inteligência da operação.",
-  "Processo de geração e enriquecimento de leads: o Módulo 2 pressupõe que os leads já estão disponíveis para a cadência, mas o processo de geração de listas (fontes, ferramentas, critérios de seleção) não foi documentado.",
-  "Processo de no-show: o que o BDR faz quando o lead não aparece na reunião agendada não foi detalhado (scripts de remarcação, número de tentativas, critério para descartar).",
-  "Integração evolu.AI com Meetime Dialer: a análise automática das ligações dos BDRs depende da integração entre o Dialer do Meetime e a evolu.AI. Isso foi mencionado como recomendação mas precisa ser validado tecnicamente.",
-  "Script de inbound (5% do volume): a abordagem oficial foi desenvolvida para outbound. Para o volume inbound (leads que chegam pela Omni), o script de recepção e qualificação não foi desenvolvido.",
-];
-
 export const MODULE_2_SECTIONS = [
   { id: "m2-sec-1", label: "2.1 Contexto e Filosofia" },
   { id: "m2-sec-2", label: "2.2 Perfil Ideal do BDR" },
@@ -492,5 +479,5 @@ export const MODULE_2_SECTIONS = [
   { id: "m2-sec-11", label: "2.11 Métricas e KPIs" },
   { id: "m2-sec-12", label: "2.12 Checklist de Implementação" },
   { id: "m2-sec-13", label: "2.13 Erros Comuns (Antiplaybook)" },
-  { id: "m2-sec-14", label: "Procedência e Pontos de Atenção" },
+  { id: "m2-sec-14", label: "Procedência das Práticas" },
 ];

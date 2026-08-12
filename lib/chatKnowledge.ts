@@ -247,18 +247,6 @@ LinkedIn antes; discutir preço na cold call (preço só na proposta); tratar um
 definitivo; esquecer de registrar no Meetime Flow; tratar todos os leads igual sem
 priorização A/B/C; pular o briefing ao vivo na passagem de bastão pro closer.
 
-## Pontos de atenção do Módulo 2 (ainda em aberto — não afirmar como definido)
-- CRM usado pelos closers para gestão de pipeline ainda não foi confirmado.
-- Templates de WhatsApp completos só existem prontos para a vertical de ISPs; as demais só têm o gancho de dor mapeado.
-- Critérios de pontuação do Fit Score no Meetime (0-10) ainda não foram definidos.
-- SLA de resposta para os 5% de leads inbound ainda não foi definido.
-- Critérios de perda automática por inatividade na cadência ainda não foram parametrizados.
-- Motivos de perda padronizados no Meetime ainda não foram configurados.
-- Processo de geração/enriquecimento de listas de leads não foi documentado neste módulo.
-- Processo de no-show (remarcação, nº de tentativas) não foi detalhado.
-- Integração técnica evolu.AI + Meetime Dialer ainda precisa ser validada.
-- Script de qualificação para leads inbound (5% do volume) ainda não existe — a abordagem oficial foi desenhada para outbound.
-
 # MÓDULO 3 — VENDAS / CLOSERS
 
 ## Perfil e papel do closer

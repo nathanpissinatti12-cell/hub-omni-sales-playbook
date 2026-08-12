@@ -34,7 +34,6 @@ import {
   ANTI_PLAYBOOK,
   ORIGENS_M2_OFICIAIS,
   ORIGENS_M2_EXTERNAS,
-  ATTENTION_M2,
 } from "@/lib/playbookModule2";
 
 function ChecklistBlock({ title, items }: { title: string; items: string[] }) {
@@ -541,19 +540,6 @@ export default function Modulo2Page() {
               ))}
             </ul>
           </div>
-
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Pontos de Atenção
-          </h2>
-          <Callout tone="pink" title="Sobre esta seção">
-            Os temas abaixo foram mencionados ao longo do desenvolvimento do Módulo 2 mas não
-            foram completamente desenvolvidos. Devem ser endereçados em próximas revisões.
-          </Callout>
-          <ol className="list-decimal space-y-2 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
-            {ATTENTION_M2.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ol>
         </section>
 
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
