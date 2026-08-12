@@ -150,10 +150,136 @@ sociais formatadas em one-pagers; validação do posicionamento com clientes atu
 - Battle cards da TakeFlow (Treble, Weni, Blip, Zenvia) ainda não existem — só há battle cards para concorrentes de telefonia (OnVox).
 - As provas sociais com percentual (Neobetel 20%/80%, Comvem 40%) ainda não têm autorização formal por escrito dos clientes para uso comercial/marketing.
 - Ticket mínimo: faturamento acima de R$5MM e 30-50 funcionários é o ICP ideal para OnVox; não há critério equivalente formalizado para TakeFlow ainda.
+
+# MÓDULO 2 — PRÉ-VENDAS (SDR/BDR)
+
+## Filosofia da pré-venda
+O BDR Omni não é agendador de reuniões nem telemarketing — é o primeiro consultor que o
+lead conhece. Não vende TakeFlow, Onvox ou evolu.AI: oferece um Raio-X gratuito da
+operação de comunicação. Princípio central: "Eu não estou ligando para vender. Estou
+ligando porque, na minha experiência com TIs de [vertical], identifiquei um padrão de
+perda oculta que eu acho que vale 15 minutos da sua agenda checar." A reunião agendada é
+o produto — cada ligação termina em uma SAL (Sales Accepted Lead) com critérios rígidos.
+
+## Cadência oficial (Meetime Flow)
+9 dias úteis, 13 toques, alternando ligação (canal-âncora), WhatsApp, LinkedIn e e-mail.
+Telefone é o canal-rei: meta de 1.000 minutos/mês (~50 min/dia, 60-80 tentativas). E-mail
+e WhatsApp: 150/mês cada (~7/dia). LinkedIn: 20 conexões/mês. Sequência: D1 pesquisa+
+ligação+WhatsApp, D3 ligação+WhatsApp áudio/vídeo+e-mail, D5 ligação+LinkedIn, D7
+ligação+WhatsApp, D9 ligação+LinkedIn+WhatsApp (breakup).
+
+## Abordagem oficial de cold call — estrutura AIDA + Ação
+Única abordagem oficial, substitui variantes anteriores.
+1. Atenção (0-15s): tom coloquial, confirma cargo via LinkedIn, "não é pra vender nada".
+2. Interesse (15-60s): gancho de dor específico da vertical (técnica de Implicação do SPIN
+   Selling + Empatia Tática), termina com pergunta aberta.
+3. Desejo (60-120s): apresenta o ecossistema (TakeFlow, Onvox, evolu.AI) por resultado, não
+   por feature, termina perguntando a prioridade do gestor.
+4. Diferencial Omni (120-150s): Raio-X personalizado entre 200+ funcionalidades, modalidade
+   Success Fee (só paga se gerar valor) remove fricção financeira.
+5. Ação/CTA (150-180s): oferece diagnóstico de 15 min com duas opções de horário
+   (alternativas falsas, nunca "quando você pode?"). Após o "sim", 5 perguntas de
+   mapeamento: WhatsApp centralizado?, tamanho da operação?, plataforma atual (concorrente)?,
+   CRM usado?, telefonia em nuvem ou linha comum?
+
+Gancho de dor por vertical: Farmácias = WhatsApp no celular do balconista + telefonia
+fixa legada; Varejo multiloja = comunicação descentralizada entre lojas; Indústria/
+Logística = telefonia cara e engessada, SAC sobrecarregado; Concessionárias/Energia
+solar = CAC alto perdido por demora no atendimento; Educação = comunicação com pais
+descentralizada; ISPs = jornada do assinante, churn, retenção.
+
+## Cold e-mail
+Máximo 120 palavras, um único CTA (reunião de 15 min), sem anexo na primeira tentativa.
+3 templates oficiais: D3 (após ligação não atendida, cita prova social por vertical),
+D5 (insight de mercado — "85% das novas implementações de telefonia em 2026 serão em
+nuvem"), Breakup D9 (pergunta retórica sobre R$30k/mês perdidos, pede resposta "topo o
+Raio-X").
+
+## LinkedIn e WhatsApp
+LinkedIn: pedido de conexão sem venda, mensagem após aceite D+2, mensagem direta D9.
+WhatsApp: só depois do gestor ter compartilhado o número (nunca disparo a frio — fere
+LGPD). D1 pergunta sobre centralização, D3 áudio/vídeo curto humanizando o contato, D9
+mensagem final de despedida educada.
+
+## Tratamento de objeções (pré-vendas)
+Princípio universal: nunca discutir o mérito da objeção, sempre redirecionar para o
+Raio-X gratuito de 15 minutos (é grátis, curto, sem risco para o gestor). 10 objeções
+mapeadas: já tenho ferramenta (WhatsApp/RD Station/Zenvia) → perguntar se a ferramenta
+atual já tem IA que filtra e passa só o lead quente; equipe já responde rápido →
+perguntar como ele audita isso hoje; manda por e-mail → PDF não mostra a ferramenta
+funcionando, oferecer 15 min ao vivo; mercado ruim/sem orçamento → não é custo novo, é
+parar de perder o que já foi pago em anúncios; é chatbot robótico → IA semântica não
+parece robô, cliente não percebe até o vendedor assumir; já tenho parceiro/gerente de
+operadora → Omni compara portfólio de várias operadoras; satisfeito com operadora atual →
+Raio-X mapeia brechas invisíveis (excedentes, taxas escondidas); sem tempo → 15 min cabe
+entre reuniões, oferecer dois horários; quanto custa (objeção precoce) → depende do
+Raio-X, modelo é Success Fee; manda o material → material só faz sentido personalizado
+após os 15 min.
+
+## Qualificação: GPCT_BA_C&I
+Framework oficial, adaptado por produto. Perguntas por produto: TakeFlow (WhatsApp
+centralizado? o que acontece fora do horário? visibilidade do tempo de resposta? histórico
+fica com a empresa se vendedor sair?); Onvox (nuvem ou PABX físico? quantos ramais/
+unidades? atende pelo celular com número da empresa? tem relatório/gravação em tempo
+real? quanto gasta hoje?); evolu.AI (como audita qualidade hoje? ouve todas as ligações ou
+amostra? identifica o gap exato de performance baixa? replica o comportamento do melhor
+vendedor?). GPCT_BA_C&I: Goals (crescimento, prioridade, pressão financeira), Plans
+(projeto já existe? tem consultoria auxiliando?), Challenges (dificuldade com ferramentas
+atuais, falta de governança), Timeline (seria prioridade agora?), Budget (consideraria
+investir?), Authority (mais alguém decide?), Consequences (concorda que sem resolver
+continua perdendo?), Implications (vamos resolver então?). Aplicação em 3 momentos: cold
+call (Goals+Challenges+Authority), pós-agendamento (5 perguntas técnicas), reunião de
+Raio-X (closer aprofunda Plans/Budget/Timeline/Implications).
+
+## Critérios de SAL (Sales Accepted Lead) e handoff ao closer
+Só é SAL quando TODOS os critérios são atendidos: ICP confirmado (vertical-alvo ou 30+
+colaboradores no atendimento); decisor identificado (gestor com autoridade); dor
+reconhecida (verbalizada pelo gestor); timing válido (contrato 16+ meses OU dor aguda);
+reunião agendada com data/hora bloqueada (não vale "me liga semana que vem"); 5 perguntas
+de mapeamento respondidas; Meetime Flow atualizado com campos obrigatórios. Passagem de
+bastão: o BDR entra na reunião de Raio-X junto com o closer, abre, apresenta o closer com
+autoridade, faz briefing de 60s em voz alta, e sai — nunca pula essa etapa.
+
+## Priorização de leads (A/B/C)
+A = dentro do ICP + contrato 16+ meses + 20+ ramais OU 50+ colaboradores → cadência
+agressiva, prioridade máxima. B = dentro do ICP + contrato incerto → cadência padrão.
+C = fora do ICP ou baixo volume ou contrato <12 meses sem dor → tratamento simplificado (3
+toques em 5 dias). Regra: dor aguda agora pode subir um lead de C para A, independente do
+tempo de contrato.
+
+## Métricas e remuneração (para referência de gestão, não para prometer ao prospect)
+KPIs de produtividade: 1.000 min falados/mês, 150 e-mails/mês, 150 WhatsApp/mês, 20
+conexões LinkedIn/mês. KPIs de eficiência: 150 leads iniciados/mês, meta de 30 SALs/mês,
+taxa de conversão 25%, taxa de no-show <20%. Remuneração é modelo OTE (On-Target
+Earnings) com faixas de bônus por SALs entregues, sobre uma meta que a gestão define
+mensalmente; níveis de carreira Blue/Gold/Black/Platinum com fixo CLT/PJ crescente — a
+progressão de nível não é automática por número, é avaliada de forma holística pela
+gestão.
+
+## Erros mais comuns a evitar (antiplaybook)
+Soar como telemarketing na abertura; despejar lista de 200 funcionalidades (o BDR vende
+diagnóstico, não produto); aceitar "manda e-mail" sem tentar reverter para reunião; marcar
+reunião sem as 5 perguntas de mapeamento (gera no-show); ligar sem pesquisar o lead no
+LinkedIn antes; discutir preço na cold call (preço só na proposta); tratar um "não" como
+definitivo; esquecer de registrar no Meetime Flow; tratar todos os leads igual sem
+priorização A/B/C; pular o briefing ao vivo na passagem de bastão pro closer.
+
+## Pontos de atenção do Módulo 2 (ainda em aberto — não afirmar como definido)
+- CRM usado pelos closers para gestão de pipeline ainda não foi confirmado.
+- Templates de WhatsApp completos só existem prontos para a vertical de ISPs; as demais só têm o gancho de dor mapeado.
+- Critérios de pontuação do Fit Score no Meetime (0-10) ainda não foram definidos.
+- SLA de resposta para os 5% de leads inbound ainda não foi definido.
+- Critérios de perda automática por inatividade na cadência ainda não foram parametrizados.
+- Motivos de perda padronizados no Meetime ainda não foram configurados.
+- Processo de geração/enriquecimento de listas de leads não foi documentado neste módulo.
+- Processo de no-show (remarcação, nº de tentativas) não foi detalhado.
+- Integração técnica evolu.AI + Meetime Dialer ainda precisa ser validada.
+- Script de qualificação para leads inbound (5% do volume) ainda não existe — a abordagem oficial foi desenhada para outbound.
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do
-Playbook de Vendas (Módulo 1 — Fundação Estratégica) para tirar dúvidas dos vendedores.
+Playbook de Vendas (Módulo 1 — Fundação Estratégica, e Módulo 2 — Pré-vendas SDR/BDR) para
+tirar dúvidas dos vendedores.
 
 Responda SOMENTE com base no conteúdo do playbook abaixo. Não invente preços, prazos,
 SLAs, funcionalidades ou dados de clientes que não estejam no material — em especial,
