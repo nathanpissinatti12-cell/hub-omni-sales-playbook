@@ -80,57 +80,6 @@ export const COMP_GOLDEN_RULES = [
   "Comunique o modelo por escrito. O vendedor assina o modelo de comissão antes de começar.",
 ];
 
-// ---------- 6.6 Ramp-up ----------
-
-export const RAMPUP_INTRO =
-  "Um novo vendedor sem onboarding estruturado leva de 30% a 50% mais tempo para atingir a primeira meta. Se ele não entende o produto, a cultura e o processo nos primeiros 30 dias, as chances de ele sair nos primeiros 3 meses sobem drasticamente.";
-
-export const BDR_RAMPUP_WEEK1 = [
-  ["D1", "Boas-vindas, apresentação do time, acesso às ferramentas"],
-  ["D2", "Imersão na Omni: história, posicionamento, produtos, clientes, concorrentes"],
-  ["D3–4", "Treinamento técnico: TakeFlow, Onvox, evolu.AI — como funcionam, para quem e por quê"],
-  ["D5", "Módulo 1 do Playbook: posicionamento, ICP, narrativa, objeções"],
-];
-
-export const BDR_RAMPUP_WEEK1_PIPELOVERS =
-  "Inscrever o novo BDR no grupo de Pré-Vendedores da Pipelovers. A imersão na comunidade já começa com benchmarking de peers e acesso às aulas de cold call e cadência.";
-
-export const BDR_RAMPUP_WEEK2 = [
-  ["Shadow de 20 ligações", "Ouvir BDR Black ou Platinum em operação real — sem interferir"],
-  ["Roleplay da Abordagem Oficial", "Mínimo 5 sessões gravadas com feedback do evolu.AI"],
-  ["Treinamento Meetime", "Cadências, Dialer, Fit Score, registro de SAL"],
-  ["Treinamento GPCT_BA_C&I", "Aplicação prática por produto com roleplay"],
-];
-
-export const BDR_RAMPUP_WEEK3 =
-  "O BDR começa a discar com madrinha ou padrinho ao lado — BDR sênior disponível para consultar em tempo real. Meta de 50% do volume padrão. Feedback diário do gestor via evolu.AI.";
-
-export const BDR_RAMPUP_WEEK4 =
-  "BDR opera de forma independente. Gestor faz análise de 5 ligações no evolu.AI com feedback escrito. Avaliação formal ao final da semana.";
-
-export const BDR_RAMPUP_AFTER =
-  "Do dia 31 em diante: Meta cheia. Feedback semanal via evolu.AI. 1:1 quinzenal com gestor.";
-
-export const CLOSER_RAMPUP_WEEK1_2 = [
-  ["Imersão nos produtos", "Demo ao vivo de TakeFlow, Onvox e evolu.AI — entender como usar, não só vender"],
-  ["Leitura dos Módulos 1, 3 e 4", "Posicionamento, ciclo de vendas e precificação"],
-  ["Shadow de 3 reuniões de diagnóstico", "Observar closer sênior conduzindo — anotar tudo"],
-  ["Shadow de 2 reuniões de demonstração", "Idem"],
-  ["Treinamento HubSpot", "Pipeline, campos obrigatórios, registro de atividades"],
-];
-
-export const CLOSER_RAMPUP_WEEK3_4 =
-  "O novo closer conduz reuniões de diagnóstico com o closer sênior presente como apoio. Após cada reunião, análise via evolu.AI com feedback estruturado. Meta: 3 diagnósticos conduzidos com aprovação do sênior.";
-
-export const CLOSER_RAMPUP_WEEK5_6 =
-  "Opera sozinho com meta de 50% do volume padrão. Gestor revisa todo card no HubSpot antes de qualquer proposta ser enviada.";
-
-export const CLOSER_RAMPUP_AFTER =
-  "Do dia 46 em diante: Meta cheia. Pipeline review semanal padrão. Análise de evolu.AI semanal.";
-
-export const CLOSER_RAMPUP_G4 =
-  "A Trilha de Vendas do G4 Skills (3 níveis) serve como formação contínua paralela ao ramp-up. O gestor define quais módulos são obrigatórios nos primeiros 45 dias. O dashboard do G4 Skills mostra o progresso individual sem precisar perguntar.";
-
 // ---------- 6.7 Ferramentas ----------
 
 export const TOOL_STACK = [
@@ -168,6 +117,5 @@ export const PIPELOVERS_VS_G4 = [
 export const MODULE_6_SECTIONS = [
   { id: "m6-sec-1", label: "6.1 Cultura Comercial" },
   { id: "m6-sec-5", label: "6.5 Metas e Comissionamento" },
-  { id: "m6-sec-6", label: "6.6 Ramp-up de Novos Vendedores" },
   { id: "m6-sec-7", label: "6.7 Ferramentas por Função" },
 ];

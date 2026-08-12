@@ -10,18 +10,6 @@ import {
   CS_VARIABLE_METRICS,
   MANAGER_COMP_NOTE,
   COMP_GOLDEN_RULES,
-  RAMPUP_INTRO,
-  BDR_RAMPUP_WEEK1,
-  BDR_RAMPUP_WEEK1_PIPELOVERS,
-  BDR_RAMPUP_WEEK2,
-  BDR_RAMPUP_WEEK3,
-  BDR_RAMPUP_WEEK4,
-  BDR_RAMPUP_AFTER,
-  CLOSER_RAMPUP_WEEK1_2,
-  CLOSER_RAMPUP_WEEK3_4,
-  CLOSER_RAMPUP_WEEK5_6,
-  CLOSER_RAMPUP_AFTER,
-  CLOSER_RAMPUP_G4,
   TOOL_STACK,
   PIPELOVERS_PRACTICE,
   PIPELOVERS_ROUTINE,
@@ -106,36 +94,6 @@ export default function Modulo6Page() {
             <strong>Gestor Comercial:</strong> {MANAGER_COMP_NOTE}
           </p>
           <List title="Regras de Ouro do Comissionamento" items={COMP_GOLDEN_RULES} />
-        </section>
-
-        {/* 6.6 */}
-        <section id="m6-sec-6" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            6.6 — Onboarding de Novos Vendedores (Ramp-up)
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{RAMPUP_INTRO}</p>
-
-          <p className="text-sm font-medium">Ramp-up BDR — 30 dias</p>
-          <p className="text-sm font-medium">Semana 1 — Imersão (não discar ainda)</p>
-          <Table headers={["Dia", "Atividade"]} rows={BDR_RAMPUP_WEEK1} />
-          <Callout tone="blue" title="Como usar a Pipelovers nessa semana">{BDR_RAMPUP_WEEK1_PIPELOVERS}</Callout>
-          <p className="text-sm font-medium">Semana 2 — Shadow e Roleplay</p>
-          <Table headers={["Atividade", "Detalhe"]} rows={BDR_RAMPUP_WEEK2} />
-          <p className="text-sm font-medium">Semana 3 — Operação com Suporte (50% da meta)</p>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{BDR_RAMPUP_WEEK3}</p>
-          <p className="text-sm font-medium">Semana 4 — Operação Independente (75% da meta)</p>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{BDR_RAMPUP_WEEK4}</p>
-          <p className="text-sm italic" style={{ color: "var(--text-muted)" }}>{BDR_RAMPUP_AFTER}</p>
-
-          <p className="text-sm font-medium">Ramp-up Closer — 45 dias</p>
-          <p className="text-sm font-medium">Semana 1–2 — Imersão Profunda</p>
-          <Table headers={["Atividade", "Detalhe"]} rows={CLOSER_RAMPUP_WEEK1_2} />
-          <p className="text-sm font-medium">Semana 3–4 — Co-condução</p>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{CLOSER_RAMPUP_WEEK3_4}</p>
-          <p className="text-sm font-medium">Semana 5–6 — Operação Independente (Meta reduzida)</p>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{CLOSER_RAMPUP_WEEK5_6}</p>
-          <p className="text-sm italic" style={{ color: "var(--text-muted)" }}>{CLOSER_RAMPUP_AFTER}</p>
-          <Callout tone="blue" title="Como usar o G4 Skills no ramp-up dos Closers">{CLOSER_RAMPUP_G4}</Callout>
         </section>
 
         {/* 6.7 */}

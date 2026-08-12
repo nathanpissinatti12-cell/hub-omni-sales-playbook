@@ -584,17 +584,6 @@ do vendedor começar. IMPORTANTE: os valores absolutos de fixo/bônus/OTE do Clo
 não foram definidos — apenas a estrutura de faixas — então nunca afirmar um valor específico
 de salário de Closer.
 
-## Ramp-up de novos vendedores
-BDR (30 dias): semana 1 = imersão sem discar (produto, cultura, Módulo 1, inscrição na
-Pipelovers); semana 2 = shadow de 20 ligações + roleplay com evolu.AI + treinamento
-Meetime/GPCT; semana 3 = opera com madrinha/padrinho a 50% da meta; semana 4 = opera
-independente a 75% da meta com feedback formal. Do dia 31 em diante, meta cheia. Closer (45
-dias): semanas 1–2 = imersão profunda (demos, Módulos 1/3/4, shadow de reuniões,
-HubSpot); semanas 3–4 = co-condução de diagnósticos com sênior (meta: 3 aprovados);
-semanas 5–6 = opera sozinho a 50% da meta com todo card revisado pelo gestor antes de
-enviar proposta. Do dia 46 em diante, meta cheia. Um vendedor sem ramp-up estruturado leva
-30–50% mais tempo para bater a primeira meta.
-
 ## Ferramentas por função
 Stack obrigatório: Meetime Flow (principal do BDR), HubSpot (pipeline do Closer, pós-venda do
 CS, forecast do gestor), evolu.AI (ligações do BDR, reuniões do Closer, dashboard do gestor),
