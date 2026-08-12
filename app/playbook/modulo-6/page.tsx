@@ -3,7 +3,6 @@ import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
   CULTURE_PILLARS,
-  RITUALS,
   COMP_PRINCIPLES,
   CLOSER_PERFORMANCE_TIERS,
   BDR_GOAL_NOTE,
@@ -95,35 +94,6 @@ export default function Modulo6Page() {
               <div key={p.title}>
                 <p className="text-sm font-medium">{p.title}</p>
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>{p.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 6.4 */}
-        <section id="m6-sec-4" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            6.4 — Rituais de Gestão Comercial
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Ritual é o que transforma intenção em execução. Sem rituais definidos, cada gestor
-            opera com sua própria cadência — e o time perde referência. Os rituais abaixo são
-            obrigatórios para a operação comercial da Omni.
-          </p>
-          <div className="space-y-4">
-            {RITUALS.map((r) => (
-              <div key={r.title} className="rounded-md border p-3" style={{ borderColor: "var(--border)" }}>
-                <p className="text-sm font-semibold">{r.title}</p>
-                <p className="text-xs" style={{ color: "var(--text-muted)" }}>{r.cadence}</p>
-                <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>{r.audience}</p>
-                <ul className="mt-2 list-disc space-y-1 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
-                  {r.agenda.map((a) => (
-                    <li key={a}>{a}</li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-xs font-medium" style={{ color: "var(--accent)" }}>
-                  Regra de ouro: {r.goldenRule}
-                </p>
               </div>
             ))}
           </div>

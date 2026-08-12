@@ -567,22 +567,6 @@ sem dado é opinião, decisão sem dado é aposta). Próximo passo sempre (nenhu
 termina sem próximo passo concreto, datado e com responsável). Crescimento com
 responsabilidade (upsell é consequência de um cliente com resultado, não métrica de pressão).
 
-## Rituais de gestão obrigatórios (cadência e regra de ouro)
-Daily (15 min, todo dia útil às 9h, time de pé): 3 perguntas por pessoa em até 2 min (o que fiz
-ontem/hoje/bloqueios); nunca discutir pipeline aqui; regra de ouro — passar de 20 min já virou
-reunião, responsabilidade do gestor. Pipeline Review Semanal (60 min, segunda, gestor +
-closers, HubSpot card a card): checa próximo passo datado, decisor identificado, ROI
-apresentado, temperatura atualizada; card sem próximo passo datado é risco imediato. Review
-de BDR Semanal (45 min, sexta, dashboard Meetime): minutos falados, SALs, top 3 ligações
-ouvidas ao vivo com feedback do evolu.AI — ouvir em grupo é desenvolvimento, não punição.
-1:1 Individual (30 min, quinzenal): não é revisão de meta nem feedback negativo acumulado;
-se o gestor fala mais de 40% do tempo a reunião falhou; é o principal instrumento de retenção.
-Forecast Mensal (90 min, última semana do mês, gestor + liderança): performance real vs.
-meta, 3 cenários de forecast; gestor que erra o forecast em mais de 30% por 2 meses seguidos
-precisa revisar o método. QBR trimestral (meio dia, time completo + liderança): resultado do
-trimestre, o que funcionou/não funcionou, reconhecimento, metas do próximo trimestre,
-atualização do playbook — não pode ser cancelado nem virar monólogo da liderança.
-
 ## Metas e comissionamento
 Princípios: clareza total (vendedor calcula a própria comissão sem precisar do RH), esforço +
 resultado (reconhece score evolu.AI e qualidade de handoff, não só fechamento), acelerador

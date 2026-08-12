@@ -26,96 +26,6 @@ export const CULTURE_PILLARS = [
 ];
 
 
-// ---------- 6.4 Rituais ----------
-
-export type Ritual = {
-  title: string;
-  cadence: string;
-  audience: string;
-  agenda: string[];
-  goldenRule: string;
-};
-
-export const RITUALS: Ritual[] = [
-  {
-    title: "Daily",
-    cadence: "15 minutos, todo dia útil, 9h",
-    audience: "Time de BDR e Closers (separados ou juntos, dependendo do porte do time). Formato: de pé, sem apresentação, rápido.",
-    agenda: [
-      "Cada membro responde 3 perguntas em até 2 minutos: O que fiz ontem? O que farei hoje? Tem algum bloqueio?",
-      "Gestor registra bloqueios e resolve fora da daily",
-      "Nada de análise de pipeline na daily — isso vai para o pipeline review",
-    ],
-    goldenRule: "Daily que passa de 20 minutos virou reunião. Terminar na hora é responsabilidade do gestor, não do time.",
-  },
-  {
-    title: "Pipeline Review Semanal",
-    cadence: "60 minutos, toda segunda-feira",
-    audience: "Gestor + Closers. Formato: HubSpot aberto na tela. Card por card nos negócios em andamento.",
-    agenda: [
-      "Negócios em negociação — status, próximo passo e data",
-      "Negócios em demonstração — o que está travando a evolução?",
-      "Negócios sem atividade há mais de 7 dias — o que aconteceu?",
-      "Forecast da semana — o que fecha essa semana com alta confiança?",
-      "O que o gestor avalia em cada card: há próximo passo com data definida? O decisor real está identificado? O ROI foi apresentado? O campo de temperatura está atualizado?",
-    ],
-    goldenRule: "Qualquer card sem próximo passo datado é marcado como risco imediato. O closer tem até a daily de terça para atualizar.",
-  },
-  {
-    title: "Review de BDR Semanal",
-    cadence: "45 minutos, toda sexta-feira",
-    audience: "Gestor + Time de BDR. Formato: Dashboard do Meetime aberto. KPIs da semana na tela.",
-    agenda: [
-      "Minutos falados na semana — quem está abaixo de 200 minutos?",
-      "SALs geradas na semana — qualidade e volume",
-      "Top 3 ligações da semana — ouvir trechos ao vivo com feedback do evolu.AI",
-      "Objeção nova que apareceu — como o time respondeu?",
-      "Plano da semana seguinte — fila priorizada por A/B/C",
-    ],
-    goldenRule: "Ouvir ligações em grupo não é punição — é desenvolvimento. Criar cultura de que feedback em grupo é normal elimina a resistência ao evolu.AI.",
-  },
-  {
-    title: "1:1 Individual",
-    cadence: "30 minutos, quinzenal por colaborador",
-    audience: "Gestor + cada membro do time individualmente.",
-    agenda: [
-      "Como está você? (5 minutos — genuíno, não protocolar)",
-      "O que está indo bem na sua operação? (10 minutos)",
-      "Onde você está travado ou precisando de ajuda? (10 minutos)",
-      "Que compromisso você leva dessa conversa? (5 minutos)",
-      "O que NÃO é o 1:1: não é revisão de meta (isso vai para o pipeline review); não é feedback negativo acumulado (deve ser dado na hora, não guardado); não é monólogo do gestor (se o gestor fala mais de 40% do tempo, a reunião falhou)",
-    ],
-    goldenRule: "O 1:1 é o principal instrumento de retenção de talentos. Time que não tem 1:1 consistente é time que não sente que a empresa se importa com seu desenvolvimento.",
-  },
-  {
-    title: "Forecast Mensal",
-    cadence: "90 minutos, última semana do mês",
-    audience: "Gestor Comercial + Liderança da Omni. Formato: apresentação estruturada com HubSpot + planilha de forecast.",
-    agenda: [
-      "Performance do mês — real vs. meta (BDR e Closers separados)",
-      "Análise de pipeline — o que está em negociação para o próximo mês?",
-      "Forecast do próximo mês — três cenários: pessimista, realista, otimista",
-      "Principais riscos — deals que podem cair e por quê",
-      "Ações corretivas — o que muda no processo para o próximo mês?",
-    ],
-    goldenRule: "Forecast não é chute — é compromisso com base em dados. Gestor que erra o forecast por mais de 30% por dois meses consecutivos precisa revisar seu método de análise de pipeline.",
-  },
-  {
-    title: "QBR — Quarterly Business Review",
-    cadence: "A cada trimestre (meio dia)",
-    audience: "Time Comercial completo + Liderança da Omni.",
-    agenda: [
-      "Resultado do trimestre — BDR, Closers e CS",
-      "O que funcionou — práticas que geraram resultado e devem ser mantidas",
-      "O que não funcionou — o que precisa mudar no processo, não nas pessoas",
-      "Reconhecimento — top performers do trimestre com critérios claros",
-      "Próximas metas — definição colaborativa das metas do próximo trimestre",
-      "Atualização do playbook — o que aprendemos que deve ser registrado?",
-    ],
-    goldenRule: "O QBR é o momento mais estratégico do calendário comercial. Não pode ser cancelado, não pode ser reduzido a 1 hora e não pode ser só a liderança falando. Time que não participa da construção das metas não se compromete com elas.",
-  },
-];
-
 // ---------- 6.5 Metas e comissionamento ----------
 
 export const COMP_PRINCIPLES = [
@@ -334,7 +244,6 @@ export const CHECKLIST_CULTURA_SAUDE = [
 
 export const MODULE_6_SECTIONS = [
   { id: "m6-sec-1", label: "6.1 Cultura Comercial" },
-  { id: "m6-sec-4", label: "6.4 Rituais de Gestão" },
   { id: "m6-sec-5", label: "6.5 Metas e Comissionamento" },
   { id: "m6-sec-6", label: "6.6 Ramp-up de Novos Vendedores" },
   { id: "m6-sec-7", label: "6.7 Ferramentas por Função" },
