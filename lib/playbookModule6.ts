@@ -165,48 +165,9 @@ export const PIPELOVERS_VS_G4 = [
   ["Foco em BDR e Closer", "Foco em Closer e Gestor"],
 ];
 
-// ---------- 6.9 Checklist ----------
-
-export const CHECKLIST_SETUP_INICIAL = [
-  "Modelo de comissionamento de BDR e Closer documentado por escrito e assinado por todos",
-  "Calendário de rituais criado no Google Calendar com recorrência — daily, pipeline review, review BDR, 1:1, forecast mensal, QBR trimestral",
-  "HubSpot com campos obrigatórios por etapa configurados (conforme Módulo 3)",
-  "Meetime Flow com cadências, Fit Score e campos de SAL configurados (conforme Módulo 2)",
-  "evolu.AI integrada ao Meetime Dialer e ao Google Meet — análise automática ativa",
-  "Pipelovers: licenças contratadas e time inscrito nos grupos corretos por função",
-  "G4 Skills: plataforma configurada com trilhas definidas por função e conteúdo interno da Omni adicionado",
-  "Plano de carreira documentado e comunicado ao time",
-];
-
-export const CHECKLIST_ONBOARDING_COLABORADOR = [
-  "Acesso a todas as ferramentas configurado antes do primeiro dia",
-  "Madrinha ou padrinho designado",
-  "Trilha obrigatória no G4 Skills mapeada antes da chegada",
-  "Inscrição na Pipelovers no grupo correto",
-  "Cronograma de ramp-up enviado ao colaborador no primeiro dia",
-  "Avaliação formal agendada para o D30 e D45",
-];
-
-export const CHECKLIST_RITUAIS_MENSAL = [
-  "Daily está sendo realizada todos os dias úteis e não está passando de 20 minutos?",
-  "Pipeline review está gerando próximos passos concretos em todos os cards?",
-  "Review de BDR está incluindo escuta de ligações ao vivo com feedback?",
-  "1:1 individual está acontecendo quinzenalmente com todos?",
-  "Forecast mensal está sendo preparado com dados, não com intuição?",
-  "QBR trimestral está gerando atualização do playbook?",
-];
-
-export const CHECKLIST_CULTURA_SAUDE = [
-  "Menos de 20% do time está abaixo de 70% da meta por mais de 2 meses consecutivos?",
-  "Taxa de turnover do time comercial está abaixo de 25% ao ano?",
-  "Feedback positivo : corretivo está em pelo menos 2:1 nos rituais de gestão?",
-  "O playbook foi atualizado pelo menos uma vez nos últimos 90 dias com aprendizados reais?",
-];
-
 export const MODULE_6_SECTIONS = [
   { id: "m6-sec-1", label: "6.1 Cultura Comercial" },
   { id: "m6-sec-5", label: "6.5 Metas e Comissionamento" },
   { id: "m6-sec-6", label: "6.6 Ramp-up de Novos Vendedores" },
   { id: "m6-sec-7", label: "6.7 Ferramentas por Função" },
-  { id: "m6-sec-9", label: "6.9 Checklist de Implementação" },
 ];

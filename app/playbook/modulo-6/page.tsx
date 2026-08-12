@@ -27,10 +27,6 @@ import {
   PIPELOVERS_ROUTINE,
   G4_SKILLS_PRACTICE,
   PIPELOVERS_VS_G4,
-  CHECKLIST_SETUP_INICIAL,
-  CHECKLIST_ONBOARDING_COLABORADOR,
-  CHECKLIST_RITUAIS_MENSAL,
-  CHECKLIST_CULTURA_SAUDE,
 } from "@/lib/playbookModule6";
 
 function List({ title, items }: { title?: string; items: string[] }) {
@@ -46,21 +42,6 @@ function List({ title, items }: { title?: string; items: string[] }) {
   );
 }
 
-function ChecklistBlock({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="space-y-2">
-      <h4 className="text-sm font-medium">{title}</h4>
-      <ul className="space-y-1 text-sm">
-        {items.map((item) => (
-          <li key={item} className="flex gap-2">
-            <span aria-hidden>☐</span>
-            <span style={{ color: "var(--text-muted)" }}>{item}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
 
 export default function Modulo6Page() {
   return (
@@ -188,19 +169,6 @@ export default function Modulo6Page() {
 
           <p className="text-sm font-medium">Como as duas ferramentas se complementam</p>
           <Table headers={["Pipelovers", "G4 Skills"]} rows={PIPELOVERS_VS_G4} />
-        </section>
-
-        {/* 6.9 */}
-        <section id="m6-sec-9" className="scroll-mt-20 space-y-6">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            6.9 — Checklist de Implementação — Para o Gestor
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2">
-            <ChecklistBlock title="Setup inicial (fazer uma vez antes de ativar o playbook)" items={CHECKLIST_SETUP_INICIAL} />
-            <ChecklistBlock title="Onboarding de novo colaborador (checklist por contratação)" items={CHECKLIST_ONBOARDING_COLABORADOR} />
-            <ChecklistBlock title="Rituais (checar mensalmente)" items={CHECKLIST_RITUAIS_MENSAL} />
-            <ChecklistBlock title="Cultura (indicadores de saúde)" items={CHECKLIST_CULTURA_SAUDE} />
-          </div>
         </section>
       </div>
     </>
