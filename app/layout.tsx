@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import { ChatWidget } from "@/components/ChatWidget";
+import { SiteWidgets } from "@/components/SiteWidgets";
 
 export const metadata: Metadata = {
   title: "Playbook de Vendas",
@@ -22,10 +22,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Dashboard
             </Link>
+            <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
+              Admin
+            </Link>
           </nav>
         </header>
         <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
-        <ChatWidget />
+        <SiteWidgets />
       </body>
     </html>
   );
