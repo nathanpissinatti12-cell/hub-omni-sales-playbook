@@ -376,7 +376,6 @@ export const MODULES = [
   { id: 4, title: "Produto, Mercado & Precificação", href: "/playbook/modulo-4", available: true },
   { id: 5, title: "Pós-venda / Customer Success", href: "/playbook/modulo-5", available: true },
   { id: 6, title: "Cultura, Gestão e Rituais Comerciais", href: "/playbook/modulo-6", available: true },
-  { id: 7, title: "Próximo módulo", href: null, available: false },
 ];
 
 export const MODULE_1_SECTIONS = [
