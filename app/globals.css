@@ -53,3 +53,16 @@ body {
   color: var(--text);
   font-family: "Omni Atyp", ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Tópicos do playbook (h3/h4 e rótulos "font-medium" de bloco) em amarelo,
+   maiúsculo e compacto — resposta abaixo permanece na cor de leitura normal. */
+.playbook-content h3.font-medium,
+.playbook-content h4.font-medium,
+.playbook-content p.font-medium,
+.playbook-content dt.font-medium {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.75rem;
+  font-weight: 700;
+}

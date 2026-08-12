@@ -118,7 +118,7 @@ export default function Modulo4Page() {
     <>
       <PlaybookSidebar activeModuleId={4} />
 
-      <div className="min-w-0 flex-1 space-y-14">
+      <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
             Playbook de Vendas — Omni Assessoria
