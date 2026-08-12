@@ -402,19 +402,6 @@ export const CHECKLIST_SETUP = [
   "Banco de objeções com respostas treinadas distribuído ao time",
 ];
 
-export const CHECKLIST_ONBOARDING = [
-  "Imersão Omni completa (institucional, produtos, mercado) — 3 dias",
-  "Treinamento técnico em TakeFlow, Onvox e evolu.AI — 2 dias",
-  "Shadow de 20 ligações com BDR Black/Platinum (madrinha/padrinho)",
-  "Role-play da Abordagem Oficial Omni — mínimo 5 sessões",
-  "Treinamento Meetime Flow: cadências, Dialer, Fit Score, registro de SAL",
-  "Treinamento GPCT_BA_C&I com aplicação prática por produto",
-  "1ª semana: 50% da meta de ligações",
-  "2ª semana: 75% da meta",
-  "3ª semana: 100% da meta",
-  "Avaliação de 30 dias com análise de 5 ligações via evolu.AI",
-];
-
 export const CHECKLIST_ROTINA = [
   "Segunda — Planejamento (30 min): revisão de pipeline, distribuição de leads A/B/C",
   "Terça a Quinta — Operação: acompanhamento de KPIs diários no dashboard Meetime",

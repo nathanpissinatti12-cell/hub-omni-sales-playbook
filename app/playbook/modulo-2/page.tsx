@@ -28,7 +28,6 @@ import {
   KPI_EFICIENCIA,
   QUALITY_METRICS,
   CHECKLIST_SETUP,
-  CHECKLIST_ONBOARDING,
   CHECKLIST_ROTINA,
   CHECKLIST_AUDITORIA,
   CHECKLIST_TOOLS,
@@ -500,7 +499,10 @@ export default function Modulo2Page() {
             2.12 — Checklist de Implementação para o Gestor de Pré-vendas
           </h2>
           <ChecklistBlock title="Setup inicial (fazer 1 vez)" items={CHECKLIST_SETUP} />
-          <ChecklistBlock title="Onboarding de novo BDR (primeiros 30 dias)" items={CHECKLIST_ONBOARDING} />
+          <p className="text-sm italic" style={{ color: "var(--text-muted)" }}>
+            O onboarding de novo BDR (primeiros 30 dias) está centralizado no Módulo 06 —
+            Cultura, Gestão e Rituais Comerciais (seção 6.6 — Ramp-up de Novos Vendedores).
+          </p>
           <ChecklistBlock title="Rotina semanal de gestão" items={CHECKLIST_ROTINA} />
           <ChecklistBlock title="Auditoria mensal de qualidade" items={CHECKLIST_AUDITORIA} />
           <ChecklistBlock title="Ferramentas obrigatórias por BDR" items={CHECKLIST_TOOLS} />
