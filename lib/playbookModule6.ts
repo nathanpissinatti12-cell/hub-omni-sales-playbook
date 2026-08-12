@@ -101,10 +101,10 @@ export const HIRING_COST_NOTE =
 // ---------- 6.3 Plano de carreira ----------
 
 export const BDR_CAREER_LEVELS = [
-  ["Blue", "Entrada — primeiros 3 meses", "R$ 2.500"],
-  ["Gold", "Consistência em resultado + comportamento", "R$ 2.700"],
-  ["Black", "Alta performance sustentada", "R$ 3.000"],
-  ["Platinum", "Referência técnica e cultural do time", "R$ 3.500"],
+  ["Blue", "Entrada — primeiros 3 meses", "R$ 2.500", "R$ 3.000", "20"],
+  ["Gold", "Consistência em resultado + comportamento", "R$ 2.700", "R$ 3.500", "25"],
+  ["Black", "Alta performance sustentada", "R$ 3.000", "R$ 4.000", "30"],
+  ["Platinum", "Referência técnica e cultural do time", "R$ 3.500", "R$ 5.000", "40"],
 ];
 
 export const BDR_PROGRESSION_NOTE =

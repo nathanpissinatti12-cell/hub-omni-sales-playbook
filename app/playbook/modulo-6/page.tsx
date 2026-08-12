@@ -148,7 +148,10 @@ export default function Modulo6Page() {
             performa mais e dura mais.
           </p>
           <p className="text-sm font-medium">Trilha de Pré-vendas (BDR)</p>
-          <Table headers={["Nível", "Critério de Progressão", "Fixo CLT (ref.)"]} rows={BDR_CAREER_LEVELS} />
+          <Table
+            headers={["Nível", "Critério de Progressão", "Fixo CLT (ref.)", "Fixo PJ (ref.)", "Meta inicial (SALs)"]}
+            rows={BDR_CAREER_LEVELS}
+          />
           <Callout tone="blue" title="Importante">{BDR_PROGRESSION_NOTE}</Callout>
           <p className="text-sm font-medium">Próximo degrau após Platinum</p>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>{BDR_NEXT_STEP}</p>

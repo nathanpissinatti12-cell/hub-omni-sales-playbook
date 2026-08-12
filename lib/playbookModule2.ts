@@ -403,13 +403,6 @@ export const OTE_FAIXAS = [
   { faixa: "Faixa 5", pct: "200%+", leads: "40+", mult: "3,3x", bonus: "R$ 3.300", total: "R$ 7.300" },
 ];
 
-export const CAREER_LEVELS = [
-  { nivel: "Blue", clt: "R$ 2.500", pj: "R$ 3.000", meta: "20" },
-  { nivel: "Gold", clt: "R$ 2.700", pj: "R$ 3.500", meta: "25" },
-  { nivel: "Black", clt: "R$ 3.000", pj: "R$ 4.000", meta: "30" },
-  { nivel: "Platinum", clt: "R$ 3.500", pj: "R$ 5.000", meta: "40" },
-];
-
 export const CHECKLIST_SETUP = [
   "Meetime Flow configurado com todos os campos obrigatórios do template de SAL Omni",
   "Cadências oficiais criadas no Meetime Flow por vertical (9 dias, 13 toques)",

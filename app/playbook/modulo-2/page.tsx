@@ -28,7 +28,6 @@ import {
   KPI_EFICIENCIA,
   QUALITY_METRICS,
   OTE_FAIXAS,
-  CAREER_LEVELS,
   CHECKLIST_SETUP,
   CHECKLIST_ONBOARDING,
   CHECKLIST_ROTINA,
@@ -501,16 +500,6 @@ export default function Modulo2Page() {
               headers={["Faixa", "% da Meta", "Leads SAL", "Multiplicador", "Bônus Final", "Total (Fixo + Bônus)"]}
               rows={OTE_FAIXAS.map((f) => [f.faixa, f.pct, f.leads, f.mult, f.bonus, f.total])}
             />
-            <p className="text-sm font-medium">Níveis de carreira e faixas de fixo (referência)</p>
-            <Table
-              headers={["Nível", "CLT — Fixo", "PJ — Fixo", "Meta inicial (SALs)"]}
-              rows={CAREER_LEVELS.map((c) => [c.nivel, c.clt, c.pj, c.meta])}
-            />
-            <p className="text-sm italic" style={{ color: "var(--text-muted)" }}>
-              A progressão de nível não segue critérios quantitativos fixos. É avaliada com base
-              em comportamento, comprometimento e resultado — a visão holística do que define um
-              ótimo colaborador. A meta mensal varia e é definida pela gestão a cada mês.
-            </p>
           </div>
         </section>
 

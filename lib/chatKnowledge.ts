@@ -613,8 +613,11 @@ que sabe que gerenciar não é vender pelo time.
 
 ## Plano de carreira
 BDR (4 níveis, progressão holística — não automática por tempo, avaliada trimestralmente por
-comportamento + comprometimento + resultado, nunca só quantitativa): Blue (entrada,
-R$2.500), Gold (R$2.700), Black (R$3.000), Platinum (R$3.500, referência técnica e cultural).
+comportamento + comprometimento + resultado, nunca só quantitativa), com fixo CLT/PJ e meta
+inicial de SALs crescentes por nível: Blue (entrada — primeiros 3 meses, R$2.500 CLT / R$3.000
+PJ, meta inicial de 20 SALs), Gold (consistência em resultado + comportamento, R$2.700 CLT /
+R$3.500 PJ, 25 SALs), Black (alta performance sustentada, R$3.000 CLT / R$4.000 PJ, 30 SALs),
+Platinum (referência técnica e cultural do time, R$3.500 CLT / R$5.000 PJ, 40 SALs).
 BDR Platinum com perfil consultivo é o candidato natural para virar Closer. Closer (4 níveis):
 Junior (ramp-up, meta reduzida) → Pleno (meta cheia) → Sênior (>110% da meta por 3
 trimestres) → Executivo de Contas (carteira estratégica + expansão) — os dois últimos são
