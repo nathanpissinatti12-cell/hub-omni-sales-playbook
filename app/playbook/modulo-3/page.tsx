@@ -18,6 +18,7 @@ import {
   PROOF_CASES,
   MENTAL_TRIGGERS,
   NEGOTIATION_OBJECTIONS,
+  CLOSER_OBJECTION_SCRIPTS,
   CLOSER_HUBSPOT_RESPONSIBILITIES,
   CLOSER_DASHBOARDS,
   CLOSER_KPIS,
@@ -391,6 +392,32 @@ export default function Modulo3Page() {
               {NEGOTIATION_OBJECTIONS.map((o) => (
                 <div key={o.question} className="rounded-lg border" style={{ borderColor: "var(--border)" }}>
                   <p className="px-4 py-2 text-sm font-medium" style={{ background: "var(--border)" }}>{o.question}</p>
+                  <p className="p-4 text-sm" style={{ color: "var(--text-muted)" }}>{o.answer}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="font-medium">3.7.6 — 7 Objeções do Closer — Scripts</h3>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              Objeções de nível executivo, próprias da reunião de negociação — distintas das do
+              Módulo 2 (cold call BDR). Estrutura padrão de resposta: reconheça a preocupação
+              (sem concordar) → reframe (mude o ângulo da discussão) → prova social com dado
+              concreto → próxima etapa clara e de baixo risco.
+            </p>
+            <div className="space-y-3">
+              {CLOSER_OBJECTION_SCRIPTS.map((o) => (
+                <div key={o.tag} className="rounded-lg border" style={{ borderColor: "var(--border)" }}>
+                  <div className="flex items-center justify-between gap-3 px-4 py-2" style={{ background: "var(--border)" }}>
+                    <p className="text-sm font-medium">{o.question}</p>
+                    <span
+                      className="shrink-0 rounded px-2 py-0.5 text-xs font-semibold"
+                      style={{ background: "var(--accent)", color: "var(--on-accent)" }}
+                    >
+                      {o.tag}
+                    </span>
+                  </div>
                   <p className="p-4 text-sm" style={{ color: "var(--text-muted)" }}>{o.answer}</p>
                 </div>
               ))}

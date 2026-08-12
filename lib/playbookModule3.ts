@@ -5,6 +5,60 @@
 // A numeração de perguntas do Raio-X segue exatamente o documento fonte
 // (pula de 43 para 46 no Bloco 7, conforme o PDF original).
 
+export type ClosingObjection = {
+  tag: string;
+  question: string;
+  answer: string;
+};
+
+// Movido do Módulo 1 (Fundação Estratégica) — são objeções de nível
+// executivo, próprias da reunião de negociação do closer, e não da
+// abordagem inicial de BDR/cold call (essas ficam no Módulo 2).
+export const CLOSER_OBJECTION_SCRIPTS: ClosingObjection[] = [
+  {
+    tag: "INÉRCIA",
+    question: "\"Já tenho uma operadora. Está funcionando.\"",
+    answer:
+      "\"Entendo. A maioria dos nossos clientes pensava assim antes de fazer o Raio-X. A questão não é se 'está funcionando' — é quanto está custando além do que aparece na fatura. Ligações perdidas sem registro, ramal que cai, manutenção de hardware, falta de dado para gestão... isso não aparece no boleto, mas aparece no resultado. Posso propor uma análise gratuita? Se não tiver gargalo, você sai com a confirmação de que está bem. Se tiver, você vai saber exatamente onde está perdendo dinheiro.\"",
+  },
+  {
+    tag: "PREÇO",
+    question: "\"Vocês são mais caros do que o concorrente X.\"",
+    answer:
+      "\"Depende do que você está comparando. O concorrente mostrou um preço por ramal — mas incluiu URA, gravação, dashboard, suporte 24/7 e integração com CRM? Porque muitos players têm preço de entrada baixo e cobram tudo no detalhe. Posso te mandar uma comparação lado a lado do custo total? E além do custo, tem a pergunta mais importante: o que acontece quando cai? Nosso SLA é de [X] e temos suporte dedicado. Qual é o compromisso deles?\"",
+  },
+  {
+    tag: "ORÇAMENTO",
+    question: "\"Não tenho orçamento agora.\"",
+    answer:
+      "\"Faz sentido. Por isso o Raio-X é importante: dependendo dos números, a Omni não é um custo — é uma redução de custo. A Neobetel, por exemplo, reduziu 20% na conta de telefonia e 80% na linha 0800. Se você está pagando R$X por mês hoje e a gente consegue baixar para R$Y com mais funcionalidade, o ROI se paga sozinho. Posso calcular esse número com você antes de qualquer decisão?\"",
+  },
+  {
+    tag: "DECISÃO",
+    question: "\"Preciso falar com o TI / com meu sócio / com a diretoria.\"",
+    answer:
+      "\"Claro, faz todo sentido envolver quem precisa. Para facilitar esse processo, posso preparar um documento executivo com o diagnóstico e o business case — algo que você possa apresentar internamente sem ter que explicar tudo do zero. Poderia marcar uma reunião com o TI e o decisor juntos? Às vezes é mais eficiente eu apresentar diretamente e tirar as dúvidas técnicas na hora.\"",
+  },
+  {
+    tag: "EXP. NEGATIVA",
+    question: "\"Já testamos uma plataforma de WhatsApp e não funcionou.\"",
+    answer:
+      "\"Isso é muito mais comum do que parece, e quase sempre o problema não foi a plataforma — foi a implementação. Plataformas genéricas instalam e somem. O diferencial da Omni é a nossa metodologia de implantação: mapeamos o fluxo de atendimento, configuramos os chatbots com a sua lógica de negócio e treinamos o time. Além disso, temos suporte 24/7 e um CS dedicado que monitora os primeiros 90 dias. Você pode conversar com um dos nossos clientes que passou por isso antes de decidir?\"",
+  },
+  {
+    tag: "RISCO TÉCNICO",
+    question: "\"Tenho medo da migração quebrar o que já tenho.\"",
+    answer:
+      "\"Essa é a principal preocupação de quem tem uma operação crítica — e é por isso que a gente tem um processo de migração em fases, sem downtime. A implementação começa em paralelo, validamos tudo antes de cortar, e ficamos ao lado do time técnico durante a transição. Nos 15 anos de mercado, nunca tivemos uma migração que causou interrupção de operação. Posso apresentar nosso protocolo técnico de migração?\"",
+  },
+  {
+    tag: "CONTRATO",
+    question: "\"O contrato é muito longo. Não quero ficar preso.\"",
+    answer:
+      "\"Entendo a preocupação. Nossos contratos têm prazo porque a implementação tem custo e queremos garantir que o cliente colha resultado. Mas o que prende o cliente não é o contrato — é o resultado. O British Council está conosco há mais de 5 anos porque quer, não porque é obrigado. Podemos conversar sobre flexibilidade de prazo dependendo do escopo, mas o mais importante é você entender que o seu risco é mínimo: temos SLA, suporte e uma equipe que responde quando você precisa.\"",
+  },
+];
+
 export const CLOSER_BEHAVIORAL = [
   "Escuta ativa genuína — sabe ficar em silêncio e deixar o cliente falar",
   "Curiosidade consultiva — faz perguntas que aprofundam, não que encerram",

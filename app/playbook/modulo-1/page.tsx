@@ -8,7 +8,6 @@ import {
   BATTLECARDS,
   NARRATIVE_STEPS,
   RAIO_X,
-  OBJECTIONS_M1,
   CHECKLIST_M1,
   ORIGENS,
   FUTURE_MODULES_CONTENT,
@@ -27,7 +26,7 @@ export default function Modulo1Page() {
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Módulo 1 — Fundação Estratégica</h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-            Posicionamento · Proposta de Valor por ICP · Diferenciação · Narrativa · Objeções
+            Posicionamento · Proposta de Valor por ICP · Diferenciação · Narrativa
           </p>
           <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
             Baseado em: Apresentação Omni Assessoria + PAR OnVox & TakeFlow (Vinteo 2026)
@@ -235,42 +234,7 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
         {/* Seção 5 */}
         <section id="sec-5" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Seção 5 — Objeções Mais Comuns e Como Responder com Autoridade
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            7 objeções mapeadas com resposta estruturada. Todas adaptadas ao contexto e
-            linguagem da Omni. Estrutura padrão de resposta: reconheça a preocupação (sem
-            concordar) → reframe (mude o ângulo da discussão) → prova social com dado concreto →
-            próxima etapa clara e de baixo risco.
-          </p>
-          <div className="space-y-3">
-            {OBJECTIONS_M1.map((o) => (
-              <div
-                key={o.tag}
-                className="rounded-lg border"
-                style={{ borderColor: "var(--border)" }}
-              >
-                <div className="flex items-center justify-between gap-3 px-4 py-2" style={{ background: "var(--border)" }}>
-                  <p className="text-sm font-medium">{o.question}</p>
-                  <span
-                    className="shrink-0 rounded px-2 py-0.5 text-xs font-semibold text-white"
-                    style={{ background: "#b91c1c" }}
-                  >
-                    {o.tag}
-                  </span>
-                </div>
-                <p className="p-4 text-sm" style={{ color: "var(--text-muted)" }}>
-                  {o.answer}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Seção 6 */}
-        <section id="sec-6" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Seção 6 — Checklist de Implementação — Para o Gestor
+            Seção 5 — Checklist de Implementação — Para o Gestor
           </h2>
           <Callout tone="blue" title="Como usar este checklist">
             Revisar com o time antes de considerar o Módulo 1 implementado. Cada item deve ser
@@ -288,10 +252,10 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
           </ul>
         </section>
 
-        {/* Seção 7 */}
-        <section id="sec-7" className="scroll-mt-20 space-y-4">
+        {/* Seção 6 */}
+        <section id="sec-6" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Seção 7 — Origem das Práticas e Referências
+            Seção 6 — Origem das Práticas e Referências
           </h2>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Transparência metodológica: o que veio dos próprios materiais da Omni e o que foi
@@ -303,10 +267,10 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
           />
         </section>
 
-        {/* Seção 8 */}
-        <section id="sec-8" className="scroll-mt-20 space-y-6">
+        {/* Seção 7 */}
+        <section id="sec-7" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Seção 8 — Pontos de Atenção
+            Seção 7 — Pontos de Atenção
           </h2>
           <Callout tone="pink" title="Sobre esta seção">
             Temas identificados como relevantes para a fundação estratégica que foram
@@ -316,7 +280,7 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
           </Callout>
 
           <div className="space-y-3">
-            <h3 className="font-medium">8.1 A ser desenvolvido nos próximos módulos</h3>
+            <h3 className="font-medium">7.1 A ser desenvolvido nos próximos módulos</h3>
             <ul className="list-disc space-y-1 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
               {FUTURE_MODULES_CONTENT.map((item) => (
                 <li key={item}>{item}</li>
@@ -325,7 +289,7 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
           </div>
 
           <div className="space-y-3">
-            <h3 className="font-medium">8.2 Ações imediatas da gestão antes da ativação</h3>
+            <h3 className="font-medium">7.2 Ações imediatas da gestão antes da ativação</h3>
             <ul className="list-disc space-y-1 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
               {IMMEDIATE_ACTIONS.map((item) => (
                 <li key={item}>{item}</li>

@@ -126,27 +126,13 @@ O Raio-X Operacional (ferramenta comercial central, não coleta de dados) — 6 
 5. Auditoria: "Quando um cliente reclama, você consegue ouvir a gravação?" → gravação de 100% das chamadas + auditoria cognitiva com IA.
 6. Mobilidade: "Seus funcionários em campo recebem ramal pelo celular?" → mobilidade corporativa, ramal no app, sem chip extra.
 
-## Seção 5 — Objeções Mais Comuns e Como Responder com Autoridade
-Estrutura padrão: reconhecer a preocupação (sem concordar) → reframe → prova social com
-dado concreto → próxima etapa clara e de baixo risco.
-
-- INÉRCIA "Já tenho uma operadora, está funcionando" → a questão não é se está funcionando, é quanto está custando além da fatura (ligação perdida sem registro, manutenção, falta de dado). Propor Raio-X gratuito.
-- PREÇO "Vocês são mais caros que o concorrente X" → perguntar se o concorrente incluiu URA, gravação, dashboard, suporte 24/7 e CRM no preço. Oferecer comparação de custo total e perguntar qual é o SLA/compromisso deles.
-- ORÇAMENTO "Não tenho orçamento agora" → o Raio-X mostra que a Omni pode ser redução de custo, não custo novo (Neobetel -20% telefonia, -80% 0800). Propor calcular o número antes de qualquer decisão.
-- DECISÃO "Preciso falar com TI/sócio/diretoria" → oferecer documento executivo com diagnóstico e business case, e propor reunião conjunta com o decisor técnico e o econômico.
-- EXP. NEGATIVA "Já testamos WhatsApp e não funcionou" → normalmente o problema foi a implementação, não a plataforma. Diferencial da Omni: metodologia de implantação, CS dedicado nos primeiros 90 dias, oferecer conversa com cliente que passou por isso.
-- RISCO TÉCNICO "Tenho medo da migração quebrar o que já tenho" → migração em fases, sem downtime, implementação em paralelo, validação antes de cortar. Nunca houve interrupção de operação em 15 anos de mercado.
-- CONTRATO "O contrato é muito longo, não quero ficar preso" → contrato tem prazo por causa do custo de implementação, mas o que prende o cliente é o resultado (British Council está há 5+ anos por escolha). Pode-se conversar sobre flexibilidade de prazo dependendo do escopo.
-
-## Seção 6 — Checklist de Implementação (uso do gestor, não do vendedor no dia a dia)
+## Seção 5 — Checklist de Implementação (uso do gestor, não do vendedor no dia a dia)
 Pitch de elevador reproduzível sem ler; identificar cluster de ICP e decisor econômico
 antes da reunião; frases proibidas eliminadas; Raio-X com roteiro-padrão de 6 perguntas;
-as 7 objeções testadas em roleplay; diferenciação por concorrente documentada; provas
-sociais formatadas em one-pagers; validação do posicionamento com clientes atuais.
+diferenciação por concorrente documentada; provas sociais formatadas em one-pagers;
+validação do posicionamento com clientes atuais.
 
 ## Pontos de atenção importantes (ainda em aberto, não prometer ao prospect sem confirmar)
-- SLA de suporte: mencionado nas objeções como argumento ("nosso SLA é de [X]"), mas o número exato de horas/resposta ainda não foi formalizado internamente — não citar número específico sem confirmar com a gestão.
-- Flexibilidade contratual: objeção de contrato menciona negociação de prazo, mas os limites internos não foram definidos — confirmar com o gestor antes de prometer.
 - Battle cards da TakeFlow (Treble, Weni, Blip, Zenvia) ainda não existem — só há battle cards para concorrentes de telefonia (OnVox).
 - As provas sociais com percentual (Neobetel 20%/80%, Comvem 40%) ainda não têm autorização formal por escrito dos clientes para uso comercial/marketing.
 - Ticket mínimo: faturamento acima de R$5MM e 30-50 funcionários é o ICP ideal para OnVox; não há critério equivalente formalizado para TakeFlow ainda.
@@ -377,6 +363,32 @@ reunião conjunta; "já uso outra ferramenta" → perguntar qual e mapear a dor 
 dela; "custo alto" → comparar com a perda mensal estimada pelo próprio cliente; "não quero
 fidelidade" → modelo é aviso prévio de 60 dias, sem multa; "vou avaliar outras opções" →
 perguntar os critérios de comparação e se oferecer para ajudar nessa comparação.
+
+Além dessas, existem 7 objeções de nível executivo próprias da negociação (distintas das
+objeções de cold call do Módulo 2), com a mesma estrutura padrão de resposta (reconhecer
+sem concordar → reframe → prova social com dado concreto → próxima etapa clara e de baixo
+risco): INÉRCIA "já tenho uma operadora, está funcionando" → a questão não é se está
+funcionando, é quanto custa além da fatura (ligação perdida, manutenção, falta de dado) —
+propor Raio-X gratuito. PREÇO "vocês são mais caros que o concorrente X" → perguntar se o
+concorrente incluiu URA, gravação, dashboard, suporte 24/7 e CRM no preço, oferecer
+comparação de custo total. ORÇAMENTO "não tenho orçamento agora" → o Raio-X mostra que a
+Omni pode ser redução de custo, não custo novo (Neobetel -20% telefonia, -80% 0800). DECISÃO
+"preciso falar com TI/sócio/diretoria" → oferecer documento executivo com diagnóstico e
+business case, propor reunião conjunta. EXP. NEGATIVA "já testamos WhatsApp e não funcionou"
+→ normalmente o problema foi a implementação, não a plataforma; diferencial é a metodologia
+de implantação e o CS dedicado nos primeiros 90 dias. RISCO TÉCNICO "tenho medo da migração
+quebrar o que já tenho" → migração em fases, sem downtime, validação antes de cortar, nunca
+houve interrupção em 15 anos de mercado. CONTRATO "o contrato é muito longo, não quero
+ficar preso" → contrato tem prazo pelo custo de implementação, mas o que prende o cliente é
+o resultado (British Council está há 5+ anos por escolha); pode-se negociar flexibilidade de
+prazo conforme o escopo.
+
+Pontos de atenção herdados destas objeções (ainda em aberto, não prometer sem confirmar):
+SLA de suporte é citado como argumento ("nosso SLA é de [X]") mas o número exato de
+horas/resposta ainda não foi formalizado — não citar número específico; os limites internos
+de flexibilidade de prazo contratual também não foram definidos — confirmar com o gestor
+antes de prometer; as provas sociais com percentual (Neobetel 20%/80%, Comvem 40%) ainda
+não têm autorização formal por escrito dos clientes para uso comercial/marketing.
 
 ## Gestão de pipeline e métricas do closer
 O pipeline do HubSpot é espelho da realidade comercial, não relatório para o gestor —
