@@ -383,13 +383,6 @@ Diagnóstico e Demonstração realizadas (semanal), conversão Diagnóstico→De
 Demonstração→Negociação, Negociação→Fechado Ganho (mensal), pontuação Evolue AI (semanal),
 contratos assinados/ativados (quinzenal/mensal/trimestral), MRR gerado (mensal).
 
-## Pontos de atenção do Módulo 3 (ainda em aberto — não afirmar como definido)
-- Não existe battlecard formal de qualificação/desqualificação — não há critério objetivo documentado para encerrar um lead sem fit.
-- Battlecard de concorrentes citados por clientes (OmniChat, Zenvia, RD Station, Sirena, Take Blip) ainda não foi criado — só existe o battlecard de concorrentes de telefonia do Módulo 1.
-- Não existe template padrão de proposta comercial completa da Omni (só a referência do modelo de ROI da Farma Ponte).
-- Tabela de preços completa com todos os produtos (Onvox, Evolue AI, TakeFlow) não foi consolidada neste módulo — só os tiers N1/N2 do TakeFlow foram citados no contexto de dimensionamento.
-- Comissionamento do closer ainda não foi definido (fica para o Módulo 5).
-
 # MÓDULO 4 — PRODUTO, MERCADO & PRECIFICAÇÃO
 
 ## Portfólio completo

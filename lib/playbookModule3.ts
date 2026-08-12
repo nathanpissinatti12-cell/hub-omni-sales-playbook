@@ -395,16 +395,6 @@ export const CHECKLIST_M3_GESTAO = [
   "Contratos assinados e ativados são revisados na quinzena e no mês",
 ];
 
-export const ATTENTION_M3 = [
-  "Perfil de qualificação/disqualificação formal — Um battlecard de disqualificação com critérios objetivos não foi desenvolvido neste módulo. Leads sem fit (ex: Megalabs) consumiram tempo do closer sem critério claro de encerramento.",
-  "Script de criação de urgência — Técnicas e scripts específicos para clientes que adiam mesmo com ROI claro foram parcialmente cobertos na seção de objeções, mas merecem aprofundamento próprio.",
-  "Battlecard de concorrentes — OmniChat, Zenvia, RD Station, Sirena, Take Blip foram mencionados por clientes nas transcrições. Recomenda-se criar um documento separado com posicionamento da Omni frente a cada concorrente.",
-  "Estrutura formal da proposta comercial — O template de ROI da Farma Ponte foi referenciado como modelo, mas um template padrão de proposta comercial completa da Omni não foi desenvolvido neste módulo.",
-  "Protocolo de handoff SDR → Closer — O SLA de handoff e o template de brief do SDR pertencem ao Módulo 2, mas impactam diretamente a qualidade do Diagnóstico do Módulo 3.",
-  "Valores e tabela de preços completa — Os tiers do TakeFlow (N1 e N2) foram mencionados no contexto de dimensionamento, mas uma tabela comercial completa com todos os produtos (Onvox, Evolue AI, TakeFlow) não foi desenvolvida neste módulo.",
-  "Comissionamento do closer — Mencionado como tema do Módulo 5. Recomenda-se alinhar estrutura de comissão com as métricas de KPI definidas neste módulo.",
-];
-
 export const MODULE_3_SECTIONS = [
   { id: "m3-sec-1", label: "3.1 Perfil Ideal do Closer" },
   { id: "m3-sec-2", label: "3.2 Ciclo de Vendas" },
@@ -415,5 +405,5 @@ export const MODULE_3_SECTIONS = [
   { id: "m3-sec-7", label: "3.7 Negociação e Fechamento" },
   { id: "m3-sec-8", label: "3.8 Gestão de Pipeline e CRM" },
   { id: "m3-sec-9", label: "3.9 Métricas e KPIs" },
-  { id: "m3-sec-10", label: "Checklist e Pontos de Atenção" },
+  { id: "m3-sec-10", label: "Checklist de Implementação" },
 ];

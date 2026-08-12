@@ -27,7 +27,6 @@ import {
   CHECKLIST_M3_HUBSPOT,
   CHECKLIST_M3_NEGOCIACAO,
   CHECKLIST_M3_GESTAO,
-  ATTENTION_M3,
 } from "@/lib/playbookModule3";
 
 function ChecklistBlock({ title, items }: { title: string; items: string[] }) {
@@ -436,7 +435,7 @@ export default function Modulo3Page() {
           />
         </section>
 
-        {/* Checklist + Pontos de atenção */}
+        {/* Checklist */}
         <section id="m3-sec-10" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Checklist de Implementação — Módulo 3
@@ -446,19 +445,6 @@ export default function Modulo3Page() {
           <ChecklistBlock title="HubSpot" items={CHECKLIST_M3_HUBSPOT} />
           <ChecklistBlock title="Negociação" items={CHECKLIST_M3_NEGOCIACAO} />
           <ChecklistBlock title="Gestão" items={CHECKLIST_M3_GESTAO} />
-
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Pontos de Atenção
-          </h2>
-          <Callout tone="pink" title="Temas mencionados mas não desenvolvidos completamente neste módulo">
-            Ver lista abaixo — cada item indica o que precisa de aprofundamento em revisões
-            futuras.
-          </Callout>
-          <ol className="list-decimal space-y-2 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
-            {ATTENTION_M3.map((a) => (
-              <li key={a}>{a}</li>
-            ))}
-          </ol>
         </section>
 
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
