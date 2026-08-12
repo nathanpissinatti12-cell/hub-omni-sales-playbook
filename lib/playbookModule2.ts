@@ -403,9 +403,10 @@ export const CHECKLIST_SETUP = [
 ];
 
 export const CHECKLIST_ROTINA = [
-  "Segunda — Planejamento (30 min): revisão de pipeline, distribuição de leads A/B/C",
-  "Terça a Quinta — Operação: acompanhamento de KPIs diários no dashboard Meetime",
-  "Quarta — Role-play (1h): simulação de objeções e ligações reais",
+  "Segunda — Reunião Semanal (30 min): revisão de pipeline, distribuição de leads A/B/C",
+  "Terça — Operação: acompanhamento de KPIs diários no dashboard Meetime",
+  "Quarta — Panorama (30 min): visão consolidada dos indicadores da semana e ajuste de prioridades",
+  "Quinta — Role-play (1h): simulação de objeções e ligações reais",
   "Sexta — Review semanal (1h): análise de KPIs, relatórios evolu.AI, top 3 ligações da semana, ajustes",
   "Sexta — 1:1 individual (30 min/BDR): feedback personalizado e plano de ação",
 ];
