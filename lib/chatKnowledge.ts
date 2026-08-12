@@ -392,11 +392,114 @@ contratos assinados/ativados (quinzenal/mensal/trimestral), MRR gerado (mensal).
 - Não existe template padrão de proposta comercial completa da Omni (só a referência do modelo de ROI da Farma Ponte).
 - Tabela de preços completa com todos os produtos (Onvox, Evolue AI, TakeFlow) não foi consolidada neste módulo — só os tiers N1/N2 do TakeFlow foram citados no contexto de dimensionamento.
 - Comissionamento do closer ainda não foi definido (fica para o Módulo 5).
+
+# MÓDULO 4 — PRODUTO, MERCADO & PRECIFICAÇÃO
+
+## Portfólio completo
+A Omni Assessoria vende três produtos complementares: Onvox (UCaaS/PABX em nuvem, voz e
+contact center, rodando sobre AWS, mais de 450.000 usuários ativos e 120 países), TakeFlow
+(atendimento multicanal via WhatsApp com API Oficial da Meta, construtor de fluxos
+drag-and-drop, chatbot com IA/GPT agêntica) e evolu.AI (supervisor comercial 24/7 que
+transcreve, pontua em 5 dimensões — Rapport, Escuta Ativa, Clareza, Contorno de Objeções,
+Fechamento — e gera o relatório Raio-X de cada ligação). Os três podem ser vendidos juntos
+como ecossistema; a evolu.AI se integra nativamente às gravações da Onvox.
+
+Onvox 2026 trouxe Recepcionista Virtual com IA (atende 24/7 sem operador, disponível nos
+planos Enterprise e Ultimate), transcrição de chamadas com IA (Enterprise 120 min grátis/mês,
+Ultimate 240 min grátis/mês, pacote adicional 1.000 min por R$ 300,00) e relatórios
+personalizados com IA. Implantação em 6 etapas: assinatura digital, onboarding, configuração
+com número provisório, treinamento, go-live com portabilidade, acompanhamento periódico.
+IMPORTANTE: antes de prometer portabilidade, o vendedor deve checar cobertura em
+apoio.onvox.com.br (aba Cobertura) — nem toda cidade tem.
+
+TakeFlow: TAKEFLOW SISTEMAS LTDA, Tatuí-SP. Atua como Tech Provider oficial da Meta — a
+Meta cobra as mensagens direto do cliente, a TakeFlow não cobra nada sobre isso. IA agêntica
+(não só responde, resolve tarefas: consulta sistemas, agenda, processa pedidos) com
+promessas declaradas de +40% conversão em vendas, -60% tempo de espera, 85% de tarefas
+autônomas.
+
+evolu.AI: fluxo é ligação encerrada → transcrição automática → avaliação por metodologia
+configurável (SPIN Selling, BANT) → score por pilar → Raio-X disponível em segundos →
+alertas automáticos ao gestor. Todos os critérios e red flags são customizáveis pelo
+gestor. Dado de impacto citado: equipes sem feedback estruturado convertem até 40% menos
+que equipes com coaching baseado em dados reais.
+
+## API Oficial Meta para WhatsApp — o que o vendedor precisa saber
+Uma "conversa" é a unidade de cobrança = janela de 24h; dentro dela, mensagens ilimitadas
+sem custo extra. Conversa iniciada pelo cliente = sempre grátis (categoria Serviço). Conversa
+iniciada pela empresa exige template aprovado pela Meta e é cobrada, em 3 categorias:
+Marketing (~R$0,31–0,40/conversa), Utilidade (~R$0,04–0,08/conversa, transacional — ex.
+lembrete de consulta), Autenticação (~R$0,07/conversa). ATENÇÃO CRÍTICA: classificar uma
+mensagem transacional como Utilidade em vez de Marketing pode gerar até 9x de economia — é
+um erro comum e caro. As 1.000 primeiras conversas de Serviço/mês são sempre grátis.
+
+Tiers de envio diário: Inicial 250/dia (conta nova) → Nível 1: 1.000/dia (verificada) →
+Nível 2: 10.000/dia → Nível 3: 100.000/dia → Nível 4: ilimitado (aprovação Meta). Qualidade
+da conta é um semáforo (verde/amarelo/vermelho) baseado em taxa de spam, resposta e opt-in;
+conta vermelha pode ter o limite reduzido ou ser suspensa. Número bloqueado perde tudo
+(histórico, contatos, grupos) e não há recurso junto à Meta — por isso o warmup gradual de
+número novo (começar com 100–250 msgs/dia, subir 20–30%/dia) e a proteção de ritmo da
+TakeFlow (~40 novos contatos/24h) são importantes. Opt-in explícito é obrigatório para
+mensagens iniciadas pela empresa.
+
+## Precificação Onvox
+A ferramenta oficial e única para montar propostas é a calculadora em
+apoio.onvox.com.br/calculadora.html — nunca usar como referência propostas antigas em
+arquivo, pois os preços (ramal, DID, desconto de marketing) são configuráveis livremente
+ali. Planos: Enterprise (120 min transcrição IA grátis/mês) e Ultimate (240 min). Adicionais:
++1.000 min transcrição R$300, 1.000 min 0800 R$250, 50GB armazenamento R$100, 500 min
+internacional R$250. Prazo de implementação: até 20 dias após aprovação de crédito. Validade
+da proposta: 7 dias.
+
+## Precificação TakeFlow
+Base: conexão R$80,00/mês por número + licença R$39,90/mês por atendente. Pacotes de IA em
+dois níveis (N1 e N2) escalonados por volume diário (50 a 300 atendimentos/dia), com preço
+mensal fixo + excedente por atendimento acima do pacote. Regras críticas: atendimentos são
+acumulativos dentro do mês (o limite diário é uma média, não um teto rígido diário), piso de
+contratação é 3.000 atendimentos/mês, e saldo não usado NÃO acumula para o mês seguinte.
+Taxa de implantação = 1,5x o valor da fatura mensal, cobrada na 1ª fatura, para todo projeto
+(com ou sem IA). Projeto com IA tem 30 dias de POC grátis, cancelamento livre nesse período,
+e fidelidade de 12 meses após o POC. Projeto sem IA não tem fidelidade — só aviso prévio de
+60 dias para cancelar.
+
+## Precificação evolu.AI
+Três planos mensais: Inicial R$750 (até 50h de análise), Médio R$1.197 (até 85h, alertas
+WhatsApp/e-mail, API para CRM), Avançado R$1.797 (120h+, customização total de critérios,
+n8n/Zapier, onboarding personalizado). Onboarding em 48h da assinatura até a primeira
+análise.
+
+## Como identificar a solução certa
+Mapa rápido: PABX físico/operadora cara ou equipe remota sem controle → Onvox. Time perde
+ligações ou não monitora atendimento → Onvox Contact Center. WhatsApp sobrecarregado ou
+risco de bloqueio com ferramenta não oficial → TakeFlow. Time comercial sem visibilidade de
+qualidade de call, ou quer replicar os top performers → evolu.AI. Cliente que quer tudo →
+Onvox + TakeFlow + evolu.AI como ecossistema.
+
+## Business case / ROI — fórmulas e exemplos citados
+Onvox: economia mensal = custo atual do cliente − mensalidade Onvox; projetar em 12 e 36
+meses. Exemplo real citado: cliente com 42 ramais, custo atual R$1.722/mês → Onvox
+R$1.470/mês → economia de R$252/mês (R$3.024/ano). TakeFlow: comparação de recepcionista
+manual (R$2.500–3.500/mês, só horário comercial) vs. TakeFlow IA N1 100/dia (R$2.570/mês,
+24/7). evolu.AI: exemplo com 5 closers fazendo 20 ligações/dia, conversão de 15% para 20% (+5
+p.p.) gera 110 negócios extras/mês — a R$500 de ticket médio, R$55.000/mês de receita
+adicional contra um custo de R$1.197/mês (plano Médio), ou seja ROI de ~45x.
+
+## Pontos de atenção do Módulo 4 (ainda em aberto — não afirmar como definido)
+- Tabela comparativa completa de recursos entre planos Enterprise/Ultimate da Onvox (além dos minutos de transcrição) não foi fornecida — consultar o portal de apoio.
+- Preços de referência (piso, margem de negociação) por ramal e DID da Onvox não foram definidos — a calculadora aceita valor livre.
+- Regras de quando aplicar desconto de marketing na calculadora Onvox (limite, quem aprova) não foram formalizadas.
+- Tabela de preços por modelo de aparelho/headset Onvox não foi consultada (carregamento dinâmico no portal apoio.onvox.com.br/aparelhos.html).
+- Diferença funcional entre os níveis de IA N1 e N2 da TakeFlow não foi detalhada — só os preços.
+- Fluxo formal de aprovação interna para propostas com desconto ou fora do padrão não existe ainda.
+- Análise de concorrentes por produto (Onvox, TakeFlow, evolu.AI) e de tendências do mercado UCaaS/CPaaS não foi desenvolvida neste módulo.
+- Templates de proposta comercial padronizados para TakeFlow e evolu.AI ainda não existem (só a calculadora da Onvox gera proposta).
+- Política de desconto para contratação conjunta (bundle de Onvox + TakeFlow + evolu.AI) ainda não foi definida.
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do
-Playbook de Vendas (Módulo 1 — Fundação Estratégica, Módulo 2 — Pré-vendas SDR/BDR, e
-Módulo 3 — Vendas/Closers) para tirar dúvidas dos vendedores.
+Playbook de Vendas (Módulo 1 — Fundação Estratégica, Módulo 2 — Pré-vendas SDR/BDR,
+Módulo 3 — Vendas/Closers, e Módulo 4 — Produto, Mercado & Precificação) para tirar dúvidas
+dos vendedores.
 
 Responda SOMENTE com base no conteúdo do playbook abaixo. Não invente preços, prazos,
 SLAs, funcionalidades ou dados de clientes que não estejam no material — em especial,

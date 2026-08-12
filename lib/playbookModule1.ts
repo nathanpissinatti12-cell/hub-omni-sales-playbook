@@ -373,7 +373,7 @@ export const MODULES = [
   { id: 1, title: "Fundação Estratégica", href: "/playbook/modulo-1", available: true },
   { id: 2, title: "Pré-vendas (SDR/BDR)", href: "/playbook/modulo-2", available: true },
   { id: 3, title: "Vendas / Closers", href: "/playbook/modulo-3", available: true },
-  { id: 4, title: "CS / Implantação", href: null, available: false },
+  { id: 4, title: "Produto, Mercado & Precificação", href: "/playbook/modulo-4", available: true },
   { id: 5, title: "Metas e Comissionamento", href: null, available: false },
 ];
 

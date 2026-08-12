@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ICPS, MODULES, MODULE_1_SECTIONS } from "@/lib/playbookModule1";
 import { MODULE_2_SECTIONS } from "@/lib/playbookModule2";
 import { MODULE_3_SECTIONS } from "@/lib/playbookModule3";
+import { MODULE_4_SECTIONS } from "@/lib/playbookModule4";
 
 export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) {
   return (
@@ -41,6 +42,23 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
           })}
         </ul>
       </div>
+
+      {activeModuleId === 4 && (
+        <div>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+            Navegação — Módulo 4
+          </p>
+          <ul className="space-y-1" style={{ color: "var(--text-muted)" }}>
+            {MODULE_4_SECTIONS.map((s) => (
+              <li key={s.id}>
+                <a href={`#${s.id}`} className="block rounded-md px-2 py-1 hover:underline">
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {activeModuleId === 3 && (
         <div>
