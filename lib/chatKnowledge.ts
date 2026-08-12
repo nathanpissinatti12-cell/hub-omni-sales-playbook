@@ -577,12 +577,109 @@ perguntado): Early Warning Signals de churn (Zendesk/Gainsight), NRR (padrão Sa
 HubSpot/Twilio/Salesforce), timing de expansão 30/90 dias (modelo Salesforce CS), tabela de
 sucesso por ICP (Outcome-Based CS da Gainsight), separação CS vs Vendedor (prática de GoTo e
 RingCentral em UCaaS).
+
+# MÓDULO 6 — CULTURA, GESTÃO E RITUAIS COMERCIAIS
+
+## Os quatro pilares da cultura comercial
+Consultoria antes de venda (o time vende diagnóstico e resultado, não software — "bater a
+meta" nunca deve vir antes de "resolver o problema do cliente"). Dado é argumento (evolu.AI
+audita 100% das interações, Meetime trackeia esforço, HubSpot mapeia o pipeline — feedback
+sem dado é opinião, decisão sem dado é aposta). Próximo passo sempre (nenhuma interação
+termina sem próximo passo concreto, datado e com responsável). Crescimento com
+responsabilidade (upsell é consequência de um cliente com resultado, não métrica de pressão).
+
+## Perfis de contratação por função (o que buscar/red flags na entrevista)
+BDR/SDR: energia alta, ego regulado, curiosidade genuína; testar com cold call simulada na
+hora; red flag definitivo é candidato sem ambição de virar Closer. Experiência mínima: 6
+meses em função com contato direto com cliente. Closer: conversa executiva sem
+intimidação, pensa em ROI antes de funcionalidade; red flags incluem pedir o deck antes de
+entender o cliente, resolver objeção com desconto reflexo, ou não saber o que é LTV/MRR/NRR.
+Experiência mínima: 2 anos em vendas consultivas B2B com ciclo acima de 15 dias. CS/
+Implantação (Tatuí): combina técnica com empatia, tolerância a ambiguidade; red flag é
+resolver tudo "no feeling" sem processo. Gestor Comercial: ex-vendedor de alta performance
+que sabe que gerenciar não é vender pelo time.
+
+## Plano de carreira
+BDR (4 níveis, progressão holística — não automática por tempo, avaliada trimestralmente por
+comportamento + comprometimento + resultado, nunca só quantitativa): Blue (entrada,
+R$2.500), Gold (R$2.700), Black (R$3.000), Platinum (R$3.500, referência técnica e cultural).
+BDR Platinum com perfil consultivo é o candidato natural para virar Closer. Closer (4 níveis):
+Junior (ramp-up, meta reduzida) → Pleno (meta cheia) → Sênior (>110% da meta por 3
+trimestres) → Executivo de Contas (carteira estratégica + expansão) — os dois últimos são
+candidatos naturais a liderança comercial.
+
+## Rituais de gestão obrigatórios (cadência e regra de ouro)
+Daily (15 min, todo dia útil às 9h, time de pé): 3 perguntas por pessoa em até 2 min (o que fiz
+ontem/hoje/bloqueios); nunca discutir pipeline aqui; regra de ouro — passar de 20 min já virou
+reunião, responsabilidade do gestor. Pipeline Review Semanal (60 min, segunda, gestor +
+closers, HubSpot card a card): checa próximo passo datado, decisor identificado, ROI
+apresentado, temperatura atualizada; card sem próximo passo datado é risco imediato. Review
+de BDR Semanal (45 min, sexta, dashboard Meetime): minutos falados, SALs, top 3 ligações
+ouvidas ao vivo com feedback do evolu.AI — ouvir em grupo é desenvolvimento, não punição.
+1:1 Individual (30 min, quinzenal): não é revisão de meta nem feedback negativo acumulado;
+se o gestor fala mais de 40% do tempo a reunião falhou; é o principal instrumento de retenção.
+Forecast Mensal (90 min, última semana do mês, gestor + liderança): performance real vs.
+meta, 3 cenários de forecast; gestor que erra o forecast em mais de 30% por 2 meses seguidos
+precisa revisar o método. QBR trimestral (meio dia, time completo + liderança): resultado do
+trimestre, o que funcionou/não funcionou, reconhecimento, metas do próximo trimestre,
+atualização do playbook — não pode ser cancelado nem virar monólogo da liderança.
+
+## Metas e comissionamento
+Princípios: clareza total (vendedor calcula a própria comissão sem precisar do RH), esforço +
+resultado (reconhece score evolu.AI e qualidade de handoff, não só fechamento), acelerador
+para quem supera (abaixo de 70% não ganha bônus, mas o fixo nunca é penalizado). Faixas de
+performance do Closer: <70% = 0x; 70–99% = 0,7x; 100% = 1,0x; 110–130% = 1,5x; 131–160%
+= 2,0x; 160%+ = 3,0x (raro e celebrado). BDR segue o modelo OTE por nível definido no Módulo
+2. CS/Implantação tem variável atrelada a NPS de onboarding, churn rate, taxa de expansão e
+tempo médio de go live. Gestor Comercial é remunerado sobre o resultado consolidado do
+time, nunca individual. Regras de ouro: nunca mudar as regras no meio do mês (aviso de pelo
+menos 2 semanas), pagar sempre em dia, e o modelo de comissão é assinado por escrito antes
+do vendedor começar. IMPORTANTE: os valores absolutos de fixo/bônus/OTE do Closer ainda
+não foram definidos — apenas a estrutura de faixas — então nunca afirmar um valor específico
+de salário de Closer.
+
+## Ramp-up de novos vendedores
+BDR (30 dias): semana 1 = imersão sem discar (produto, cultura, Módulo 1, inscrição na
+Pipelovers); semana 2 = shadow de 20 ligações + roleplay com evolu.AI + treinamento
+Meetime/GPCT; semana 3 = opera com madrinha/padrinho a 50% da meta; semana 4 = opera
+independente a 75% da meta com feedback formal. Do dia 31 em diante, meta cheia. Closer (45
+dias): semanas 1–2 = imersão profunda (demos, Módulos 1/3/4, shadow de reuniões,
+HubSpot); semanas 3–4 = co-condução de diagnósticos com sênior (meta: 3 aprovados);
+semanas 5–6 = opera sozinho a 50% da meta com todo card revisado pelo gestor antes de
+enviar proposta. Do dia 46 em diante, meta cheia. Um vendedor sem ramp-up estruturado leva
+30–50% mais tempo para bater a primeira meta.
+
+## Ferramentas por função
+Stack obrigatório: Meetime Flow (principal do BDR), HubSpot (pipeline do Closer, pós-venda do
+CS, forecast do gestor), evolu.AI (ligações do BDR, reuniões do Closer, dashboard do gestor),
+LinkedIn Sales Navigator (prospecção/pesquisa), Google Meet (reuniões/onboarding/gestão),
+WhatsApp Business (cadência/follow-up/suporte). Desenvolvimento: Pipelovers (comunidade
+B2B com aulas ao vivo semanais — BDRs no grupo de Pré-Vendedores, Closers no grupo de
+Executivos de Vendas, gestores na Academia B2B) e G4 Skills (trilhas assíncronas
+personalizadas por IA, com conteúdo proprietário da Omni, foco em Closer e Gestor).
+
+## Reconhecimento e cultura de performance
+Mecanismos: Top BDR do Mês (volume × qualidade/score evolu.AI), Top Closer do Trimestre
+(>130% da meta, com narrativa), Ligação da Semana (trecho tocado publicamente com elogio
+específico), Indicação de Carreira (conversa formal sobre virar Closer ao atingir Platinum).
+Evitar: ranking só por número fechado (ignora quem teve ciclo difícil ou gerou lead melhor);
+feedback só negativo (ratio recomendado é 3 positivos para 1 corretivo); e meta impossível
+(se menos de 30% do time bate a meta no mês, o problema é a meta/processo, não o time).
+
+## Pontos de atenção do Módulo 6 (ainda em aberto — não afirmar como definido)
+- Valores absolutos de fixo, bônus e OTE do Closer ainda dependem de decisão da liderança com base na margem dos produtos — só a estrutura de faixas foi formalizada.
+- Não existe rubrica explícita/ponderada para a progressão holística de nível do BDR — só os critérios gerais.
+- Conteúdo interno da Omni ainda não foi produzido para o G4 Skills — a plataforma permite, mas a produção inicial ainda não foi feita.
+- Não existe ticket mínimo definido para o time de Closers perseguir ou descartar negócios.
+- Não existe protocolo formal de desligamento de colaborador (proteção do relacionamento com o cliente, transferência de pipeline, moral do time).
+- A integração entre o score do evolu.AI e o plano de desenvolvimento na Pipelovers (ex: score baixo → aula específica indicada) ainda não existe — é só uma recomendação.
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do
 Playbook de Vendas (Módulo 1 — Fundação Estratégica, Módulo 2 — Pré-vendas SDR/BDR,
-Módulo 3 — Vendas/Closers, Módulo 4 — Produto, Mercado & Precificação, e Módulo 5 —
-Pós-venda/Customer Success) para tirar dúvidas dos vendedores.
+Módulo 3 — Vendas/Closers, Módulo 4 — Produto, Mercado & Precificação, Módulo 5 —
+Pós-venda/Customer Success, e Módulo 6 — Cultura, Gestão e Rituais Comerciais) para tirar
+dúvidas dos vendedores.
 
 Responda SOMENTE com base no conteúdo do playbook abaixo. Não invente preços, prazos,
 SLAs, funcionalidades ou dados de clientes que não estejam no material — em especial,
