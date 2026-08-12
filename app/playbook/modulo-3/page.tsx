@@ -1,6 +1,7 @@
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
+import { ObjectionAccordion } from "@/components/playbook/ObjectionAccordion";
 import {
   CLOSER_BEHAVIORAL,
   CLOSER_TECHNICAL,
@@ -390,10 +391,7 @@ export default function Modulo3Page() {
             <h3 className="font-medium">3.7.5 — Contorno de objeções mais comuns</h3>
             <div className="space-y-3">
               {NEGOTIATION_OBJECTIONS.map((o) => (
-                <div key={o.question} className="rounded-lg border" style={{ borderColor: "var(--border)" }}>
-                  <p className="px-4 py-2 text-sm font-medium" style={{ background: "var(--border)" }}>{o.question}</p>
-                  <p className="p-4 text-sm" style={{ color: "var(--text-muted)" }}>{o.answer}</p>
-                </div>
+                <ObjectionAccordion key={o.question} question={o.question} answer={o.answer} />
               ))}
             </div>
           </div>
@@ -408,18 +406,7 @@ export default function Modulo3Page() {
             </p>
             <div className="space-y-3">
               {CLOSER_OBJECTION_SCRIPTS.map((o) => (
-                <div key={o.tag} className="rounded-lg border" style={{ borderColor: "var(--border)" }}>
-                  <div className="flex items-center justify-between gap-3 px-4 py-2" style={{ background: "var(--border)" }}>
-                    <p className="text-sm font-medium">{o.question}</p>
-                    <span
-                      className="shrink-0 rounded px-2 py-0.5 text-xs font-semibold"
-                      style={{ background: "var(--accent)", color: "var(--on-accent)" }}
-                    >
-                      {o.tag}
-                    </span>
-                  </div>
-                  <p className="p-4 text-sm" style={{ color: "var(--text-muted)" }}>{o.answer}</p>
-                </div>
+                <ObjectionAccordion key={o.tag} tag={o.tag} question={o.question} answer={o.answer} />
               ))}
             </div>
           </div>
