@@ -13,20 +13,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="pt-BR">
       <body>
         <header className="border-b" style={{ borderColor: "var(--border)" }}>
-          <nav className="mx-auto flex max-w-6xl items-center gap-6 px-6 py-4">
+          <nav className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4">
             <span className="font-semibold">Omni Assessoria</span>
             <Link href="/playbook" className="text-sm hover:underline">
-              Playbook TakeFlow
-            </Link>
-            <Link href="/playbook/onvox" className="text-sm hover:underline">
-              Playbook Onvox
+              Playbook de Vendas
             </Link>
             <Link href="/dashboard" className="text-sm hover:underline">
               Dashboard
             </Link>
           </nav>
         </header>
-        <main className="mx-auto max-w-6xl px-6 py-8">{children}</main>
+        <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
         <ChatWidget />
       </body>
     </html>
