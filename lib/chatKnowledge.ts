@@ -494,12 +494,95 @@ adicional contra um custo de R$1.197/mês (plano Médio), ou seja ROI de ~45x.
 - Análise de concorrentes por produto (Onvox, TakeFlow, evolu.AI) e de tendências do mercado UCaaS/CPaaS não foi desenvolvida neste módulo.
 - Templates de proposta comercial padronizados para TakeFlow e evolu.AI ainda não existem (só a calculadora da Onvox gera proposta).
 - Política de desconto para contratação conjunta (bundle de Onvox + TakeFlow + evolu.AI) ainda não foi definida.
+
+# MÓDULO 5 — PÓS-VENDA / CUSTOMER SUCCESS
+
+## Regra de ouro
+O vendedor fecha. A unidade de Tatuí implanta, treina e suporta. Essa separação é
+intencional e é um diferencial competitivo. Ao vendedor cabe acompanhar a satisfação, abrir
+portas para expansão e repassar feedbacks — nunca executar a operação técnica, prometer
+prazos de configuração, mexer em tickets de suporte ou ajustar contas de clientes por conta
+própria.
+
+## Onboarding — 5 etapas, todas conduzidas pela unidade de Tatuí
+1) Boas-vindas e Alinhamento Inicial (até 48h após assinatura): e-mail de boas-vindas,
+kick-off agendado, coleta de dados, cronograma, ticket de implantação criado.
+2) Configuração das Ferramentas Contratadas (3 a 15 dias úteis): provisionamento de ramais,
+URA, filas, integrações, gravação, dashboards, testes internos.
+3) Treinamento com o Cliente (após configuração aprovada): treinamento do gestor e dos
+usuários finais, material de apoio, sessão de dúvidas, validação formal do cliente.
+4) Portabilidades e Adequações Contratuais (conforme ANATEL, até 30 dias para portabilidade
+fixa): processo de portabilidade, ajustes de contrato — o vendedor NÃO interfere, só
+encaminha ao time de implantação.
+5) Go Live e Acompanhamento Pós-implantação (30 dias após go live): declaração formal de go
+live, check-in na semana 1 e semana 4, canal de suporte aberto, NPS dos primeiros 30 dias,
+relatório de entrega ao vendedor.
+Linha do tempo típica: kick-off D+0 a D+2, configuração D+3 a D+10, treinamento D+10 a D+15,
+portabilidades D+5 a D+35, go live + 30 dias de acompanhamento D+15 a D+45.
+
+O vendedor faz o handoff para a implantação com um checklist obrigatório: contrato assinado,
+contato do responsável técnico e do gestor de decisão, número de ramais/usuários, serviços
+contratados, necessidade de portabilidade, equipamentos existentes, prazo de expectativa do
+cliente, observações da negociação, e CRM atualizado.
+
+## Sucesso do cliente varia por perfil (ICP)
+Empresa com equipe de vendas ativa: sucesso = time ligando mais e menos chamada perdida
+(risco: sistema subutilizado). SAC/receptivo: sucesso = menos espera e melhor NPS do
+cliente final (risco: URA mal configurada). Escritório/profissional liberal: sucesso = nunca
+mais perder chamada (risco: sensação de "é igual ao que tinha antes"). Empresa em
+crescimento: sucesso = infraestrutura escala sem fricção (risco: dificuldade de escalar
+rápido). Empresa com filiais: sucesso = comunicação unificada entre unidades (risco:
+integração entre unidades não funciona). No kick-off, sempre perguntar ao cliente "como você
+vai saber que valeu a pena?" e usar a resposta como norte do check-in de 30 dias.
+
+## Suporte contínuo — diferencial da Omni
+Inclui dúvidas operacionais, novos treinamentos, ajustes de configuração, suporte técnico,
+portabilidades adicionais — tudo gerido pela unidade de Tatuí. Se um cliente reportar um
+problema técnico ao vendedor, o vendedor apenas escuta, registra e encaminha imediatamente
+para Tatuí, informando o cliente que o time especializado foi acionado, e depois confirma que
+foi atendido — nunca promete solução ou prazo técnico.
+
+## Expansão de conta (upsell/cross-sell)
+Momentos-chave: 30 dias após go live (check-in de satisfação), 90 dias após go live (se
+aumentou o volume de uso, apresentar upgrade), renovação contratual, crescimento da empresa,
+ou logo após uma reclamação resolvida com sucesso. Oportunidades típicas: telefonia básica →
+gravação de chamadas; sem URA → URA inteligente; só ramal fixo → ramal mobile/softphone;
+filial sem integração → expandir a solução; WhatsApp pessoal do time → WhatsApp Business API
+integrado; sem relatórios → módulo de analytics.
+
+## Risco de churn — sinais de alerta e plano de ação
+Sinais vermelhos (ação imediata: ligação direta, sem e-mail): cliente não responde
+check-ins; reclamação não resolvida há mais de 5 dias (escalar para CS sênior). Sinais
+amarelos: queda brusca no volume de uso; cliente pergunta sobre portabilidade de saída; NPS
+abaixo de 7 na coleta de 30 dias. Sinal verde/final: pedido de cancelamento formal — escalar
+para o gestor comercial imediatamente. Plano de ação: identificar → registrar no CRM com
+nível de risco → ligar e diagnosticar diretamente → acionar Tatuí para a causa técnica →
+definir compromisso com prazo → checar em 48h → medir NPS de recuperação. Nunca defender o
+produto na abordagem — escutar, perguntar, registrar e agir.
+
+## Métricas e KPIs do pós-venda
+Implantação: tempo de kick-off (meta ≤2 dias úteis), tempo de go live (meta ≤15 dias úteis),
+NPS de onboarding aos 30 dias (meta ≥8,0), taxa de handoff completo (meta ≥95%). Suporte e
+retenção: churn rate mensal (meta <2%), Net Revenue Retention/NRR (meta ≥105% trimestral),
+CSAT de suporte (meta ≥90%), tempo médio de resolução/TMR (meta ≤24h úteis), % de clientes
+com risco de churn ativo (meta <5% da base). Expansão: taxa de upsell (meta ≥15% ao
+trimestre), MRR de expansão (crescimento mês a mês positivo), indicações geradas (meta ≥2
+por trimestre por CS).
+
+## Transparência metodológica do Módulo 5
+Práticas originárias da própria Omni: centralização do pós-venda na unidade de Tatuí,
+separação vendedor/Tatuí, processo de onboarding completo, suporte humanizado como
+diferencial. Frameworks adaptados de referências externas de mercado (citar quando
+perguntado): Early Warning Signals de churn (Zendesk/Gainsight), NRR (padrão SaaS B2B como
+HubSpot/Twilio/Salesforce), timing de expansão 30/90 dias (modelo Salesforce CS), tabela de
+sucesso por ICP (Outcome-Based CS da Gainsight), separação CS vs Vendedor (prática de GoTo e
+RingCentral em UCaaS).
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do
 Playbook de Vendas (Módulo 1 — Fundação Estratégica, Módulo 2 — Pré-vendas SDR/BDR,
-Módulo 3 — Vendas/Closers, e Módulo 4 — Produto, Mercado & Precificação) para tirar dúvidas
-dos vendedores.
+Módulo 3 — Vendas/Closers, Módulo 4 — Produto, Mercado & Precificação, e Módulo 5 —
+Pós-venda/Customer Success) para tirar dúvidas dos vendedores.
 
 Responda SOMENTE com base no conteúdo do playbook abaixo. Não invente preços, prazos,
 SLAs, funcionalidades ou dados de clientes que não estejam no material — em especial,

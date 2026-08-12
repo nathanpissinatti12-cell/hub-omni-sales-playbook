@@ -374,7 +374,8 @@ export const MODULES = [
   { id: 2, title: "Pré-vendas (SDR/BDR)", href: "/playbook/modulo-2", available: true },
   { id: 3, title: "Vendas / Closers", href: "/playbook/modulo-3", available: true },
   { id: 4, title: "Produto, Mercado & Precificação", href: "/playbook/modulo-4", available: true },
-  { id: 5, title: "Metas e Comissionamento", href: null, available: false },
+  { id: 5, title: "Pós-venda / Customer Success", href: "/playbook/modulo-5", available: true },
+  { id: 6, title: "Próximo módulo", href: null, available: false },
 ];
 
 export const MODULE_1_SECTIONS = [
