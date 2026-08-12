@@ -70,6 +70,14 @@ reunião de diagnóstico para dimensionar o impacto financeiro do prospect.
 - Vocês já perderam lead ou cliente por demora na primeira resposta?
 - Existe horário sem cobertura (noite, fim de semana) em que perdem contato?
 
+## Dores de quem já tem um chatbot/automação (e por que trocar pelo TakeFlow)
+Muito prospect já tentou automação e se frustrou. Usar com quem já tem alguma ferramenta:
+- "O bot só segue um roteiro fixo e não entende o cliente" → causa: fluxo engessado nunca revisado. TakeFlow: nós de IA com GPT interpretam além do fluxo fixo, e a implantação é acompanhada (ajusta conforme o uso real).
+- "O bot não sabe status de pedido/2ª via de boleto" → causa: sem integração com sistemas internos. TakeFlow: integra via N8N, webhooks, OpenAI e bancos de dados, consultando o sistema do cliente em tempo real.
+- "Não dá pra falar com humano, o bot 'prende' o atendimento" → causa: transferência escondida/difícil, uma das maiores causas de reclamação. TakeFlow: transferência inteligente para agentes por fila/setor sempre que necessário.
+- "Automação só funciona em horário comercial" → causa: falta de cobertura 24/7. TakeFlow: fluxo roda 24/7, decide o que resolve sozinho e o que aciona humano mesmo fora do expediente.
+- "Suporte da ferramenta atual demora" → causa comum de troca de plataforma. TakeFlow: suporte dedicado via WhatsApp, não é ticket genérico.
+
 ## Objeções frequentes
 - "O TakeFlow funciona com o WhatsApp Oficial (Business API)?" → Sim, a plataforma opera sobre a API oficial do WhatsApp Business, não o app comum.
 - "Preciso de conhecimento técnico para usar?" → Não. O construtor de fluxos é 100% visual, sem código, com mais de 30 tipos de nós prontos.
@@ -157,6 +165,15 @@ separadas, dependendo da dor do prospect:
 - Hoje o atendimento é feito em quais canais (telefone, WhatsApp, e-mail, redes sociais)? Estão integrados ou cada um em um lugar?
 - Vocês usam algum CRM ou ERP que precisa estar integrado à telefonia?
 - Já perderam ligação ou tiveram queda de atendimento por limitação da infraestrutura atual?
+
+## Dores de quem já tem PABX em nuvem/VoIP (e como o Onvox se posiciona)
+Prazos citados são práticas de mercado, não compromisso contratual do Onvox — confirmar com
+o time técnico antes de prometer prazo ao prospect:
+- "A ligação cai/qualidade piora por ser via internet" → causa: risco real de qualquer PABX em nuvem sem internet estável. Onvox: reforçar que a solução é feita para uso intensivo (áudio HD, alta disponibilidade) e validar a internet do prospect na demonstração.
+- "Depois de contratar, a rede não estava preparada" → causa: rede não avaliada antes da implantação. Onvox: a etapa de Demonstração existe para validar isso antes da proposta.
+- "Assinamos contrato sem checar SLA, portabilidade e LGPD" → causa comum de insatisfação com fornecedores. Onvox: trazer esses três pontos explicitamente na proposta.
+- "Migração/portabilidade demorou ou interrompeu o atendimento" → causa: migração sem manter o sistema antigo ativo durante a transição. Prática de mercado: portabilidade em até 3 dias úteis com dados corretos (migração completa 5-15 dias úteis), mantendo os dois sistemas ativos até a transição terminar. Confirmar prazo real do Onvox com o time técnico.
+- "PABX anterior não tinha visão de call center de verdade" → causa: PABX genérico resolve só ligação. Onvox: Módulo Call Center cobre filas, URA, supervisão em tempo real, gravação e regras de transbordo.
 
 ## Objeções frequentes (respostas validadas com o time técnico/comercial, página não publica FAQ nem preços)
 - "A qualidade da ligação não vai cair por ser via internet?" → PABX em nuvem depende de conexão estável — reforçar que a solução foi feita para call center (uso intensivo) e recomendar validar a internet do cliente na demonstração. Confirmar com o time técnico requisitos mínimos de banda antes de prometer SLA.

@@ -112,6 +112,39 @@ const COMPANY = {
   why: "Números publicados pela própria Onvox em onvox.com.br (seção \"Nossos números\") — use como prova de escala real da operação ao apresentar a plataforma, principalmente para prospects preocupados com a solidez do fornecedor de telefonia (é uma migração de infraestrutura crítica, o prospect quer saber se a empresa por trás é sólida).",
 };
 
+// Dores de mercado de quem já tem PABX em nuvem/VoIP, levantadas em pesquisa
+// sobre riscos comuns de migração e motivos de insatisfação com fornecedores
+// de telefonia em nuvem. Os prazos citados são práticas de mercado, não
+// compromisso contratual do Onvox — confirmar com o time técnico antes de
+// prometer prazo ao prospect.
+const COMPETITOR_PAIN_POINTS = [
+  {
+    pain: "\"A ligação cai ou a qualidade piora, porque é tudo via internet\"",
+    cause: "Risco real de qualquer PABX em nuvem: sem internet estável, a telefonia para. Não é exclusividade de nenhum fornecedor específico.",
+    solution: "Reforçar que o Onvox foi feito para uso intensivo de call center (áudio HD, alta disponibilidade) e validar a internet do prospect já na demonstração — não prometer qualidade sem essa checagem.",
+  },
+  {
+    pain: "\"Depois de contratar, descobrimos que a rede não estava preparada\"",
+    cause: "Um dos riscos mais citados em migração para nuvem: rede não avaliada antes da implantação, descoberta só em produção.",
+    solution: "A etapa de Demonstração do funil existe justamente para validar isso antes da proposta — não pular essa etapa para \"andar mais rápido\".",
+  },
+  {
+    pain: "\"Assinamos contrato sem checar SLA, portabilidade e LGPD\"",
+    cause: "Apontado como uma das maiores causas de insatisfação com fornecedores de telefonia em nuvem — decisão contratual, não limitação técnica.",
+    solution: "Trazer esses três pontos (SLA, portabilidade, LGPD) de forma explícita na proposta, em vez de deixar implícito — reduz o risco de o prospect descobrir depois de assinar.",
+  },
+  {
+    pain: "\"A migração/portabilidade demorou mais do que o esperado ou interrompeu o atendimento\"",
+    cause: "Migração mal planejada, sem manter o sistema antigo ativo durante a transição.",
+    solution: "Prática de mercado é portabilidade em até 3 dias úteis com dados corretos (migração completa entre 5 e 15 dias úteis) mantendo os dois sistemas ativos até a transição terminar, sem interromper o atendimento. Confirmar o prazo real e o método de transição do Onvox com o time técnico antes de prometer ao prospect.",
+  },
+  {
+    pain: "\"O PABX anterior não tinha visão de call center de verdade (filas, URA, supervisão, transbordo)\"",
+    cause: "PABX genérico resolve só ligação — não gestão de operação de atendimento.",
+    solution: "É exatamente o que o Módulo Call Center do Onvox cobre: filas inteligentes, URA, supervisão em tempo real, gravação e regras de transbordo.",
+  },
+];
+
 const SEGMENTS = [
   {
     name: "Call centers e centrais de atendimento",
@@ -493,6 +526,32 @@ export default function OnvoxPlaybookPage() {
             <div key={item.q} className="text-sm">
               <p className="font-medium">{item.q}</p>
               <p style={{ color: "var(--text-muted)" }}>{item.why}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Dores de quem já tem PABX em nuvem/VoIP (e como o Onvox se posiciona)</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Muito prospect nessa categoria já migrou de PABX físico para algum PABX em nuvem e se
+          frustrou no caminho. Pergunte o que deu errado na experiência anterior antes de
+          listar os pontos abaixo.
+        </p>
+        <div className="space-y-3">
+          {COMPETITOR_PAIN_POINTS.map((p) => (
+            <div
+              key={p.pain}
+              className="rounded-lg border p-4"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              <p className="text-sm font-medium">{p.pain}</p>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+                <span className="font-medium">Por que acontece: </span>{p.cause}
+              </p>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+                <span className="font-medium">Como o Onvox se posiciona: </span>{p.solution}
+              </p>
             </div>
           ))}
         </div>

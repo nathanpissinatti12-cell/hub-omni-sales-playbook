@@ -53,6 +53,39 @@ const PRICING_MODEL = {
 const NO_PUBLIC_PROOF_WARNING =
   "O site não divulga nomes de clientes, estudos de caso com números específicos, nem selo oficial de parceria Meta/WhatsApp — apenas a integração com a API oficial. Não afirme ter certificação oficial da Meta nem cite cliente específico sem confirmar antes com o time de marketing/comercial.";
 
+// Dores de mercado de quem já usa algum chatbot/automação de WhatsApp,
+// levantadas em pesquisa sobre falhas comuns de chatbot e motivos de troca
+// de plataforma (ver fontes no README/registro da pesquisa). Use com
+// prospects que já têm alguma automação — pergunte o que mais incomoda na
+// ferramenta atual antes de despejar a lista inteira.
+const COMPETITOR_PAIN_POINTS = [
+  {
+    pain: "\"O bot só segue um roteiro fixo e não entende o que o cliente quer\"",
+    cause: "Fluxo engessado que nunca foi revisado depois de implantado — uma das maiores causas de reclamação em chatbots no Brasil.",
+    solution: "No TakeFlow, os nós de IA com GPT interpretam a mensagem além do fluxo fixo, e a implantação é acompanhada (não é \"vende e some\") — o fluxo é ajustado conforme o uso real mostra onde trava.",
+  },
+  {
+    pain: "\"O bot não sabe status de pedido ou 2ª via de boleto\"",
+    cause: "Chatbot sem integração com os sistemas internos da empresa (CRM, ERP, banco de dados) fica isolado do resto da operação.",
+    solution: "O TakeFlow integra via N8N, webhooks, OpenAI e conexão direta com bancos de dados — o fluxo pode consultar o sistema do cliente em tempo real.",
+  },
+  {
+    pain: "\"Não dá pra falar com um humano, o bot 'prende' o atendimento\"",
+    cause: "Um dos maiores geradores de reclamação no Reclame Aqui: o cliente é atendido mas o problema não é resolvido, e a transferência para humano é escondida ou difícil.",
+    solution: "Transferência inteligente para agentes por fila/setor sempre que o fluxo identifica necessidade — o humano nunca fica bloqueado.",
+  },
+  {
+    pain: "\"Automação só funciona em horário comercial\"",
+    cause: "Falta de cobertura 24/7 é apontada como um dos problemas operacionais mais comuns em automação de atendimento.",
+    solution: "O fluxo do TakeFlow roda 24/7 — o próprio desenho do fluxo decide o que o bot resolve sozinho e o que aciona um humano, mesmo fora do expediente.",
+  },
+  {
+    pain: "\"Suporte da ferramenta atual demora pra responder\"",
+    cause: "Insatisfação com suporte é um dos principais motivos de troca de plataforma de automação.",
+    solution: "Suporte dedicado via WhatsApp — não é um canal de ticket genérico.",
+  },
+];
+
 const SEGMENTS = [
   {
     name: "Serviços profissionais",
@@ -406,6 +439,32 @@ export default function PlaybookPage() {
             <div key={item.q} className="text-sm">
               <p className="font-medium">{item.q}</p>
               <p style={{ color: "var(--text-muted)" }}>{item.why}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Dores de quem já tem um chatbot/automação (e por que trocar pelo TakeFlow)</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Muito prospect não está comprando automação pela primeira vez — já tentou algo e se
+          frustrou. Pergunte especificamente o que mais incomoda na ferramenta atual antes de
+          listar os pontos abaixo; use só o que for relevante para a dor real dele.
+        </p>
+        <div className="space-y-3">
+          {COMPETITOR_PAIN_POINTS.map((p) => (
+            <div
+              key={p.pain}
+              className="rounded-lg border p-4"
+              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+            >
+              <p className="text-sm font-medium">{p.pain}</p>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+                <span className="font-medium">Por que acontece: </span>{p.cause}
+              </p>
+              <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+                <span className="font-medium">Como o TakeFlow resolve: </span>{p.solution}
+              </p>
             </div>
           ))}
         </div>
