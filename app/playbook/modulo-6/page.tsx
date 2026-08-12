@@ -3,12 +3,6 @@ import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
   CULTURE_PILLARS,
-  BDR_CAREER_LEVELS,
-  BDR_PROGRESSION_NOTE,
-  BDR_NEXT_STEP,
-  BDR_PROGRESSION_PROCESS,
-  CLOSER_CAREER_LEVELS,
-  CLOSER_LEADERSHIP_NOTE,
   RITUALS,
   COMP_PRINCIPLES,
   CLOSER_PERFORMANCE_TIERS,
@@ -105,30 +99,6 @@ export default function Modulo6Page() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* 6.3 */}
-        <section id="m6-sec-3" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            6.3 — Plano de Carreira Comercial
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            A Omni investe em crescimento de carreira do time de pré-vendas e vendas. Isso não é
-            benefício — é estratégia de retenção e performance. Time que vê futuro na empresa
-            performa mais e dura mais.
-          </p>
-          <p className="text-sm font-medium">Trilha de Pré-vendas (BDR)</p>
-          <Table
-            headers={["Nível", "Critério de Progressão", "Fixo CLT (ref.)", "Fixo PJ (ref.)", "Meta inicial (SALs)"]}
-            rows={BDR_CAREER_LEVELS}
-          />
-          <Callout tone="blue" title="Importante">{BDR_PROGRESSION_NOTE}</Callout>
-          <p className="text-sm font-medium">Próximo degrau após Platinum</p>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{BDR_NEXT_STEP}</p>
-          <List title="Como funciona na prática" items={BDR_PROGRESSION_PROCESS} />
-          <p className="text-sm font-medium">Trilha de Vendas (Closer)</p>
-          <Table headers={["Nível", "Critério"]} rows={CLOSER_CAREER_LEVELS} />
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{CLOSER_LEADERSHIP_NOTE}</p>
         </section>
 
         {/* 6.4 */}

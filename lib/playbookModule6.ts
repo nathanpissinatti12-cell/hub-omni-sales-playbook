@@ -25,36 +25,6 @@ export const CULTURE_PILLARS = [
   },
 ];
 
-// ---------- 6.3 Plano de carreira ----------
-
-export const BDR_CAREER_LEVELS = [
-  ["Blue", "Entrada — primeiros 3 meses", "R$ 2.500", "R$ 3.000", "20"],
-  ["Gold", "Consistência em resultado + comportamento", "R$ 2.700", "R$ 3.500", "25"],
-  ["Black", "Alta performance sustentada", "R$ 3.000", "R$ 4.000", "30"],
-  ["Platinum", "Referência técnica e cultural do time", "R$ 3.500", "R$ 5.000", "40"],
-];
-
-export const BDR_PROGRESSION_NOTE =
-  "A progressão não é automática por tempo — é avaliada pela gestão com base em comportamento, comprometimento e resultado. Critérios holísticos, não apenas quantitativos.";
-
-export const BDR_NEXT_STEP =
-  "Closer / Executivo de Vendas. O BDR que atinge Platinum e demonstra perfil consultivo é o candidato natural para fazer a transição para o time de fechamento. Essa expectativa deve ser comunicada desde a contratação.";
-
-export const BDR_PROGRESSION_PROCESS = [
-  "A cada trimestre, o gestor conduz uma avaliação formal de nível com o BDR",
-  "A avaliação considera: score médio no evolu.AI, taxa de conversão de SAL para reunião realizada, qualidade do handoff avaliada pelos closers, presença e engajamento nos rituais do time",
-  "O BDR recebe feedback escrito com plano de desenvolvimento para o próximo nível",
-];
-
-export const CLOSER_CAREER_LEVELS = [
-  ["Closer Junior", "Primeiros 6 meses — em ramp-up com meta reduzida"],
-  ["Closer Pleno", "Meta cheia + ciclo de vendas autônomo"],
-  ["Closer Sênior", "Consistência acima de 110% da meta por 3 trimestres"],
-  ["Executivo de Contas", "Carteira de clientes estratégicos + responsabilidade de expansão"],
-];
-
-export const CLOSER_LEADERSHIP_NOTE =
-  "O Closer Sênior e o Executivo de Contas são candidatos naturais para posições de liderança comercial conforme a Omni escala.";
 
 // ---------- 6.4 Rituais ----------
 
@@ -173,7 +143,7 @@ export const CLOSER_PERFORMANCE_TIERS = [
 ];
 
 export const BDR_GOAL_NOTE =
-  "Meta de SALs mensais definida por nível (Blue/Gold/Black/Platinum — ver seção 6.3), com modelo OTE (On-Target Earnings) e multiplicadores por faixa de atingimento.";
+  "Meta de SALs mensais definida por nível (Blue/Gold/Black/Platinum), com modelo OTE (On-Target Earnings) e multiplicadores por faixa de atingimento.";
 
 export const OTE_FAIXAS = [
   { faixa: "Faixa 0", pct: "< 70%", leads: "< 14", mult: "0x", bonus: "R$ 0", total: "R$ 4.000" },
@@ -375,7 +345,6 @@ export const ATTENTION_M6 = [
 
 export const MODULE_6_SECTIONS = [
   { id: "m6-sec-1", label: "6.1 Cultura Comercial" },
-  { id: "m6-sec-3", label: "6.3 Plano de Carreira" },
   { id: "m6-sec-4", label: "6.4 Rituais de Gestão" },
   { id: "m6-sec-5", label: "6.5 Metas e Comissionamento" },
   { id: "m6-sec-6", label: "6.6 Ramp-up de Novos Vendedores" },
