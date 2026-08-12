@@ -628,13 +628,6 @@ Evitar: ranking só por número fechado (ignora quem teve ciclo difícil ou gero
 feedback só negativo (ratio recomendado é 3 positivos para 1 corretivo); e meta impossível
 (se menos de 30% do time bate a meta no mês, o problema é a meta/processo, não o time).
 
-## Pontos de atenção do Módulo 6 (ainda em aberto — não afirmar como definido)
-- Valores absolutos de fixo, bônus e OTE do Closer ainda dependem de decisão da liderança com base na margem dos produtos — só a estrutura de faixas foi formalizada.
-- Não existe rubrica explícita/ponderada para a progressão holística de nível do BDR — só os critérios gerais.
-- Conteúdo interno da Omni ainda não foi produzido para o G4 Skills — a plataforma permite, mas a produção inicial ainda não foi feita.
-- Não existe ticket mínimo definido para o time de Closers perseguir ou descartar negócios.
-- Não existe protocolo formal de desligamento de colaborador (proteção do relacionamento com o cliente, transferência de pipeline, moral do time).
-- A integração entre o score do evolu.AI e o plano de desenvolvimento na Pipelovers (ex: score baixo → aula específica indicada) ainda não existe — é só uma recomendação.
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do

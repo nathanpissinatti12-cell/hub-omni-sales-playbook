@@ -35,7 +35,6 @@ import {
   CHECKLIST_ONBOARDING_COLABORADOR,
   CHECKLIST_RITUAIS_MENSAL,
   CHECKLIST_CULTURA_SAUDE,
-  ATTENTION_M6,
 } from "@/lib/playbookModule6";
 
 function List({ title, items }: { title?: string; items: string[] }) {
@@ -260,24 +259,6 @@ export default function Modulo6Page() {
             <ChecklistBlock title="Onboarding de novo colaborador (checklist por contratação)" items={CHECKLIST_ONBOARDING_COLABORADOR} />
             <ChecklistBlock title="Rituais (checar mensalmente)" items={CHECKLIST_RITUAIS_MENSAL} />
             <ChecklistBlock title="Cultura (indicadores de saúde)" items={CHECKLIST_CULTURA_SAUDE} />
-          </div>
-        </section>
-
-        {/* 6.10 */}
-        <section id="m6-sec-10" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            6.10 — Pontos de Atenção
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Temas identificados durante o desenvolvimento deste módulo que merecem
-            endereçamento antes ou logo após a ativação do playbook:
-          </p>
-          <div className="space-y-2">
-            {ATTENTION_M6.map((item, i) => (
-              <Callout key={i} tone="gray">
-                {item}
-              </Callout>
-            ))}
           </div>
         </section>
       </div>

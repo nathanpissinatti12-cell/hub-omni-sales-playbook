@@ -332,17 +332,6 @@ export const CHECKLIST_CULTURA_SAUDE = [
   "O playbook foi atualizado pelo menos uma vez nos últimos 90 dias com aprendizados reais?",
 ];
 
-// ---------- 6.10 Pontos de atenção ----------
-
-export const ATTENTION_M6 = [
-  "Valores exatos de fixo e bônus do Closer: o modelo de estrutura de comissionamento foi formalizado, mas os valores absolutos de fixo, bônus e OTE do Closer dependem de decisão da liderança com base na margem atual dos produtos. Isso precisa ser definido antes de qualquer contratação ou revisão salarial.",
-  "Critérios formais de progressão entre níveis de BDR: a progressão é holística, não quantitativa. Para evitar percepção de arbitrariedade, recomenda-se criar uma rubrica de avaliação com critérios explícitos — mesmo que ponderados, não binários.",
-  "Integração do G4 Skills com conteúdo interno: a plataforma permite adicionar módulos próprios da Omni. Requer dedicação de tempo para produção inicial do conteúdo — oportunidade de centralizar todos os treinamentos internos em um único lugar.",
-  "Definição de ticket mínimo para o time de Closers: sem esse critério, Closers podem gastar tempo em negócios de baixo valor que deveriam ser redirecionados ou encerrados mais cedo.",
-  "Processo de desligamento de colaborador: não foi desenvolvido neste módulo um protocolo de desligamento que proteja o relacionamento com o cliente, transfira o pipeline com qualidade e mantenha o moral do time. Recomenda-se criar esse processo antes que a primeira situação apareça.",
-  "Integração entre Pipelovers e evolu.AI: criar um ciclo formal onde o score do evolu.AI alimenta o plano de desenvolvimento na Pipelovers — por exemplo: score baixo em contorno de objeções na semana → aula específica indicada para a semana seguinte. Isso seria um diferencial de gestão de alta performance.",
-];
-
 export const MODULE_6_SECTIONS = [
   { id: "m6-sec-1", label: "6.1 Cultura Comercial" },
   { id: "m6-sec-4", label: "6.4 Rituais de Gestão" },
@@ -351,5 +340,4 @@ export const MODULE_6_SECTIONS = [
   { id: "m6-sec-7", label: "6.7 Ferramentas por Função" },
   { id: "m6-sec-8", label: "6.8 Reconhecimento e Performance" },
   { id: "m6-sec-9", label: "6.9 Checklist de Implementação" },
-  { id: "m6-sec-10", label: "6.10 Pontos de Atenção" },
 ];
