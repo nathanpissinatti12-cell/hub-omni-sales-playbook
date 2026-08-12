@@ -27,6 +27,7 @@ export type SummaryRow = {
   total_fila: number;
   total_processado: number;
   total_criados_meetime: number;
+  total_empresas_enriquecidas: number;
 };
 
 export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]> {
@@ -234,7 +235,8 @@ export async function getSummary(): Promise<SummaryRow> {
       (SELECT count(*)::int FROM campanhas WHERE status = 'ativa') AS campanhas_ativas,
       (SELECT count(*)::int FROM fila_processamento) AS total_fila,
       (SELECT count(*)::int FROM fila_processamento WHERE status = 'processado') AS total_processado,
-      (SELECT count(*)::int FROM fila_processamento WHERE lead_status = 'criado meetime') AS total_criados_meetime
+      (SELECT count(*)::int FROM fila_processamento WHERE lead_status = 'criado meetime') AS total_criados_meetime,
+      (SELECT count(*)::int FROM empresas) AS total_empresas_enriquecidas
   `);
   return rows[0];
 }
