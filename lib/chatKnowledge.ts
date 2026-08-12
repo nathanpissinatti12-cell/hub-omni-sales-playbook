@@ -275,11 +275,128 @@ priorização A/B/C; pular o briefing ao vivo na passagem de bastão pro closer.
 - Processo de no-show (remarcação, nº de tentativas) não foi detalhado.
 - Integração técnica evolu.AI + Meetime Dialer ainda precisa ser validada.
 - Script de qualificação para leads inbound (5% do volume) ainda não existe — a abordagem oficial foi desenhada para outbound.
+
+# MÓDULO 3 — VENDAS / CLOSERS
+
+## Perfil e papel do closer
+O closer da Omni não vende produto — é um consultor de comunicação corporativa que usa a
+venda como consequência de um diagnóstico bem feito. Não é apresentador de slides, não
+manda proposta padrão, não espera o cliente ligar de volta, não vende funcionalidade
+(vende resultado). Precisa dominar TakeFlow, Onvox e Evolue AI, saber construir cálculo
+de ROI na hora, e ter fluência no HubSpot.
+
+## Ciclo de vendas (funil HubSpot — Aquisição de Receita Sênior)
+1. Oportunidade (Entrada) → 2. Diagnóstico (Reunião 1) → 3. Solicitação de Projeto
+(interno) → 4. Demonstração da Solução (Reunião 2) → 5. Negociação (Comercial) →
+6. Contrato Enviado (Jurídico) → 7. Em Ativação (Implantação) → 8. Fechado Ganho
+(Concluído) → 9. Fechado Perdido (Encerrado). Cada avanço de etapa no HubSpot exige campos
+obrigatórios preenchidos (ex: prioridade, orçamento, decisor, valor, temperatura,
+oportunidade Onvox/TakeFlow/Evolue AI Sim/Não). Toda reunião via Google Meet gera
+transcrição processada pela Evolue AI, cujo resumo o closer cola como nota no card.
+
+## Reunião 1 — Diagnóstico ("Raio-X")
+Duração 45-60 min. É a reunião mais importante do ciclo — define se o negócio anda e em
+qual direção. Antes de entrar: pesquisar empresa e gestor no LinkedIn, ler o brief do
+SDR, ter hipótese inicial de produto. Abertura com rapport genuíno (2-3 min) antes de
+qualquer protocolo — define metade da abertura do cliente para o resto da reunião.
+
+Estrutura em 7 blocos (roteiro completo, não pular blocos):
+1. Contexto e Posicionamento (5-7min): o que a empresa faz, porte, papel do gestor e
+   autoridade, canais de captação, como usam WhatsApp hoje (Business comum com múltiplos
+   atendentes no mesmo número = gancho forte), outros canais, histórico de mudança de
+   plataforma.
+2. Estrutura do Time e Operação (8-10min): quantas pessoas atendem, filas/setores,
+   distribuição automática ou manual (manual = perda de leads), horário de atendimento,
+   meta de tempo de primeira resposta (lead sem resposta em 5min tem 80% mais chance de
+   fechar com concorrente).
+3. Volume e Dimensionamento (8-10min) — CRÍTICO, nunca pular: volume médio de
+   atendimentos/dia, pico, % cliente novo vs recorrente (limite TakeFlow é ~40 novos
+   contatos/dia por número — acima disso precisa arquitetura multi-número), disparos
+   ativos, ticket médio, taxa de conversão atual (base do cálculo de ROI).
+4. Dores, Gargalos e Tentativas Anteriores (10-12min, metodologia SPIN): maiores desafios
+   percebidos, casos específicos de venda perdida por demora, o que acontece com contatos
+   quando atendente sai (dor de centralização), se o gestor consegue ver o que o atendente
+   faz ("caixa-preta" abre porta para Evolue AI), histórico de banimento no WhatsApp,
+   estimativa de receita perdida/custo extra, custo de cada atendente (base direta de ROI),
+   ferramentas testadas antes e por que pararam (vira battlecard), concorrência ativa.
+5. Stack Tecnológico e Integrações (5-7min): CRM usado e se integra automaticamente ou é
+   copia-cola, ERP/e-commerce, chatbot/automação existente, preocupações com IA, tom de
+   comunicação, volume de ligações telefônicas (cross-sell Onvox), se são gravadas e
+   auditadas (grava mas não escuta = candidato perfeito para Evolue AI).
+6. Performance Comercial e ROI (5-7min, decisivo): investimento em mídia paga e leads
+   gerados, ciclo de venda médio, leads/dia e taxa de conversão para oportunidade,
+   estimativa de perda mensal com falhas de atendimento (mesmo um chute define o teto da
+   proposta), impacto de atender o dobro sem aumentar headcount, prioridade do cliente
+   (automatizar primeiro contato / reduzir espera / visibilidade / escalar sem contratar).
+7. Decisão, Autoridade e Próximos Passos (5-8min): quem decide além do gestor (se há
+   decisor adicional, trazê-lo para a próxima reunião — regra de ouro, senão o closer repete
+   tudo), orçamento já alocado ou orçamento novo, prazo/urgência (escala 0-10 se não houver
+   prazo claro), tempo para operação rodando (setup TakeFlow leva 1 a 4 semanas dependendo
+   da complexidade).
+
+Encerramento: "Perfeito. Agora a lição de casa fica comigo... Você prefere segunda ou
+quarta da semana que vem?" — sempre com dia/horário/link confirmados, mensagem de
+confirmação no mesmo dia, lembrete um dia antes, link 5 min antes.
+
+Sinais a mapear durante o Diagnóstico: cross-sell Onvox (volume de ligações, PABX
+próprio, celular pessoal, múltiplas filiais sem ramal único), cross-sell Evolue AI (grava
+mas ninguém escuta, sem visibilidade do atendente, auditoria manual), pacote maior N1
+200+/N2 (100+ atendimentos/dia, 40+ novos contatos/dia, atendimento 24/7), sinais de risco
+que exigem ajustar expectativa (já desistiu de 2+ ferramentas, espera resolver tudo
+automaticamente sem humano, quer volume acima da realidade, decisor real não vai à
+próxima reunião).
+
+## Reunião 2 — Demonstração da Solução
+Duração 45-60 min. Não é apresentação de produto — é entrega do diagnóstico em forma de
+solução personalizada. Abertura retoma as dores mapeadas ("vocês me contaram que [dor 1],
+[dor 2] e [dor 3]..."). Apresentação estruturada na ordem das dores do cliente (não na
+ordem das features): resgatar a dor → mostrar como a solução resolve (demo ao vivo) →
+materializar o impacto em números. Métricas de expectativa a citar: eficiência comercial
++20% a +40%, conversão de vendas +10% a +30%, NPS/CSAT +10% a +25%, redução de custo
+operacional -15% a -35%. Exemplo de ROI (modelo Farma Ponte): "se cada loja perde uma
+venda de R$20 por falta de atendimento e vocês têm 119 lojas, isso é R$71.400/mês
+somindo" — adaptar sempre com os números reais do cliente, nunca usar esse exemplo como
+se fosse do prospect. Cases de prova social mais usados: Farma Ponte (120 lojas, varejo
+farmacêutico), Neobetel (-20% telefonia, -80% linha 0800), Comvem (-40% telefonia móvel),
+British Council (5+ anos de parceria); Bioderma, Samsonite, Bluefit, NBB citados como
+referência de carteira. Microfechamento: "Isso resolve o que vocês precisam? Faz sentido
+evoluirmos — nem que seja com uma degustação?"
+
+## Negociação e fechamento
+Princípio central: nunca terminar uma interação sem próximo passo específico, datado e
+com responsável — nunca "vou mandar a proposta e aguardo retorno". Ancoragem de preço:
+sempre mostrar valor de tabela antes do negociado, desconto é concessão deliberada, não
+ponto de partida; isenção de implantação pode ser condicionada a prazo ("se fecharmos até
+sexta..."). Gatilhos mentais usados: reciprocidade (entrega o Diagnóstico e ROI antes de
+cobrar), urgência (custo de adiar, com base no ROI calculado), escassez (condição com
+prazo), prova social (cases do mesmo segmento/porte), autoridade (15 anos de mercado,
+profundidade do diagnóstico), comprometimento e coerência (usar o que o próprio cliente
+disse no Diagnóstico). Objeções de negociação: "não é urgente" → perguntar o que mudaria
+isso, reforçar o R$X/mês parado; "preciso falar com sócio/diretor" → oferecer marcar
+reunião conjunta; "já uso outra ferramenta" → perguntar qual e mapear a dor específica
+dela; "custo alto" → comparar com a perda mensal estimada pelo próprio cliente; "não quero
+fidelidade" → modelo é aviso prévio de 60 dias, sem multa; "vou avaliar outras opções" →
+perguntar os critérios de comparação e se oferecer para ajudar nessa comparação.
+
+## Gestão de pipeline e métricas do closer
+O pipeline do HubSpot é espelho da realidade comercial, não relatório para o gestor —
+mover o card, preencher campos obrigatórios e registrar toda atividade (ligação, mensagem,
+e-mail, nota) é responsabilidade do closer, sem exceção. KPIs acompanhados: reuniões de
+Diagnóstico e Demonstração realizadas (semanal), conversão Diagnóstico→Demonstração,
+Demonstração→Negociação, Negociação→Fechado Ganho (mensal), pontuação Evolue AI (semanal),
+contratos assinados/ativados (quinzenal/mensal/trimestral), MRR gerado (mensal).
+
+## Pontos de atenção do Módulo 3 (ainda em aberto — não afirmar como definido)
+- Não existe battlecard formal de qualificação/desqualificação — não há critério objetivo documentado para encerrar um lead sem fit.
+- Battlecard de concorrentes citados por clientes (OmniChat, Zenvia, RD Station, Sirena, Take Blip) ainda não foi criado — só existe o battlecard de concorrentes de telefonia do Módulo 1.
+- Não existe template padrão de proposta comercial completa da Omni (só a referência do modelo de ROI da Farma Ponte).
+- Tabela de preços completa com todos os produtos (Onvox, Evolue AI, TakeFlow) não foi consolidada neste módulo — só os tiers N1/N2 do TakeFlow foram citados no contexto de dimensionamento.
+- Comissionamento do closer ainda não foi definido (fica para o Módulo 5).
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do
-Playbook de Vendas (Módulo 1 — Fundação Estratégica, e Módulo 2 — Pré-vendas SDR/BDR) para
-tirar dúvidas dos vendedores.
+Playbook de Vendas (Módulo 1 — Fundação Estratégica, Módulo 2 — Pré-vendas SDR/BDR, e
+Módulo 3 — Vendas/Closers) para tirar dúvidas dos vendedores.
 
 Responda SOMENTE com base no conteúdo do playbook abaixo. Não invente preços, prazos,
 SLAs, funcionalidades ou dados de clientes que não estejam no material — em especial,
