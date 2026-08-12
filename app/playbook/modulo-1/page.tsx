@@ -10,8 +10,6 @@ import {
   RAIO_X,
   CHECKLIST_M1,
   ORIGENS,
-  FUTURE_MODULES_CONTENT,
-  IMMEDIATE_ACTIONS,
 } from "@/lib/playbookModule1";
 
 export default function Modulo1Page() {
@@ -265,37 +263,6 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
             headers={["Prática / Conteúdo", "Origem", "Referência"]}
             rows={ORIGENS.map((o) => [o.pratica, o.origem, o.referencia])}
           />
-        </section>
-
-        {/* Seção 7 */}
-        <section id="sec-7" className="scroll-mt-20 space-y-6">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Seção 7 — Pontos de Atenção
-          </h2>
-          <Callout tone="pink" title="Sobre esta seção">
-            Temas identificados como relevantes para a fundação estratégica que foram
-            mencionados mas não desenvolvidos completamente neste módulo. Divididos em dois
-            grupos: (a) pontos que serão aprofundados nos módulos seguintes e (b) pontos que
-            requerem ação imediata da gestão antes da ativação do playbook.
-          </Callout>
-
-          <div className="space-y-3">
-            <h3 className="font-medium">7.1 A ser desenvolvido nos próximos módulos</h3>
-            <ul className="list-disc space-y-1 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
-              {FUTURE_MODULES_CONTENT.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="space-y-3">
-            <h3 className="font-medium">7.2 Ações imediatas da gestão antes da ativação</h3>
-            <ul className="list-disc space-y-1 pl-5 text-sm" style={{ color: "var(--text-muted)" }}>
-              {IMMEDIATE_ACTIONS.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
-            </ul>
-          </div>
         </section>
 
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>

@@ -292,31 +292,6 @@ export const ORIGENS = [
   },
 ];
 
-export const FUTURE_MODULES_CONTENT = [
-  "Cadeia completa de qualificação de leads (framework BANT/MEDDIC adaptado) — Módulo 2 (SDR/BDR)",
-  "Scripts detalhados de cold call, cold email e LinkedIn/WhatsApp — Módulo 2",
-  "Critérios de passagem de bastão SDR → Closer (SLA de handoff) — Módulo 2 e 3",
-  "Estrutura completa da reunião de diagnóstico como sessão formal com roteiro, deck e template de notas — Módulo 3 (Closers)",
-  "Business case e cálculo de ROI formalizado (planilha ou template) — Módulo 3",
-  "Estrutura de proposta comercial (o que incluir, como apresentar, pricing) — Módulo 3",
-  "Técnicas de negociação e fechamento específicas — Módulo 3",
-  "Processo de onboarding do cliente pós-assinatura — Módulo 4 (CS/Implantação)",
-  "Playbook de expansão de conta (upsell e cross-sell) — Módulo 4",
-  "Metas, comissionamento e rituais comerciais — Módulo 5",
-  "Métricas e KPIs por função (SDR, Closer, CS) — Módulos 2, 3 e 4",
-];
-
-export const IMMEDIATE_ACTIONS = [
-  "Formalização de one-pagers de prova social: Neobetel, Comvem e British Council precisam de documento visual pronto para uso em campo (não existe ainda — criar antes do treinamento do time)",
-  "Definição do SLA de suporte com número exato de horas/resposta — mencionado nas objeções de preço e contrato como argumento, mas a política interna não foi documentada",
-  "Clareza sobre flexibilidade contratual: a objeção de contrato menciona possibilidade de negociação de prazo, mas os limites internos não foram definidos — gestor precisa estabelecer regras antes de o time usar esse argumento",
-  "Posicionamento de preço da TakeFlow vs. concorrentes diretos de WhatsApp corporativo (Treble, Weni, Blip, Zenvia) — o PAR mapeou concorrentes da OnVox, mas não mapeou players diretos da TakeFlow; battle cards da TakeFlow estão ausentes",
-  "Template padronizado do Raio-X: existe como conceito e roteiro de perguntas, mas não como documento formal entregue ao cliente — criar versão em PDF ou slides antes do treinamento",
-  "Validação formal das provas sociais: os dados percentuais (20% Neobetel, 40% Comvem, 80% 0800) devem ser formalizados em autorização escrita dos clientes para uso comercial e marketing",
-  "Processo de demonstração técnica: o PAR menciona que o ciclo de venda da OnVox inclui demonstração do PABX em nuvem — um roteiro-padrão de demo não foi desenvolvido neste módulo",
-  "Definição de ticket mínimo e porte mínimo de prospect: o PAR indica faturamento acima de R$5MM e 30-50 funcionários como ICP ideal para OnVox, mas não há definição equivalente para TakeFlow — não foi formalizado como critério de qualificação",
-];
-
 export const MODULES = [
   { id: 1, title: "Fundação Estratégica", href: "/playbook/modulo-1", available: true },
   { id: 2, title: "Pré-vendas (SDR/BDR)", href: "/playbook/modulo-2", available: true },
@@ -333,5 +308,4 @@ export const MODULE_1_SECTIONS = [
   { id: "sec-4", label: "Seção 4 — Narrativa de Vendas" },
   { id: "sec-5", label: "Seção 5 — Checklist de Implementação" },
   { id: "sec-6", label: "Seção 6 — Origem das Práticas" },
-  { id: "sec-7", label: "Seção 7 — Pontos de Atenção" },
 ];
