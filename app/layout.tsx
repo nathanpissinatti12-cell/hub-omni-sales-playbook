@@ -12,13 +12,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body>
-        <header className="border-b" style={{ borderColor: "var(--border)" }}>
+        <header style={{ background: "#0a0a0a", borderBottom: "1px solid #ffffff1f" }}>
           <nav className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4">
-            <span className="font-semibold">Omni Assessoria</span>
-            <Link href="/playbook" className="text-sm hover:underline">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/assets/omni-logo-dark.png" alt="Omni Assessoria" className="h-7 w-auto" />
+            <Link href="/playbook" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Playbook de Vendas
             </Link>
-            <Link href="/dashboard" className="text-sm hover:underline">
+            <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Dashboard
             </Link>
           </nav>

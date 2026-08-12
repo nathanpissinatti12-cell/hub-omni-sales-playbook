@@ -1,5 +1,5 @@
 const TONES = {
-  blue: { bg: "rgba(47, 111, 237, 0.10)", border: "var(--accent)" },
+  blue: { bg: "rgba(255, 212, 0, 0.12)", border: "var(--accent)" },
   green: { bg: "rgba(34, 197, 94, 0.10)", border: "#22c55e" },
   gray: { bg: "var(--border)", border: "var(--text-muted)" },
   tan: { bg: "rgba(217, 119, 6, 0.10)", border: "#d97706" },

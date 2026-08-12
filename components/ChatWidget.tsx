@@ -57,8 +57,8 @@ export function ChatWidget() {
     <>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-lg"
-        style={{ background: "var(--accent)" }}
+        className="fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg"
+        style={{ background: "var(--accent)", color: "var(--on-accent)" }}
         aria-label={open ? "Fechar assistente" : "Abrir assistente"}
       >
         {open ? "✕" : "💬"}
@@ -89,7 +89,7 @@ export function ChatWidget() {
                 className="max-w-[85%] rounded-lg px-3 py-2 text-sm"
                 style={
                   m.role === "user"
-                    ? { marginLeft: "auto", background: "var(--accent)", color: "white" }
+                    ? { marginLeft: "auto", background: "var(--accent)", color: "var(--on-accent)" }
                     : { background: "var(--background, transparent)", border: "1px solid var(--border)" }
                 }
               >
@@ -117,8 +117,8 @@ export function ChatWidget() {
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="rounded-md px-3 py-2 text-sm font-medium text-white disabled:opacity-50"
-              style={{ background: "var(--accent)" }}
+              className="rounded-md px-3 py-2 text-sm font-medium disabled:opacity-50"
+              style={{ background: "var(--accent)", color: "var(--on-accent)" }}
             >
               Enviar
             </button>

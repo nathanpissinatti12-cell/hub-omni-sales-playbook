@@ -11,8 +11,8 @@ export default function Home() {
       <div className="flex gap-4 pt-2">
         <Link
           href="/playbook"
-          className="rounded-md px-4 py-2 text-sm font-medium text-white"
-          style={{ background: "var(--accent)" }}
+          className="rounded-md px-4 py-2 text-sm font-medium"
+          style={{ background: "var(--accent)", color: "var(--on-accent)" }}
         >
           Ver Playbook
         </Link>

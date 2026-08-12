@@ -19,8 +19,8 @@ export function RankedList({
             <span className="flex items-center gap-2">
               {i === 0 && items.length > 1 ? (
                 <span
-                  className="rounded px-1.5 py-0.5 text-xs font-medium text-white"
-                  style={{ background: "var(--accent)" }}
+                  className="rounded px-1.5 py-0.5 text-xs font-medium"
+                  style={{ background: "var(--accent)", color: "var(--on-accent)" }}
                 >
                   principal
                 </span>

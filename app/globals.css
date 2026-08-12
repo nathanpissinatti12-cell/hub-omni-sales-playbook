@@ -2,27 +2,54 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Omni Atyp";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/AtypText-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Omni Atyp";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("/fonts/AtypText-Semibold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Omni Atyp";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/AtypText-Bold.ttf") format("truetype");
+}
+
 :root {
-  --bg: #f7f7f8;
+  --bg: #f7f7f5;
   --surface: #ffffff;
-  --border: #e5e5e8;
-  --text: #16161a;
-  --text-muted: #6b6b76;
-  --accent: #2f6fed;
+  --border: #e5e5e0;
+  --text: #0a0a0a;
+  --text-muted: #6b6b64;
+  --accent: #d9a900;
+  --on-accent: #0a0a0a;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0f0f12;
-    --surface: #1a1a1f;
-    --border: #2b2b33;
-    --text: #f2f2f5;
-    --text-muted: #9a9aa5;
-    --accent: #5b8dff;
+    --bg: #0a0a0a;
+    --surface: #181818;
+    --border: #ffffff1f;
+    --text: #f5f5f0;
+    --text-muted: #a8a8a0;
+    --accent: #ffd400;
+    --on-accent: #0a0a0a;
   }
 }
 
 body {
   background: var(--bg);
   color: var(--text);
+  font-family: "Omni Atyp", ui-sans-serif, system-ui, sans-serif;
 }

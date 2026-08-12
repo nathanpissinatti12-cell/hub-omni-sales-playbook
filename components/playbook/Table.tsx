@@ -5,7 +5,11 @@ export function Table({ headers, rows }: { headers: string[]; rows: string[][] }
         <thead>
           <tr style={{ background: "var(--accent)" }}>
             {headers.map((h) => (
-              <th key={h} className="px-4 py-2 text-left font-medium text-white">
+              <th
+                key={h}
+                className="px-4 py-2 text-left font-medium"
+                style={{ color: "var(--on-accent)" }}
+              >
                 {h}
               </th>
             ))}

@@ -22,8 +22,8 @@ export function RankedTable({
               <td className="px-4 py-2">
                 {i === 0 && rows.length > 1 ? (
                   <span
-                    className="mr-2 rounded px-1.5 py-0.5 text-xs font-medium text-white"
-                    style={{ background: "var(--accent)" }}
+                    className="mr-2 rounded px-1.5 py-0.5 text-xs font-medium"
+                    style={{ background: "var(--accent)", color: "var(--on-accent)" }}
                   >
                     maior
                   </span>
