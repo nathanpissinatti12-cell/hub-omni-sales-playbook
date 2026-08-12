@@ -567,17 +567,6 @@ sem dado é opinião, decisão sem dado é aposta). Próximo passo sempre (nenhu
 termina sem próximo passo concreto, datado e com responsável). Crescimento com
 responsabilidade (upsell é consequência de um cliente com resultado, não métrica de pressão).
 
-## Perfis de contratação por função (o que buscar/red flags na entrevista)
-BDR/SDR: energia alta, ego regulado, curiosidade genuína; testar com cold call simulada na
-hora; red flag definitivo é candidato sem ambição de virar Closer. Experiência mínima: 6
-meses em função com contato direto com cliente. Closer: conversa executiva sem
-intimidação, pensa em ROI antes de funcionalidade; red flags incluem pedir o deck antes de
-entender o cliente, resolver objeção com desconto reflexo, ou não saber o que é LTV/MRR/NRR.
-Experiência mínima: 2 anos em vendas consultivas B2B com ciclo acima de 15 dias. CS/
-Implantação (Tatuí): combina técnica com empatia, tolerância a ambiguidade; red flag é
-resolver tudo "no feeling" sem processo. Gestor Comercial: ex-vendedor de alta performance
-que sabe que gerenciar não é vender pelo time.
-
 ## Plano de carreira
 BDR (4 níveis, progressão holística — não automática por tempo, avaliada trimestralmente por
 comportamento + comprometimento + resultado, nunca só quantitativa), com fixo CLT/PJ e meta

@@ -3,8 +3,6 @@ import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
   CULTURE_PILLARS,
-  HIRING_PROFILES,
-  HIRING_COST_NOTE,
   BDR_CAREER_LEVELS,
   BDR_PROGRESSION_NOTE,
   BDR_NEXT_STEP,
@@ -104,35 +102,6 @@ export default function Modulo6Page() {
               <div key={p.title}>
                 <p className="text-sm font-medium">{p.title}</p>
                 <p className="text-sm" style={{ color: "var(--text-muted)" }}>{p.text}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* 6.2 */}
-        <section id="m6-sec-2" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            6.2 — Perfil de Profissional que a Omni Deve Contratar por Função
-          </h2>
-          <Callout tone="tan">{HIRING_COST_NOTE}</Callout>
-          <div className="space-y-6">
-            {HIRING_PROFILES.map((p) => (
-              <div key={p.role} className="rounded-md border p-3" style={{ borderColor: "var(--border)" }}>
-                <p className="text-sm font-semibold">{p.role}</p>
-                <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>{p.fit}</p>
-                <div className="mt-2">
-                  <List title="O que buscar na entrevista" items={p.interview} />
-                </div>
-                {p.redFlags.length > 0 && (
-                  <div className="mt-2">
-                    <List title="Red flags definitivos" items={p.redFlags} />
-                  </div>
-                )}
-                {p.minExperience && (
-                  <p className="mt-2 text-xs italic" style={{ color: "var(--text-muted)" }}>
-                    Experiência mínima recomendada: {p.minExperience}
-                  </p>
-                )}
               </div>
             ))}
           </div>

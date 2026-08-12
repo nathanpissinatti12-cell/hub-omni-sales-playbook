@@ -25,79 +25,6 @@ export const CULTURE_PILLARS = [
   },
 ];
 
-// ---------- 6.2 Perfis de contratação ----------
-
-export type HiringProfile = {
-  role: string;
-  fit: string;
-  interview: string[];
-  redFlags: string[];
-  minExperience?: string;
-};
-
-export const HIRING_PROFILES: HiringProfile[] = [
-  {
-    role: "BDR / SDR (Pré-vendas)",
-    fit: "Pessoa com energia alta, ego regulado e curiosidade genuína. Não precisa ter experiência formal em vendas — mas precisa gostar de falar com pessoas e não ter medo de rejeição. Candidatos que vieram de varejo de alto contato, telemarketing de qualidade ou atendimento B2B costumam ter boa base.",
-    interview: [
-      "Pedir para o candidato fazer uma cold call simulada na hora — avaliar tom, naturalidade e capacidade de adaptar ao \"não\"",
-      "Perguntar: \"Me conta uma vez que você foi muito persistente em algo — não necessariamente em vendas.\" Resiliência aparece em narrativas de vida, não só no currículo",
-      "Perguntar: \"Você acompanha algum conteúdo de vendas, carreira ou negócios?\" — BDR que não se desenvolve voluntariamente raramente se desenvolve com treinamento",
-    ],
-    redFlags: [
-      "Candidato que fala mais do que ouve na própria entrevista",
-      "Candidato que não fez pesquisa nenhuma sobre a Omni antes de vir",
-      "Candidato que nunca questionou a abordagem da empresa anterior (\"fazia o que mandavam\")",
-      "Candidato sem ambição de crescer para Closer — BDR Omni precisa querer o próximo degrau",
-    ],
-    minExperience: "6 meses em qualquer função com contato direto com cliente.",
-  },
-  {
-    role: "Closer / Executivo de Vendas",
-    fit: "Alguém que consegue ter uma conversa executiva sem intimidação — com sócio, diretor ou gerente de TI — e que pensa em ROI antes de pensar em funcionalidade. Experiência em venda consultiva B2B é altamente preferível. Experiência em SaaS, telecom ou tecnologia é diferencial real.",
-    interview: [
-      "Pedir para o candidato conduzir uma reunião de diagnóstico simulada — avaliar se faz perguntas ou apresenta slides",
-      "Perguntar: \"Me conta uma venda complexa que você perdeu. O que aprendeu?\" — Closer que nunca perdeu ou não reflete sobre perdas é sinal de pouca maturidade",
-      "Perguntar: \"Como você constrói urgência para um cliente que reconhece a dor mas não tem pressa?\" — Resposta boa envolve ROI e consequência da inação, não pressão artificial",
-    ],
-    redFlags: [
-      "Candidato que pede o deck antes de entender o cliente",
-      "Candidato que resolve objeção com desconto reflexo",
-      "Candidato que nunca pediu referência de cliente para fechar",
-      "Candidato que não sabe o que é LTV, MRR ou NRR",
-    ],
-    minExperience: "2 anos em vendas consultivas B2B, com ciclo de venda acima de 15 dias.",
-  },
-  {
-    role: "CS / Implantação (Pós-venda — Unidade Tatuí)",
-    fit: "Alguém que combina orientação técnica com empatia de atendimento. Precisa conseguir explicar configuração de URA para um gestor não técnico com a mesma clareza com que fala de API com um desenvolvedor. Tolerância alta a ambiguidade e capacidade de gerenciar múltiplos projetos simultaneamente são não-negociáveis.",
-    interview: [
-      "Pedir para explicar um conceito técnico simples de telefonia para um leigo — avaliar clareza e paciência",
-      "Perguntar: \"Me conta uma vez que um cliente ficou insatisfeito com você. Como resolveu?\"",
-      "Perguntar: \"Como você prioriza quando tem 5 tickets abertos ao mesmo tempo e dois são urgentes?\" — Avaliar processo, não improvisação",
-    ],
-    redFlags: [
-      "Candidato que resolve tudo \"no feeling\" sem processo",
-      "Candidato que não documenta nada",
-      "Candidato que trata suporte como \"apaga incêndio\" e não como prevenção",
-      "Candidato sem empatia declarada pelo cliente final",
-    ],
-  },
-  {
-    role: "Gestor Comercial",
-    fit: "Ex-vendedor de alta performance que fez a transição para gestão com consciência — sabe que gerenciar não é vender pelo time. Precisa ser bom em coaching individual, análise de dados e construção de processo.",
-    interview: [
-      "Perguntar: \"Como você treina alguém que tem resultado mas ignora o processo?\"",
-      "Perguntar: \"Me conta como você estruturou um processo comercial do zero.\"",
-      "Pedir para analisar um pipeline fictício e identificar riscos — avaliar leitura de dados e priorização",
-    ],
-    redFlags: [],
-  },
-];
-
-export const HIRING_COST_NOTE =
-  "A Omni não contrata \"vendedores\". Contrata perfis específicos para funções específicas. Contratar errado custa 3x o salário de um funcionário em perda de produtividade, treinamento e rotatividade.";
-
 // ---------- 6.3 Plano de carreira ----------
 
 export const BDR_CAREER_LEVELS = [
@@ -448,7 +375,6 @@ export const ATTENTION_M6 = [
 
 export const MODULE_6_SECTIONS = [
   { id: "m6-sec-1", label: "6.1 Cultura Comercial" },
-  { id: "m6-sec-2", label: "6.2 Perfis de Contratação" },
   { id: "m6-sec-3", label: "6.3 Plano de Carreira" },
   { id: "m6-sec-4", label: "6.4 Rituais de Gestão" },
   { id: "m6-sec-5", label: "6.5 Metas e Comissionamento" },
