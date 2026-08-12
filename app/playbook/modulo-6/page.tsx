@@ -27,9 +27,6 @@ import {
   PIPELOVERS_ROUTINE,
   G4_SKILLS_PRACTICE,
   PIPELOVERS_VS_G4,
-  RECOGNITION_INTRO,
-  RECOGNITION_MECHANISMS,
-  PERFORMANCE_AVOID,
   CHECKLIST_SETUP_INICIAL,
   CHECKLIST_ONBOARDING_COLABORADOR,
   CHECKLIST_RITUAIS_MENSAL,
@@ -191,32 +188,6 @@ export default function Modulo6Page() {
 
           <p className="text-sm font-medium">Como as duas ferramentas se complementam</p>
           <Table headers={["Pipelovers", "G4 Skills"]} rows={PIPELOVERS_VS_G4} />
-        </section>
-
-        {/* 6.8 */}
-        <section id="m6-sec-8" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            6.8 — Reconhecimento e Cultura de Performance
-          </h2>
-          <p className="text-sm" style={{ color: "var(--text-muted)" }}>{RECOGNITION_INTRO}</p>
-          <p className="text-sm font-medium">Mecanismos de Reconhecimento na Omni</p>
-          <div className="space-y-3">
-            {RECOGNITION_MECHANISMS.map((m) => (
-              <div key={m.title}>
-                <p className="text-sm font-medium">{m.title}</p>
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{m.text}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-sm font-medium">O que Evitar na Gestão de Performance</p>
-          <div className="space-y-3">
-            {PERFORMANCE_AVOID.map((m) => (
-              <div key={m.title}>
-                <p className="text-sm font-medium">{m.title}</p>
-                <p className="text-sm" style={{ color: "var(--text-muted)" }}>{m.text}</p>
-              </div>
-            ))}
-          </div>
         </section>
 
         {/* 6.9 */}

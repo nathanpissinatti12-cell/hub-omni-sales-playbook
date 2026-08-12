@@ -165,45 +165,6 @@ export const PIPELOVERS_VS_G4 = [
   ["Foco em BDR e Closer", "Foco em Closer e Gestor"],
 ];
 
-// ---------- 6.8 Reconhecimento ----------
-
-export const RECOGNITION_INTRO =
-  "Reconhecimento não é só dinheiro. Time que só recebe feedback quando erra aprende a esconder o que vai mal. Time que recebe reconhecimento quando acerta replica o comportamento.";
-
-export const RECOGNITION_MECHANISMS = [
-  {
-    title: "Top BDR do Mês",
-    text: "O BDR com maior combinação de volume + qualidade (SALs geradas × score evolu.AI) recebe reconhecimento público no ritual de gestão e tem o nome fixado no dashboard do time pelo mês seguinte.",
-  },
-  {
-    title: "Top Closer do Trimestre",
-    text: "Closer com resultado acima de 130% da meta por trimestre recebe reconhecimento formal no QBR — com narrativa do que fez diferente, não só o número.",
-  },
-  {
-    title: "Ligação da Semana",
-    text: "A cada sexta, o gestor escolhe a melhor ligação da semana no evolu.AI e toca um trecho para o time com comentário positivo específico. Isso reforça comportamento correto de forma pública e sem constrangimento.",
-  },
-  {
-    title: "Indicação de Carreira",
-    text: "BDR que atinge Platinum e demonstra perfil consultivo tem conversa formal com o gestor sobre transição para Closer — não espera que a oportunidade apareça por acaso.",
-  },
-];
-
-export const PERFORMANCE_AVOID = [
-  {
-    title: "Não ranking só por número",
-    text: "Ranking que mostra só quem fechou mais ignora quem teve ciclo mais difícil, quem gerou melhor qualidade de lead ou quem desenvolveu mais. Ranking multidimensional é mais justo e mais motivador.",
-  },
-  {
-    title: "Não feedback só negativo",
-    text: "Equipe que só recebe feedback quando erra desenvolve cultura defensiva. Ratio recomendado: 3 feedbacks positivos para cada 1 corretivo.",
-  },
-  {
-    title: "Não meta impossível",
-    text: "Meta que ninguém atinge não motiva — desmotiva. Se menos de 30% do time atingiu a meta no mês, o problema não é o time — é a meta ou o processo. Revisar antes de cobrar mais.",
-  },
-];
-
 // ---------- 6.9 Checklist ----------
 
 export const CHECKLIST_SETUP_INICIAL = [
@@ -247,6 +208,5 @@ export const MODULE_6_SECTIONS = [
   { id: "m6-sec-5", label: "6.5 Metas e Comissionamento" },
   { id: "m6-sec-6", label: "6.6 Ramp-up de Novos Vendedores" },
   { id: "m6-sec-7", label: "6.7 Ferramentas por Função" },
-  { id: "m6-sec-8", label: "6.8 Reconhecimento e Performance" },
   { id: "m6-sec-9", label: "6.9 Checklist de Implementação" },
 ];

@@ -604,14 +604,6 @@ B2B com aulas ao vivo semanais — BDRs no grupo de Pré-Vendedores, Closers no 
 Executivos de Vendas, gestores na Academia B2B) e G4 Skills (trilhas assíncronas
 personalizadas por IA, com conteúdo proprietário da Omni, foco em Closer e Gestor).
 
-## Reconhecimento e cultura de performance
-Mecanismos: Top BDR do Mês (volume × qualidade/score evolu.AI), Top Closer do Trimestre
-(>130% da meta, com narrativa), Ligação da Semana (trecho tocado publicamente com elogio
-específico), Indicação de Carreira (conversa formal sobre virar Closer ao atingir Platinum).
-Evitar: ranking só por número fechado (ignora quem teve ciclo difícil ou gerou lead melhor);
-feedback só negativo (ratio recomendado é 3 positivos para 1 corretivo); e meta impossível
-(se menos de 30% do time bate a meta no mês, o problema é a meta/processo, não o time).
-
 `.trim();
 
 export const CHAT_SYSTEM_PROMPT = `Você é o assistente de vendas interno da Omni Assessoria, disponível dentro do
