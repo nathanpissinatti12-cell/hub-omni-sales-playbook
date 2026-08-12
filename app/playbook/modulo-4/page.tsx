@@ -88,7 +88,6 @@ import {
   TAKEFLOW_META_SAVINGS_EXAMPLE,
   EVOLUAI_ROI_CALC,
   EVOLUAI_OTHER_ARGUMENTS,
-  ATTENTION_M4,
 } from "@/lib/playbookModule4";
 
 function List({ title, items }: { title?: string; items: string[] }) {
@@ -530,20 +529,6 @@ export default function Modulo4Page() {
             </p>
             <List items={EVOLUAI_ROI_CALC} />
             <List title="Outros Argumentos de Valor" items={EVOLUAI_OTHER_ARGUMENTS} />
-          </div>
-        </section>
-
-        {/* Pontos de Atenção */}
-        <section id="m4-sec-8" className="scroll-mt-20 space-y-4">
-          <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
-            Pontos de Atenção — Temas Mencionados mas Não Completamente Desenvolvidos
-          </h2>
-          <div className="space-y-2">
-            {ATTENTION_M4.map((item, i) => (
-              <Callout key={i} tone="gray">
-                {item}
-              </Callout>
-            ))}
           </div>
         </section>
       </div>

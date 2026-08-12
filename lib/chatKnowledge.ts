@@ -474,17 +474,6 @@ manual (R$2.500–3.500/mês, só horário comercial) vs. TakeFlow IA N1 100/dia
 p.p.) gera 110 negócios extras/mês — a R$500 de ticket médio, R$55.000/mês de receita
 adicional contra um custo de R$1.197/mês (plano Médio), ou seja ROI de ~45x.
 
-## Pontos de atenção do Módulo 4 (ainda em aberto — não afirmar como definido)
-- Tabela comparativa completa de recursos entre planos Enterprise/Ultimate da Onvox (além dos minutos de transcrição) não foi fornecida — consultar o portal de apoio.
-- Preços de referência (piso, margem de negociação) por ramal e DID da Onvox não foram definidos — a calculadora aceita valor livre.
-- Regras de quando aplicar desconto de marketing na calculadora Onvox (limite, quem aprova) não foram formalizadas.
-- Tabela de preços por modelo de aparelho/headset Onvox não foi consultada (carregamento dinâmico no portal apoio.onvox.com.br/aparelhos.html).
-- Diferença funcional entre os níveis de IA N1 e N2 da TakeFlow não foi detalhada — só os preços.
-- Fluxo formal de aprovação interna para propostas com desconto ou fora do padrão não existe ainda.
-- Análise de concorrentes por produto (Onvox, TakeFlow, evolu.AI) e de tendências do mercado UCaaS/CPaaS não foi desenvolvida neste módulo.
-- Templates de proposta comercial padronizados para TakeFlow e evolu.AI ainda não existem (só a calculadora da Onvox gera proposta).
-- Política de desconto para contratação conjunta (bundle de Onvox + TakeFlow + evolu.AI) ainda não foi definida.
-
 # MÓDULO 5 — PÓS-VENDA / CUSTOMER SUCCESS
 
 ## Regra de ouro

@@ -682,21 +682,6 @@ export const EVOLUAI_OTHER_ARGUMENTS = [
   "Reduz rotatividade ao fornecer desenvolvimento real e contínuo",
 ];
 
-// ---------- Pontos de Atenção ----------
-
-export const ATTENTION_M4 = [
-  "Diferença detalhada entre os planos Enterprise e Ultimate da Onvox — os planos diferem em minutos de transcrição gratuitos com IA (120 vs. 240 min), mas a tabela completa de diferença de recursos entre os planos não foi fornecida. Consultar o portal de apoio ou solicitar tabela comparativa atualizada à Onvox.",
-  "Preços base por ramal e por DID da Onvox — a calculadora permite inserir o preço livremente; não há tabela de preços de referência (preço sugerido de partida). O gestor deve definir e comunicar valores de referência, mínimos e margens de negociação.",
-  "Condições de desconto de marketing da Onvox — a calculadora tem campo de 'desconto de marketing' com justificativa obrigatória, mas as regras de quando aplicar, limite máximo e quem aprova não foram definidas. Precisa ser formalizado internamente.",
-  "Precificação de aparelhos e headsets Onvox — as marcas disponíveis são conhecidas (Yealink, FlyingVoice, Headsets), mas a tabela detalhada de preços por modelo não foi acessada (carregamento dinâmico no portal). Consultar apoio.onvox.com.br/aparelhos.html antes de compor propostas com hardware.",
-  "Diferença entre IA N1 e N2 na TakeFlow — os preços dos dois níveis são conhecidos, mas a diferença funcional entre eles (quais recursos cada nível entrega) não foi detalhada. Necessária para recomendar o nível correto por cliente.",
-  "Condições de aprovação interna de proposta — não foram definidos critérios de aprovação interna para propostas com desconto, fora do padrão ou de alto valor. Recomenda-se criar um fluxo de aprovação com SLA definido (quem aprova, em qual prazo, por qual canal).",
-  "Concorrentes e posicionamento competitivo — análise competitiva estruturada por produto (Onvox, TakeFlow, evolu.AI) ainda não foi desenvolvida. Necessário levantamento dedicado de concorrentes.",
-  "Como o mercado de UCaaS/CPaaS está evoluindo no Brasil e no mundo — análise de mercado (tendências, crescimento, oportunidades) ainda não foi desenvolvida com dados atualizados do setor.",
-  "Modelos e templates de proposta comercial — a Onvox tem a calculadora como gerador de proposta; TakeFlow e evolu.AI ainda não têm templates de proposta formal padronizados.",
-  "Precificação de contratação conjunta (bundle) — não foi definida uma política de bundle ou desconto para clientes que contratam mais de um produto simultaneamente (ex: Onvox + TakeFlow + evolu.AI). Pode ser um diferencial competitivo relevante a ser estruturado.",
-];
-
 export const MODULE_4_SECTIONS = [
   { id: "m4-sec-1", label: "4.1 Portfólio Completo" },
   { id: "m4-sec-2", label: "4.2 API Oficial Meta" },
@@ -705,5 +690,4 @@ export const MODULE_4_SECTIONS = [
   { id: "m4-sec-5", label: "4.5 Precificação evolu.AI" },
   { id: "m4-sec-6", label: "4.6 Solução por Perfil de Cliente" },
   { id: "m4-sec-7", label: "4.7 Business Case e ROI" },
-  { id: "m4-sec-8", label: "Pontos de Atenção" },
 ];
