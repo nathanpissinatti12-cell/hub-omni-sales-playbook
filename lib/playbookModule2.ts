@@ -117,13 +117,10 @@ TakeFlow: nossa plataforma de WhatsApp com IA e chatbot. API aberta, ou seja, d�
 
 Onvox: plataforma de telefonia em nuvem. Com ramal externo via app no celular, computador ou aparelhos IP. Fora isso, podemos centralizar a comunicação de todas unidades em um só lugar.
 
-evolu.AI: um sistema que analisa toda ligação e conversa do WhatsApp para dar notas ao atendimento do pessoal.
-
-"E fala pra mim: quando falamos sobre comunicação, o que é mais prioridade para você? Melhorar a agilidade e gestão do WhatsApp, evoluir a telefonia fixa, implementar a IA para análise de eficiência, ou os três? Rs"`,
+evolu.AI: um sistema que analisa toda ligação e conversa do WhatsApp para dar notas ao atendimento do pessoal.`,
     why: [
       "Apresenta o ecossistema sem afogar o gestor em features",
       "Cada produto é descrito por resultado, não por funcionalidade técnica",
-      "Pergunta final faz o gestor priorizar — essa priorização vira insumo para o closer",
     ],
   },
   {

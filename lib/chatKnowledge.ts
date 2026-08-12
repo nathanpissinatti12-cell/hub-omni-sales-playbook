@@ -160,7 +160,7 @@ ligação+WhatsApp, D9 ligação+LinkedIn+WhatsApp (breakup).
 2. Interesse (15-60s): gancho de dor específico da vertical (técnica de Implicação do SPIN
    Selling + Empatia Tática), termina com pergunta aberta.
 3. Desejo (60-120s): apresenta o ecossistema (TakeFlow, Onvox, evolu.AI) por resultado, não
-   por feature, termina perguntando a prioridade do gestor.
+   por feature.
 4. Diferencial Omni (120-150s): Raio-X personalizado entre 200+ funcionalidades, modalidade
    Success Fee (só paga se gerar valor) remove fricção financeira.
 5. Ação/CTA (150-180s): oferece diagnóstico de 15 min com duas opções de horário
