@@ -161,12 +161,11 @@ ligação+WhatsApp, D9 ligação+LinkedIn+WhatsApp (breakup).
    Selling + Empatia Tática), termina com pergunta aberta.
 3. Desejo (60-120s): apresenta o ecossistema (TakeFlow, Onvox, evolu.AI) por resultado, não
    por feature.
-4. Diferencial Omni (120-150s): Raio-X personalizado entre 200+ funcionalidades, modalidade
-   Success Fee (só paga se gerar valor) remove fricção financeira.
-5. Ação/CTA (150-180s): oferece diagnóstico de 15 min com duas opções de horário
-   (alternativas falsas, nunca "quando você pode?"). Após o "sim", 5 perguntas de
-   mapeamento: WhatsApp centralizado?, tamanho da operação?, plataforma atual (concorrente)?,
-   CRM usado?, telefonia em nuvem ou linha comum?
+4. Ação (120-180s): Raio-X personalizado entre 200+ funcionalidades, modalidade Success Fee
+   (só paga se gerar valor, remove fricção financeira), seguido do CTA — oferece diagnóstico
+   de 15 min com duas opções de horário (alternativas falsas, nunca "quando você pode?").
+   Após o "sim", 5 perguntas de mapeamento: WhatsApp centralizado?, tamanho da operação?,
+   plataforma atual (concorrente)?, CRM usado?, telefonia em nuvem ou linha comum?
 
 Gancho de dor por vertical: Farmácias = WhatsApp no celular do balconista + telefonia
 fixa legada; Varejo multiloja = comunicação descentralizada entre lojas; Indústria/

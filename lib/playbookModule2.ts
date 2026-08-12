@@ -124,20 +124,17 @@ evolu.AI: um sistema que analisa toda ligação e conversa do WhatsApp para dar 
     ],
   },
   {
-    stage: "Diferencial Omni",
-    timing: "120–150 segundos — antes do CTA",
-    script: `"O nosso diferencial é que não entregamos as 3 soluções de forma padrão. Nós realizamos um Raio-X na sua operação para entender, entre nossas mais de 200 funcionalidades, quais de fato trarão um ganho real pra sua operação, aí então personalizamos a entrega das soluções, somando tecnologia ao potencial da sua equipe. Na prática, vocês ganham 3 coisas: mais faturamento, melhor experiência do cliente e colaborador, e KPIs precisos para a sua tomada de decisão. E a grande vantagem de ser um parceiro da Omni é que esse Raio-X não gera nenhum custo para sua operação, porque aqui atuamos na modalidade Success Fee."`,
+    stage: "Ação",
+    timing: "120–180 segundos — diferencial, Success Fee e fechamento da reunião",
+    script: `"O nosso diferencial é que não entregamos as 3 soluções de forma padrão. Nós realizamos um Raio-X na sua operação para entender, entre nossas mais de 200 funcionalidades, quais de fato trarão um ganho real pra sua operação, aí então personalizamos a entrega das soluções, somando tecnologia ao potencial da sua equipe. Na prática, vocês ganham 3 coisas: mais faturamento, melhor experiência do cliente e colaborador, e KPIs precisos para a sua tomada de decisão."
+
+"E a grande vantagem de ser um parceiro da Omni é que esse Raio-X não gera nenhum custo para sua operação, porque aqui atuamos na modalidade Success Fee."
+
+"Faz sentido agendarmos esse diagnóstico rápido, de uns 15 minutos, para avaliarmos o que se aplica na sua operação? Como fica a sua disponibilidade para [terça-feira, período da manhã] ou [quarta-feira, período da tarde]?"`,
     why: [
       "Posiciona a Omni acima de revendas e SaaS genéricos (Raio-X é exclusivo)",
       "Quantifica valor (mais faturamento + experiência + KPIs)",
       "\"Success Fee\" remove fricção financeira — só pagam se virmos valor",
-    ],
-  },
-  {
-    stage: "Ação / CTA",
-    timing: "150–180 segundos — fechamento da reunião",
-    script: `"Faz sentido agendarmos esse diagnóstico rápido, de uns 15 minutos, para avaliarmos o que se aplica na sua operação? Como fica a sua disponibilidade para [terça-feira, período da manhã] ou [quarta-feira, período da tarde]?"`,
-    why: [
       "Oferece duas alternativas de horário (técnica de \"alternativas falsas\") ao invés de \"quando você pode?\"",
       "As 5 perguntas pós-agendamento são o micro-Raio-X que abastece o closer e reforça compromisso",
       "O timing (15 min) é deliberadamente baixo para reduzir fricção — depois a reunião pode estender naturalmente",
