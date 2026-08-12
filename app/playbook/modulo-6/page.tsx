@@ -15,6 +15,7 @@ import {
   COMP_PRINCIPLES,
   CLOSER_PERFORMANCE_TIERS,
   BDR_GOAL_NOTE,
+  OTE_FAIXAS,
   CS_VARIABLE_METRICS,
   MANAGER_COMP_NOTE,
   COMP_GOLDEN_RULES,
@@ -208,6 +209,10 @@ export default function Modulo6Page() {
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             <strong>BDR:</strong> {BDR_GOAL_NOTE}
           </p>
+          <Table
+            headers={["Faixa", "% da Meta", "Leads SAL", "Multiplicador", "Bônus Final", "Total (Fixo + Bônus)"]}
+            rows={OTE_FAIXAS.map((f) => [f.faixa, f.pct, f.leads, f.mult, f.bonus, f.total])}
+          />
           <p className="text-sm font-medium">Closer — Estrutura de Faixas de Performance</p>
           <Table headers={["Faixa", "% da Meta", "Multiplicador", "Lógica"]} rows={CLOSER_PERFORMANCE_TIERS} />
           <List title="CS / Implantação — remuneração variável atrelada a" items={CS_VARIABLE_METRICS} />

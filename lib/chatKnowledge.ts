@@ -232,14 +232,12 @@ C = fora do ICP ou baixo volume ou contrato <12 meses sem dor → tratamento sim
 toques em 5 dias). Regra: dor aguda agora pode subir um lead de C para A, independente do
 tempo de contrato.
 
-## Métricas e remuneração (para referência de gestão, não para prometer ao prospect)
+## Métricas (para referência de gestão, não para prometer ao prospect)
 KPIs de produtividade: 1.000 min falados/mês, 150 e-mails/mês, 150 WhatsApp/mês, 20
 conexões LinkedIn/mês. KPIs de eficiência: 150 leads iniciados/mês, meta de 30 SALs/mês,
-taxa de conversão 25%, taxa de no-show <20%. Remuneração é modelo OTE (On-Target
-Earnings) com faixas de bônus por SALs entregues, sobre uma meta que a gestão define
-mensalmente; níveis de carreira Blue/Gold/Black/Platinum com fixo CLT/PJ crescente — a
-progressão de nível não é automática por número, é avaliada de forma holística pela
-gestão.
+taxa de conversão 25%, taxa de no-show <20%. O modelo de remuneração (OTE, faixas de
+bônus por SALs entregues e níveis de carreira Blue/Gold/Black/Platinum) está centralizado
+no Módulo 6.
 
 ## Erros mais comuns a evitar (antiplaybook)
 Soar como telemarketing na abertura; despejar lista de 200 funcionalidades (o BDR vende
@@ -643,8 +641,11 @@ Princípios: clareza total (vendedor calcula a própria comissão sem precisar d
 resultado (reconhece score evolu.AI e qualidade de handoff, não só fechamento), acelerador
 para quem supera (abaixo de 70% não ganha bônus, mas o fixo nunca é penalizado). Faixas de
 performance do Closer: <70% = 0x; 70–99% = 0,7x; 100% = 1,0x; 110–130% = 1,5x; 131–160%
-= 2,0x; 160%+ = 3,0x (raro e celebrado). BDR segue o modelo OTE por nível definido no Módulo
-2. CS/Implantação tem variável atrelada a NPS de onboarding, churn rate, taxa de expansão e
+= 2,0x; 160%+ = 3,0x (raro e celebrado). BDR segue o modelo OTE por nível (Blue/Gold/Black/
+Platinum), com faixas de bônus por SALs entregues sobre a meta mensal definida pela
+gestão: Faixa 0 (<70% da meta) = 0x/sem bônus; Faixa 1 (70%) = 0,6x; Faixa 2 (100%, meta
+cheia) = 1,0x; Faixa 3 (140%) = 1,6x; Faixa 4 (180%) = 2,3x; Faixa 5 (200%+) = 3,3x
+(acelerador máximo). CS/Implantação tem variável atrelada a NPS de onboarding, churn rate, taxa de expansão e
 tempo médio de go live. Gestor Comercial é remunerado sobre o resultado consolidado do
 time, nunca individual. Regras de ouro: nunca mudar as regras no meio do mês (aviso de pelo
 menos 2 semanas), pagar sempre em dia, e o modelo de comissão é assinado por escrito antes

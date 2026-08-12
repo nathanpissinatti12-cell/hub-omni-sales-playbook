@@ -246,7 +246,16 @@ export const CLOSER_PERFORMANCE_TIERS = [
 ];
 
 export const BDR_GOAL_NOTE =
-  "Conforme formalizado no Módulo 2 — meta de SALs mensais definida por nível (Blue/Gold/Black/Platinum), com modelo OTE e multiplicadores por faixa de atingimento.";
+  "Meta de SALs mensais definida por nível (Blue/Gold/Black/Platinum — ver seção 6.3), com modelo OTE (On-Target Earnings) e multiplicadores por faixa de atingimento.";
+
+export const OTE_FAIXAS = [
+  { faixa: "Faixa 0", pct: "< 70%", leads: "< 14", mult: "0x", bonus: "R$ 0", total: "R$ 4.000" },
+  { faixa: "Faixa 1", pct: "70%", leads: "14", mult: "0,6x", bonus: "R$ 600", total: "R$ 4.600" },
+  { faixa: "Faixa 2", pct: "100% (meta)", leads: "20", mult: "1,0x", bonus: "R$ 1.000", total: "R$ 5.000" },
+  { faixa: "Faixa 3", pct: "140%", leads: "28", mult: "1,6x", bonus: "R$ 1.600", total: "R$ 5.600" },
+  { faixa: "Faixa 4", pct: "180%", leads: "36", mult: "2,3x", bonus: "R$ 2.300", total: "R$ 6.300" },
+  { faixa: "Faixa 5", pct: "200%+", leads: "40+", mult: "3,3x", bonus: "R$ 3.300", total: "R$ 7.300" },
+];
 
 export const CS_VARIABLE_METRICS = [
   "NPS de onboarding (média do time)",

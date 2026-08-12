@@ -27,7 +27,6 @@ import {
   KPI_PRODUTIVIDADE,
   KPI_EFICIENCIA,
   QUALITY_METRICS,
-  OTE_FAIXAS,
   CHECKLIST_SETUP,
   CHECKLIST_ONBOARDING,
   CHECKLIST_ROTINA,
@@ -489,18 +488,10 @@ export default function Modulo2Page() {
             </ul>
           </div>
 
-          <div className="space-y-3">
-            <h3 className="font-medium">2.11.3 — Modelo de remuneração OTE</h3>
-            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              A Omni opera com modelo OTE (On-Target Earnings). A meta mensal é definida pela
-              gestão e varia conforme o nível e momento da operação. A tabela abaixo apresenta a
-              estrutura de faixas de performance sobre a meta:
-            </p>
-            <Table
-              headers={["Faixa", "% da Meta", "Leads SAL", "Multiplicador", "Bônus Final", "Total (Fixo + Bônus)"]}
-              rows={OTE_FAIXAS.map((f) => [f.faixa, f.pct, f.leads, f.mult, f.bonus, f.total])}
-            />
-          </div>
+          <p className="text-sm italic" style={{ color: "var(--text-muted)" }}>
+            O modelo de remuneração OTE (On-Target Earnings) está centralizado no Módulo 06 —
+            Cultura, Gestão e Rituais Comerciais (seção 6.5).
+          </p>
         </section>
 
         {/* 2.12 */}

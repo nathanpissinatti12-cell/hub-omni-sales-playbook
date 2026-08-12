@@ -388,15 +388,6 @@ export const QUALITY_METRICS = [
   "Score médio das ligações na evolu.AI (meta definida pela gestão)",
 ];
 
-export const OTE_FAIXAS = [
-  { faixa: "Faixa 0", pct: "< 70%", leads: "< 14", mult: "0x", bonus: "R$ 0", total: "R$ 4.000" },
-  { faixa: "Faixa 1", pct: "70%", leads: "14", mult: "0,6x", bonus: "R$ 600", total: "R$ 4.600" },
-  { faixa: "Faixa 2", pct: "100% (meta)", leads: "20", mult: "1,0x", bonus: "R$ 1.000", total: "R$ 5.000" },
-  { faixa: "Faixa 3", pct: "140%", leads: "28", mult: "1,6x", bonus: "R$ 1.600", total: "R$ 5.600" },
-  { faixa: "Faixa 4", pct: "180%", leads: "36", mult: "2,3x", bonus: "R$ 2.300", total: "R$ 6.300" },
-  { faixa: "Faixa 5", pct: "200%+", leads: "40+", mult: "3,3x", bonus: "R$ 3.300", total: "R$ 7.300" },
-];
-
 export const CHECKLIST_SETUP = [
   "Meetime Flow configurado com todos os campos obrigatórios do template de SAL Omni",
   "Cadências oficiais criadas no Meetime Flow por vertical (9 dias, 13 toques)",
@@ -510,7 +501,7 @@ export const MODULE_2_SECTIONS = [
   { id: "m2-sec-8", label: "2.8 Qualificação GPCT_BA_C&I" },
   { id: "m2-sec-9", label: "2.9 SAL e Handoff" },
   { id: "m2-sec-10", label: "2.10 Prioridade de Leads (A/B/C)" },
-  { id: "m2-sec-11", label: "2.11 Métricas, KPIs e OTE" },
+  { id: "m2-sec-11", label: "2.11 Métricas e KPIs" },
   { id: "m2-sec-12", label: "2.12 Checklist de Implementação" },
   { id: "m2-sec-13", label: "2.13 Erros Comuns (Antiplaybook)" },
   { id: "m2-sec-14", label: "Procedência e Pontos de Atenção" },
