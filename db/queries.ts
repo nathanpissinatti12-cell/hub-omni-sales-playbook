@@ -195,7 +195,7 @@ export async function getCampaignOriginBreakdown(campaignName: string): Promise<
     `
     SELECT
       count(*) FILTER (WHERE dominio = '{{account.domain}}')::int AS sem_dominio,
-      count(DISTINCT dominio) FILTER (WHERE lead_status = 'criado meetime')::int AS criados_meetime,
+      count(DISTINCT dominio) FILTER (WHERE lead_status IN ('criado meetime', 'já existe na meetime'))::int AS criados_meetime,
       count(DISTINCT dominio) FILTER (WHERE lead_status = ANY($2))::int AS sem_email
     FROM fila_processamento
     WHERE ${NORMALIZE_NAME("campanha")} = $1

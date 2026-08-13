@@ -99,7 +99,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
             rows={[
               { label: "Total de leads (Apollo)", total: originTotal },
               { label: "Sem domínio (falha de mesclagem na Apollo)", total: originBreakdown.sem_dominio },
-              { label: "Criados na Meetime", total: originBreakdown.criados_meetime },
+              { label: "Presentes na Meetime (criados + já existentes)", total: originBreakdown.criados_meetime },
               { label: "Perdidos por falta de e-mail válido", total: originBreakdown.sem_email },
             ]}
           />
