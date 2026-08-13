@@ -35,24 +35,24 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
     WITH fila_stats AS (
       SELECT
         ${NORMALIZE_NAME("campanha")} AS campanha_norm,
-        count(*)::int AS total,
-        count(*) FILTER (WHERE status = 'processado')::int AS processado,
-        count(*) FILTER (WHERE status = 'pendente')::int AS pendente,
-        count(*) FILTER (WHERE status = 'em pausa')::int AS em_pausa,
-        count(*) FILTER (WHERE status = 'erro')::int AS erro,
-        count(*) FILTER (WHERE lead_status = 'criado meetime')::int AS criados_meetime
+        count(DISTINCT dominio)::int AS total,
+        count(DISTINCT dominio) FILTER (WHERE status = 'processado')::int AS processado,
+        count(DISTINCT dominio) FILTER (WHERE status = 'pendente')::int AS pendente,
+        count(DISTINCT dominio) FILTER (WHERE status = 'em pausa')::int AS em_pausa,
+        count(DISTINCT dominio) FILTER (WHERE status = 'erro')::int AS erro,
+        count(DISTINCT dominio) FILTER (WHERE lead_status = 'criado meetime')::int AS criados_meetime
       FROM fila_processamento
       GROUP BY campanha_norm
     ),
     empresas_stats AS (
       SELECT
         campanha_id,
-        count(*)::int AS empresas_enriquecidas
+        count(DISTINCT dominio)::int AS empresas_enriquecidas
       FROM empresas
       GROUP BY campanha_id
     ),
     leads_stats AS (
-      SELECT campanha_id, count(*)::int AS sem_contato
+      SELECT campanha_id, count(DISTINCT dominio)::int AS sem_contato
       FROM leads_sem_contato
       GROUP BY campanha_id
     )
@@ -132,13 +132,13 @@ export async function getCampaignSummary(
   const { rows } = await pool.query(
     `
     SELECT
-      (SELECT count(*)::int FROM empresas WHERE campanha_id = $1) AS total_empresas,
+      (SELECT count(DISTINCT dominio)::int FROM empresas WHERE campanha_id = $1) AS total_empresas,
       (
-        SELECT count(*)::int FROM fila_processamento
+        SELECT count(DISTINCT dominio)::int FROM fila_processamento
         WHERE ${NORMALIZE_NAME("campanha")} = $2 AND lead_status = 'criado meetime'
       ) AS criados_meetime,
       (
-        SELECT count(*)::int FROM fila_processamento
+        SELECT count(DISTINCT dominio)::int FROM fila_processamento
         WHERE ${NORMALIZE_NAME("campanha")} = $2 AND lead_status = ANY($3)
       ) AS perdidos
     `,
@@ -155,7 +155,7 @@ export type QueueStatusRow = {
 export async function getCampaignQueueStatusBreakdown(campaignName: string): Promise<QueueStatusRow[]> {
   const { rows } = await pool.query(
     `
-    SELECT status, count(*)::int AS total
+    SELECT status, count(DISTINCT dominio)::int AS total
     FROM fila_processamento
     WHERE ${NORMALIZE_NAME("campanha")} = $1
     GROUP BY status
@@ -169,7 +169,7 @@ export async function getCampaignQueueStatusBreakdown(campaignName: string): Pro
 export async function getCampaignLeadStatusBreakdown(campaignName: string): Promise<QueueStatusRow[]> {
   const { rows } = await pool.query(
     `
-    SELECT ${LEAD_STATUS_NORMALIZADO(2)} AS status, count(*)::int AS total
+    SELECT ${LEAD_STATUS_NORMALIZADO(2)} AS status, count(DISTINCT dominio)::int AS total
     FROM fila_processamento
     WHERE ${NORMALIZE_NAME("campanha")} = $1
     GROUP BY ${LEAD_STATUS_NORMALIZADO(2)}
@@ -190,7 +190,7 @@ export type CnaeGroupRow = {
 export async function getCampaignCnaeGroups(campaignId: string): Promise<CnaeGroupRow[]> {
   const { rows } = await pool.query(
     `
-    SELECT cnae_principal, count(*)::int AS total
+    SELECT cnae_principal, count(DISTINCT dominio)::int AS total
     FROM empresas
     WHERE campanha_id = $1
     GROUP BY cnae_principal
@@ -218,7 +218,7 @@ export async function getCampaignCnaeGroups(campaignId: string): Promise<CnaeGro
 export async function getCampaignRegionBreakdown(campaignId: string): Promise<RegionRow[]> {
   const { rows } = await pool.query(
     `
-    SELECT COALESCE(NULLIF(estado, ''), 'Não informado') AS estado, count(*)::int AS total
+    SELECT COALESCE(NULLIF(estado, ''), 'Não informado') AS estado, count(DISTINCT dominio)::int AS total
     FROM empresas
     WHERE campanha_id = $1
     GROUP BY estado
@@ -233,10 +233,10 @@ export async function getSummary(): Promise<SummaryRow> {
   const { rows } = await pool.query(`
     SELECT
       (SELECT count(*)::int FROM campanhas WHERE status = 'ativa') AS campanhas_ativas,
-      (SELECT count(*)::int FROM fila_processamento) AS total_fila,
-      (SELECT count(*)::int FROM fila_processamento WHERE status = 'processado') AS total_processado,
-      (SELECT count(*)::int FROM fila_processamento WHERE lead_status = 'criado meetime') AS total_criados_meetime,
-      (SELECT count(*)::int FROM empresas) AS total_empresas_enriquecidas
+      (SELECT count(DISTINCT dominio)::int FROM fila_processamento) AS total_fila,
+      (SELECT count(DISTINCT dominio)::int FROM fila_processamento WHERE status = 'processado') AS total_processado,
+      (SELECT count(DISTINCT dominio)::int FROM fila_processamento WHERE lead_status = 'criado meetime') AS total_criados_meetime,
+      (SELECT count(DISTINCT dominio)::int FROM empresas) AS total_empresas_enriquecidas
   `);
   return rows[0];
 }
