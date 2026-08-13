@@ -5,6 +5,7 @@
 // Apollo ("Inscrição"/"Concluído"), toda vez que uma campanha nova subir.
 export const CAMPAIGN_ORIGIN_TOTALS: Record<string, number> = {
   "ICP - Logísticas, Transportes e Comex": 525,
+  "ICP - Logísticas, Transportes e Comex ETP": 190,
 };
 
 export function getCampaignOriginTotal(campaignName: string): number | null {
