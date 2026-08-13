@@ -180,6 +180,31 @@ export async function getCampaignLeadStatusBreakdown(campaignName: string): Prom
   return rows;
 }
 
+export type CampaignOriginBreakdownRow = {
+  sem_dominio: number;
+  criados_meetime: number;
+  sem_email: number;
+};
+
+// "sem_dominio" conta LINHA BRUTA, não domínio distinto: essas linhas
+// compartilham o mesmo texto quebrado ('{{account.domain}}', campo de
+// mesclagem da Apollo que não resolveu), então cada linha representa uma
+// empresa de origem diferente mesmo aparecendo como "1 domínio só" no banco.
+export async function getCampaignOriginBreakdown(campaignName: string): Promise<CampaignOriginBreakdownRow> {
+  const { rows } = await pool.query(
+    `
+    SELECT
+      count(*) FILTER (WHERE dominio = '{{account.domain}}')::int AS sem_dominio,
+      count(DISTINCT dominio) FILTER (WHERE lead_status = 'criado meetime')::int AS criados_meetime,
+      count(DISTINCT dominio) FILTER (WHERE lead_status = ANY($2))::int AS sem_email
+    FROM fila_processamento
+    WHERE ${NORMALIZE_NAME("campanha")} = $1
+    `,
+    [normalizeName(campaignName), EMAIL_INVALIDO_VARIANTES]
+  );
+  return rows[0];
+}
+
 export type CnaeGroupRow = {
   group: string;
   percentage: number;

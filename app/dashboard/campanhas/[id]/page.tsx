@@ -4,10 +4,12 @@ import {
   getCampaignById,
   getCampaignCnaeGroups,
   getCampaignLeadStatusBreakdown,
+  getCampaignOriginBreakdown,
   getCampaignQueueStatusBreakdown,
   getCampaignRegionBreakdown,
   getCampaignSummary,
 } from "@/db/queries";
+import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
@@ -36,13 +38,16 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const campaign = await getCampaignById(params.id);
   if (!campaign) notFound();
 
-  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown] = await Promise.all([
+  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown, originBreakdown] = await Promise.all([
     getCampaignSummary(campaign.id, campaign.nome),
     getCampaignQueueStatusBreakdown(campaign.nome),
     getCampaignLeadStatusBreakdown(campaign.nome),
     getCampaignCnaeGroups(campaign.id),
     getCampaignRegionBreakdown(campaign.id),
+    getCampaignOriginBreakdown(campaign.nome),
   ]);
+
+  const originTotal = getCampaignOriginTotal(campaign.nome);
 
   const taxaConversaoMeetime =
     summary.total_empresas > 0
@@ -82,6 +87,24 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
           </div>
         ))}
       </section>
+
+      {originTotal !== null && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold">Origem: o que aconteceu com os leads enviados pela Apollo</h2>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Total enrolado no Workflow da Apollo, e o que aconteceu com cada um a partir daí.
+          </p>
+          <RankedTable
+            columns={["Etapa", "Quantidade"]}
+            rows={[
+              { label: "Total de leads (Apollo)", total: originTotal },
+              { label: "Sem domínio (falha de mesclagem na Apollo)", total: originBreakdown.sem_dominio },
+              { label: "Criados na Meetime", total: originBreakdown.criados_meetime },
+              { label: "Perdidos por falta de e-mail válido", total: originBreakdown.sem_email },
+            ]}
+          />
+        </section>
+      )}
 
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">Status de processamento na fila</h2>
