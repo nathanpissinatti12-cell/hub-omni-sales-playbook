@@ -1,13 +1,15 @@
-// Cookie de sessão assinado do /dashboard — só usuários admin_users com
-// access_level = 'root' passam pelo middleware. Web Crypto only (roda no
-// middleware, Edge Runtime, sem node:crypto), mesmo padrão de adminSession.ts.
-// Formato do valor: `${issuedAt}.${uid}.${accessLevel}.${signature}` — sem
-// Buffer/base64, já que nenhum desses campos contém ".".
+// Cookie de sessão assinado, compartilhado por /playbook e /dashboard — todo
+// usuário ativo de admin_users pode logar; qual área/módulo ele enxerga
+// depois é decidido pelo access_level (ver ROLE_MODULES em middleware.ts).
+// Web Crypto only (roda no middleware, Edge Runtime, sem node:crypto), mesmo
+// padrão de adminSession.ts. Formato do valor:
+// `${issuedAt}.${uid}.${accessLevel}.${signature}` — sem Buffer/base64, já
+// que nenhum desses campos contém ".".
 
-const SESSION_COOKIE = "dashboard_session";
+const SESSION_COOKIE = "site_session";
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8; // 8 horas
 
-export type DashboardSession = { uid: string; accessLevel: string };
+export type SiteSession = { uid: string; accessLevel: string };
 
 function sessionSecret(): string {
   const secret = process.env.ADMIN_SESSION_SECRET || process.env.ADMIN_PASSWORD;
@@ -40,13 +42,13 @@ async function sign(value: string): Promise<string> {
   return toHex(signature);
 }
 
-export async function createDashboardSessionCookieValue(uid: string, accessLevel: string): Promise<string> {
+export async function createSiteSessionCookieValue(uid: string, accessLevel: string): Promise<string> {
   const issuedAt = Date.now().toString();
   const payload = `${issuedAt}.${uid}.${accessLevel}`;
   return `${payload}.${await sign(payload)}`;
 }
 
-export async function readDashboardSession(value: string | undefined | null): Promise<DashboardSession | null> {
+export async function readSiteSession(value: string | undefined | null): Promise<SiteSession | null> {
   if (!value) return null;
   const parts = value.split(".");
   if (parts.length !== 4) return null;
@@ -70,5 +72,5 @@ export async function readDashboardSession(value: string | undefined | null): Pr
   return { uid, accessLevel };
 }
 
-export const DASHBOARD_SESSION_COOKIE = SESSION_COOKIE;
-export const DASHBOARD_SESSION_MAX_AGE_SECONDS = SESSION_MAX_AGE_SECONDS;
+export const SITE_SESSION_COOKIE = SESSION_COOKIE;
+export const SITE_SESSION_MAX_AGE_SECONDS = SESSION_MAX_AGE_SECONDS;

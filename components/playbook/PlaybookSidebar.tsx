@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Target, Users, Handshake, Package, HeartHandshake, Trophy, type LucideIcon } from "lucide-react";
+import { Target, Users, Handshake, Package, HeartHandshake, Trophy, Lock, type LucideIcon } from "lucide-react";
+import { isModuleAllowed } from "@/lib/playbookAccess";
 import { ICPS, MODULES, MODULE_1_SECTIONS } from "@/lib/playbookModule1";
 import { MODULE_2_SECTIONS } from "@/lib/playbookModule2";
 import { MODULE_3_SECTIONS } from "@/lib/playbookModule3";
@@ -19,7 +20,7 @@ const MODULE_ICONS: Record<number, LucideIcon> = {
   6: Trophy,
 };
 
-export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) {
+export function PlaybookSidebar({ activeModuleId, accessLevel }: { activeModuleId: number; accessLevel: string }) {
   // Sempre comeca recolhido, mesmo na pagina do proprio modulo ativo -
   // o usuario precisa clicar no nome do modulo pra abrir a lista de secoes.
   const [expanded, setExpanded] = useState(false);
@@ -55,6 +56,24 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
                       <span>Módulo {m.id} — {m.title}</span>
                     </span>
                     <span className="shrink-0 text-xs">em breve</span>
+                  </span>
+                </li>
+              );
+            }
+
+            if (!isModuleAllowed(accessLevel, m.id)) {
+              return (
+                <li key={m.id}>
+                  <span
+                    className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 opacity-50"
+                    style={{ color: "var(--text-muted)", borderLeft: "3px solid transparent" }}
+                    title="Módulo não liberado para o seu nível de acesso"
+                  >
+                    <span className="flex items-center gap-2">
+                      {Icon && <Icon size={16} className="shrink-0" />}
+                      <span>Módulo {m.id} — {m.title}</span>
+                    </span>
+                    <Lock size={13} className="shrink-0" aria-hidden />
                   </span>
                 </li>
               );

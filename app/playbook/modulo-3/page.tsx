@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { getSiteSession } from "@/lib/getSiteSession";
 import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -61,10 +62,11 @@ function SignalList({ title, items }: { title: string; items: string[] }) {
   );
 }
 
-export default function Modulo3Page() {
+export default async function Modulo3Page() {
+  const session = await getSiteSession();
   return (
     <>
-      <PlaybookSidebar activeModuleId={3} />
+      <PlaybookSidebar activeModuleId={3} accessLevel={session?.accessLevel ?? ""} />
 
       <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>

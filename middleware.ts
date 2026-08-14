@@ -1,10 +1,12 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_SESSION_COOKIE, isValidSessionCookieValue } from "@/lib/adminSession";
-import { DASHBOARD_SESSION_COOKIE, readDashboardSession } from "@/lib/dashboardSession";
+import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
+import { allowedModules } from "@/lib/playbookAccess";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
+  // --- /admin: senha única compartilhada, inalterado ---
   if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
     const isLoginPage = pathname === "/admin/login";
     const isLoginApi = pathname === "/api/admin/login";
@@ -26,24 +28,40 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard")) {
-    const isLoginPage = pathname === "/dashboard/login";
-    const isLoginApi = pathname === "/api/dashboard/login";
-    if (isLoginPage || isLoginApi) {
-      return NextResponse.next();
-    }
+  // --- /playbook e /dashboard: login individual (admin_users) ---
+  if (pathname.startsWith("/playbook") || pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard")) {
+    const cookie = req.cookies.get(SITE_SESSION_COOKIE)?.value;
+    const session = await readSiteSession(cookie);
 
-    const cookie = req.cookies.get(DASHBOARD_SESSION_COOKIE)?.value;
-    const session = await readDashboardSession(cookie);
-    const authorized = session?.accessLevel === "root";
-
-    if (!authorized) {
+    if (!session) {
       if (pathname.startsWith("/api/dashboard")) {
         return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
       }
-      const loginUrl = new URL("/dashboard/login", req.url);
+      const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
+    }
+
+    // Dashboard: só Root.
+    if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard")) {
+      if (session.accessLevel !== "root") {
+        if (pathname.startsWith("/api/dashboard")) {
+          return NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 });
+        }
+        return NextResponse.redirect(new URL("/playbook", req.url));
+      }
+      return NextResponse.next();
+    }
+
+    // Playbook: módulo precisa estar liberado pro cargo do usuário.
+    const moduleMatch = pathname.match(/^\/playbook\/modulo-(\d+)/);
+    if (moduleMatch) {
+      const moduleNum = Number(moduleMatch[1]);
+      const allowed = allowedModules(session.accessLevel);
+      if (allowed !== "all" && !allowed.includes(moduleNum)) {
+        const fallback = allowed[0] ?? 1;
+        return NextResponse.redirect(new URL(`/playbook/modulo-${fallback}`, req.url));
+      }
     }
     return NextResponse.next();
   }
@@ -52,5 +70,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*", "/dashboard/:path*", "/api/dashboard/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*", "/dashboard/:path*", "/api/dashboard/:path*", "/playbook/:path*"],
 };

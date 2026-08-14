@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { SiteWidgets } from "@/components/SiteWidgets";
+import { SiteLogoutButton } from "@/components/SiteLogoutButton";
+import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
 
 export const metadata: Metadata = {
   title: "Playbook de Vendas",
   description: "Playbook de vendas e dashboard de performance",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await readSiteSession(cookies().get(SITE_SESSION_COOKIE)?.value);
+
   return (
     <html lang="pt-BR">
       <body>
@@ -19,12 +24,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Link href="/playbook" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Playbook de Vendas
             </Link>
-            <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
-              Dashboard
-            </Link>
+            {session?.accessLevel === "root" && (
+              <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
+                Dashboard
+              </Link>
+            )}
             <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Admin
             </Link>
+            {session && (
+              <span className="ml-auto">
+                <SiteLogoutButton />
+              </span>
+            )}
           </nav>
         </header>
         <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>

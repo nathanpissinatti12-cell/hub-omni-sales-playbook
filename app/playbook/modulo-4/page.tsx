@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { getSiteSession } from "@/lib/getSiteSession";
 import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -116,10 +117,11 @@ function Steps({ items }: { items: string[] }) {
   );
 }
 
-export default function Modulo4Page() {
+export default async function Modulo4Page() {
+  const session = await getSiteSession();
   return (
     <>
-      <PlaybookSidebar activeModuleId={4} />
+      <PlaybookSidebar activeModuleId={4} accessLevel={session?.accessLevel ?? ""} />
 
       <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>

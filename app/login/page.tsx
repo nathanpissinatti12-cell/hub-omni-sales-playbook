@@ -16,7 +16,7 @@ function LoginForm() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/dashboard/login", {
+      const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -26,7 +26,7 @@ function LoginForm() {
         setError(data.error || "Não foi possível entrar.");
         return;
       }
-      router.push(searchParams.get("next") || "/dashboard");
+      router.push(searchParams.get("next") || "/playbook");
       router.refresh();
     } catch {
       setError("Erro de conexão. Tente novamente.");
@@ -46,9 +46,9 @@ function LoginForm() {
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
             Omni Assessoria
           </p>
-          <h1 className="mt-1 text-xl font-semibold">Dashboard — acesso restrito</h1>
+          <h1 className="mt-1 text-xl font-semibold">Entrar</h1>
           <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
-            Somente usuários administradores têm acesso a esta área.
+            Use o e-mail e senha cadastrados pelo administrador.
           </p>
         </div>
 
@@ -100,7 +100,7 @@ function LoginForm() {
   );
 }
 
-export default function DashboardLoginPage() {
+export default function LoginPage() {
   return (
     <Suspense>
       <LoginForm />
