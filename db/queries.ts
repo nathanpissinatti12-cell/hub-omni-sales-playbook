@@ -254,6 +254,83 @@ export async function getCampaignRegionBreakdown(campaignId: string): Promise<Re
   return rows;
 }
 
+export type DailyProcessedRow = {
+  dia: string;
+  total: number;
+};
+
+// Empresas enriquecidas por dia (últimos 14 dias com atividade), pra gráfico de barras.
+export async function getGlobalDailyProcessed(): Promise<DailyProcessedRow[]> {
+  const { rows } = await pool.query(`
+    SELECT to_char(processado_em::date, 'DD/MM') AS dia, count(DISTINCT dominio)::int AS total
+    FROM empresas
+    WHERE processado_em IS NOT NULL
+    GROUP BY processado_em::date
+    ORDER BY processado_em::date DESC
+    LIMIT 14
+  `);
+  return rows.reverse();
+}
+
+export type ContactStatusRow = {
+  completos: number;
+  incompletos: number;
+};
+
+// "Completos" = empresa enriquecida com decisor identificado (chegou a montar um
+// contato). "Incompletos" = caiu em leads_sem_contato (achou a empresa mas não
+// achou contato válido).
+export async function getGlobalContactStatus(): Promise<ContactStatusRow> {
+  const { rows } = await pool.query(`
+    SELECT
+      (SELECT count(DISTINCT dominio)::int FROM empresas WHERE decisor_nome IS NOT NULL AND decisor_nome != '') AS completos,
+      (SELECT count(DISTINCT dominio)::int FROM leads_sem_contato) AS incompletos
+  `);
+  return rows[0];
+}
+
+export type MissingDataRow = {
+  label: string;
+  total: number;
+};
+
+// A partir de leads_sem_contato: o que especificamente faltou pra fechar o lead.
+export async function getGlobalMissingDataBreakdown(): Promise<MissingDataRow[]> {
+  const { rows } = await pool.query(`
+    SELECT
+      count(DISTINCT dominio) FILTER (WHERE tem_email = false AND tem_telefone = false)::int AS falta_ambos,
+      count(DISTINCT dominio) FILTER (WHERE tem_email = false AND tem_telefone = true)::int AS falta_email,
+      count(DISTINCT dominio) FILTER (WHERE tem_email = true AND tem_telefone = false)::int AS falta_telefone
+    FROM leads_sem_contato
+  `);
+  const r = rows[0];
+  return [
+    { label: "Falta Ambos", total: r.falta_ambos },
+    { label: "Falta Email", total: r.falta_email },
+    { label: "Falta Telefone", total: r.falta_telefone },
+  ];
+}
+
+export type StatePercentRow = {
+  estado: string;
+  total: number;
+  percentage: number;
+};
+
+// Top estados entre TODAS as empresas enriquecidas (visão global, não por campanha).
+export async function getGlobalTopStates(limit = 5): Promise<StatePercentRow[]> {
+  const { rows } = await pool.query(`
+    SELECT COALESCE(NULLIF(estado, ''), 'Não informado') AS estado, count(DISTINCT dominio)::int AS total
+    FROM empresas
+    GROUP BY estado
+    ORDER BY total DESC
+  `);
+  const grandTotal = (rows as { total: number }[]).reduce((sum, r) => sum + r.total, 0);
+  if (grandTotal === 0) return [];
+  const top = rows.slice(0, limit) as { estado: string; total: number }[];
+  return top.map((r) => ({ ...r, percentage: Math.round((r.total / grandTotal) * 100) }));
+}
+
 export async function getSummary(): Promise<SummaryRow> {
   const { rows } = await pool.query(`
     SELECT
