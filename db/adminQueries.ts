@@ -72,6 +72,14 @@ export async function getUserById(id: string): Promise<AdminUser | null> {
   return rows[0] ?? null;
 }
 
+export async function getUserForLogin(email: string): Promise<(AdminUser & { password_hash: string }) | null> {
+  const { rows } = await adminPool.query(
+    `SELECT ${USER_COLUMNS}, password_hash FROM admin_users WHERE lower(email) = lower($1)`,
+    [email]
+  );
+  return rows[0] ?? null;
+}
+
 // ---------- Histórico ----------
 
 export type AdminHistoryEntry = {

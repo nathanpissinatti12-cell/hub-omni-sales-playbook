@@ -12,6 +12,7 @@ import { DailyProcessedChart } from "@/components/charts/DailyProcessedChart";
 import { ContactStatusDonut } from "@/components/charts/ContactStatusDonut";
 import { MissingDataChart } from "@/components/charts/MissingDataChart";
 import { TopStatesPie } from "@/components/charts/TopStatesPie";
+import { DashboardTopBar } from "@/components/dashboard/DashboardTopBar";
 
 export const dynamic = "force-dynamic";
 
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-10">
+      <DashboardTopBar />
       <div>
         <h1 className="text-2xl font-semibold">Dashboard de Prospecção</h1>
         <p className="mt-1" style={{ color: "var(--text-muted)" }}>

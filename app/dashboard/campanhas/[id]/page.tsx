@@ -13,6 +13,7 @@ import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
+import { DashboardTopBar } from "@/components/dashboard/DashboardTopBar";
 
 export const dynamic = "force-dynamic";
 
@@ -63,6 +64,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
 
   return (
     <div className="space-y-10">
+      <DashboardTopBar />
       <div>
         <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
           ← Voltar ao dashboard
