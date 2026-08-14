@@ -89,7 +89,10 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
       </section>
 
       {originTotal !== null && (
-        <section className="space-y-2">
+        <section
+          className="space-y-2 rounded-lg border p-4"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
           <h2 className="text-lg font-semibold">Origem: o que aconteceu com os leads enviados pela Apollo</h2>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Total enrolado no Workflow da Apollo, e o que aconteceu com cada um a partir daí.
@@ -106,7 +109,10 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         </section>
       )}
 
-      <section className="space-y-2">
+      <section
+        className="space-y-2 rounded-lg border p-4"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
         <h2 className="text-lg font-semibold">Status de processamento na fila</h2>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           Em que pé está cada item da fila desta campanha (coluna <code>status</code>).
@@ -120,7 +126,10 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         />
       </section>
 
-      <section className="space-y-2">
+      <section
+        className="space-y-2 rounded-lg border p-4"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
         <h2 className="text-lg font-semibold">Status dos leads (todos, sucesso e falha)</h2>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           Resultado de cada lead processado — se foi enviado, se já existia, ou o motivo de
@@ -135,7 +144,10 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         />
       </section>
 
-      <section className="space-y-2">
+      <section
+        className="space-y-2 rounded-lg border p-4"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
         <h2 className="text-lg font-semibold">Setores das empresas submetidas</h2>
         <p className="text-sm" style={{ color: "var(--text-muted)" }}>
           Grupos de atividade (CNAE) que aparecem entre as empresas desta campanha,
