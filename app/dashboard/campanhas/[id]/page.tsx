@@ -88,75 +88,78 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         ))}
       </section>
 
-      {originTotal !== null && (
-        <section
+      <section className="grid gap-4 lg:grid-cols-2">
+        {originTotal !== null && (
+          <div
+            className="space-y-2 rounded-lg border p-4"
+            style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+          >
+            <h2 className="text-lg font-semibold">Origem: o que aconteceu com os leads enviados pela Apollo</h2>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              Total enrolado no Workflow da Apollo, e o que aconteceu com cada um a partir daí.
+            </p>
+            <RankedTable
+              columns={["Etapa", "Quantidade"]}
+              preserveOrder
+              rows={[
+                { label: "Total de leads (Apollo)", total: originTotal },
+                { label: "Sem domínio (falha de mesclagem na Apollo)", total: originBreakdown.sem_dominio },
+                { label: "Presentes na Meetime (criados + já existentes)", total: originBreakdown.criados_meetime },
+                { label: "Perdidos por falta de e-mail válido", total: originBreakdown.sem_email },
+              ]}
+            />
+          </div>
+        )}
+
+        <div
           className="space-y-2 rounded-lg border p-4"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
         >
-          <h2 className="text-lg font-semibold">Origem: o que aconteceu com os leads enviados pela Apollo</h2>
+          <h2 className="text-lg font-semibold">Status de processamento na fila</h2>
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-            Total enrolado no Workflow da Apollo, e o que aconteceu com cada um a partir daí.
+            Em que pé está cada item da fila desta campanha (coluna <code>status</code>).
           </p>
           <RankedTable
-            columns={["Etapa", "Quantidade"]}
-            rows={[
-              { label: "Total de leads (Apollo)", total: originTotal },
-              { label: "Sem domínio (falha de mesclagem na Apollo)", total: originBreakdown.sem_dominio },
-              { label: "Presentes na Meetime (criados + já existentes)", total: originBreakdown.criados_meetime },
-              { label: "Perdidos por falta de e-mail válido", total: originBreakdown.sem_email },
-            ]}
+            columns={["Status", "Quantidade"]}
+            rows={queueStatus.map((r) => ({
+              label: QUEUE_STATUS_LABELS[r.status] ?? r.status,
+              total: r.total,
+            }))}
           />
-        </section>
-      )}
+        </div>
 
-      <section
-        className="space-y-2 rounded-lg border p-4"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <h2 className="text-lg font-semibold">Status de processamento na fila</h2>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          Em que pé está cada item da fila desta campanha (coluna <code>status</code>).
-        </p>
-        <RankedTable
-          columns={["Status", "Quantidade"]}
-          rows={queueStatus.map((r) => ({
-            label: QUEUE_STATUS_LABELS[r.status] ?? r.status,
-            total: r.total,
-          }))}
-        />
-      </section>
+        <div
+          className="space-y-2 rounded-lg border p-4"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <h2 className="text-lg font-semibold">Status dos leads (todos, sucesso e falha)</h2>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Resultado de cada lead processado — se foi enviado, se já existia, ou o motivo de
+            não ter avançado (coluna <code>lead_status</code>).
+          </p>
+          <RankedTable
+            columns={["Status do lead", "Quantidade"]}
+            rows={leadStatus.map((r) => ({
+              label: LEAD_STATUS_LABELS[r.status] ?? r.status,
+              total: r.total,
+            }))}
+          />
+        </div>
 
-      <section
-        className="space-y-2 rounded-lg border p-4"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <h2 className="text-lg font-semibold">Status dos leads (todos, sucesso e falha)</h2>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          Resultado de cada lead processado — se foi enviado, se já existia, ou o motivo de
-          não ter avançado (coluna <code>lead_status</code>).
-        </p>
-        <RankedTable
-          columns={["Status do lead", "Quantidade"]}
-          rows={leadStatus.map((r) => ({
-            label: LEAD_STATUS_LABELS[r.status] ?? r.status,
-            total: r.total,
-          }))}
-        />
-      </section>
-
-      <section
-        className="space-y-2 rounded-lg border p-4"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <h2 className="text-lg font-semibold">Setores das empresas submetidas</h2>
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-          Grupos de atividade (CNAE) que aparecem entre as empresas desta campanha,
-          do principal para os demais.
-        </p>
-        <RankedList
-          title="Grupo de atividade"
-          items={cnaeGroups.map((g) => ({ label: g.group, percentage: g.percentage }))}
-        />
+        <div
+          className="space-y-2 rounded-lg border p-4"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <h2 className="text-lg font-semibold">Setores das empresas submetidas</h2>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Grupos de atividade (CNAE) que aparecem entre as empresas desta campanha,
+            do principal para os demais.
+          </p>
+          <RankedList
+            title="Grupo de atividade"
+            items={cnaeGroups.map((g) => ({ label: g.group, percentage: g.percentage }))}
+          />
+        </div>
       </section>
 
       <section
