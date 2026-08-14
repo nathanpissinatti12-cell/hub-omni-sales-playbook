@@ -77,7 +77,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
     LEFT JOIN fila_stats f ON f.campanha_norm = ${NORMALIZE_NAME("c.nome")}
     LEFT JOIN empresas_stats e ON e.campanha_id = c.id
     LEFT JOIN leads_stats l ON l.campanha_id = c.id
-    ORDER BY total_fila DESC, c.criado_em DESC
+    ORDER BY c.criado_em DESC
   `);
   return rows;
 }
