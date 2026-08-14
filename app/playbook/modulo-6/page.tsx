@@ -1,3 +1,4 @@
+import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -46,7 +47,7 @@ export default function Modulo6Page() {
         </div>
 
         {/* 6.1 */}
-        <section id="m6-sec-1" className="scroll-mt-20 space-y-4">
+        <HashSection id="m6-sec-1" className="scroll-mt-20 space-y-4" defaultOpen>
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             6.1 — A Cultura Comercial da Omni
           </h2>
@@ -63,10 +64,10 @@ export default function Modulo6Page() {
               </div>
             ))}
           </div>
-        </section>
+        </HashSection>
 
         {/* 6.5 */}
-        <section id="m6-sec-5" className="scroll-mt-20 space-y-4">
+        <HashSection id="m6-sec-5" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             6.5 — Como Estruturar Metas e Comissionamento
           </h2>
@@ -94,10 +95,10 @@ export default function Modulo6Page() {
             <strong>Gestor Comercial:</strong> {MANAGER_COMP_NOTE}
           </p>
           <List title="Regras de Ouro do Comissionamento" items={COMP_GOLDEN_RULES} />
-        </section>
+        </HashSection>
 
         {/* 6.7 */}
-        <section id="m6-sec-7" className="scroll-mt-20 space-y-4">
+        <HashSection id="m6-sec-7" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             6.7 — Ferramentas por Função
           </h2>
@@ -127,7 +128,7 @@ export default function Modulo6Page() {
 
           <p className="text-sm font-medium">Como as duas ferramentas se complementam</p>
           <Table headers={["Pipelovers", "G4 Skills"]} rows={PIPELOVERS_VS_G4} />
-        </section>
+        </HashSection>
       </div>
     </>
   );

@@ -1,3 +1,4 @@
+import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -32,7 +33,7 @@ export default function Modulo1Page() {
         </div>
 
         {/* Seção 1 */}
-        <section id="sec-1" className="scroll-mt-20 space-y-6">
+        <HashSection id="sec-1" className="scroll-mt-20 space-y-6" defaultOpen>
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Seção 1 — Posicionamento e Mensagem Central de Vendas
           </h2>
@@ -81,10 +82,10 @@ Posso te mostrar como isso se aplicaria à sua operação?"`}
               rows={NAO_DIZER.map((n) => [n.naoDizer, n.porque, n.dizer])}
             />
           </div>
-        </section>
+        </HashSection>
 
         {/* Seção 2 */}
-        <section id="sec-2" className="scroll-mt-20 space-y-6">
+        <HashSection id="sec-2" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Seção 2 — Proposta de Valor por Perfil de ICP
           </h2>
@@ -165,10 +166,10 @@ Posso te mostrar como isso se aplicaria à sua operação?"`}
               interna.
             </p>
           </div>
-        </section>
+        </HashSection>
 
         {/* Seção 3 */}
-        <section id="sec-3" className="scroll-mt-20 space-y-4">
+        <HashSection id="sec-3" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Seção 3 — Como a Omni se Diferencia dos Concorrentes
           </h2>
@@ -181,10 +182,10 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
             headers={["Concorrente", "Ponto fraco deles", "Narrativa de diferenciação da Omni"]}
             rows={BATTLECARDS.map((b) => [b.concorrente, b.fraqueza, b.narrativa])}
           />
-        </section>
+        </HashSection>
 
         {/* Seção 4 */}
-        <section id="sec-4" className="scroll-mt-20 space-y-6">
+        <HashSection id="sec-4" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Seção 4 — Narrativa de Vendas: Do Problema à Solução
           </h2>
@@ -227,10 +228,10 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
               rows={RAIO_X.map((r) => [r.dimensao, r.pergunta, r.resolve])}
             />
           </div>
-        </section>
+        </HashSection>
 
         {/* Seção 5 */}
-        <section id="sec-5" className="scroll-mt-20 space-y-4">
+        <HashSection id="sec-5" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Seção 5 — Checklist de Implementação — Para o Gestor
           </h2>
@@ -248,10 +249,10 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
               </li>
             ))}
           </ul>
-        </section>
+        </HashSection>
 
         {/* Seção 6 */}
-        <section id="sec-6" className="scroll-mt-20 space-y-4">
+        <HashSection id="sec-6" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Seção 6 — Origem das Práticas e Referências
           </h2>
@@ -263,7 +264,7 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
             headers={["Prática / Conteúdo", "Origem", "Referência"]}
             rows={ORIGENS.map((o) => [o.pratica, o.origem, o.referencia])}
           />
-        </section>
+        </HashSection>
 
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
           Omni Assessoria — Playbook de Vendas — Módulo 1 — Versão 1.0

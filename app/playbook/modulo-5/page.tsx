@@ -1,3 +1,4 @@
+import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -92,7 +93,7 @@ export default function Modulo5Page() {
         </Callout>
 
         {/* 5.1 */}
-        <section id="m5-sec-1" className="scroll-mt-20 space-y-4">
+        <HashSection id="m5-sec-1" className="scroll-mt-20 space-y-4" defaultOpen>
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             5.1 — Perfil Ideal do Profissional de CS / Implantação
           </h2>
@@ -106,10 +107,10 @@ export default function Modulo5Page() {
           <Table headers={["Competência", "Por que importa na Omni"]} rows={CS_COMPETENCIES} />
           <p className="text-sm font-medium">Diferença entre papéis pós-venda</p>
           <Table headers={["Papel", "Responsabilidade", "Quem executa"]} rows={POST_SALE_ROLES} />
-        </section>
+        </HashSection>
 
         {/* 5.2 */}
-        <section id="m5-sec-2" className="scroll-mt-20 space-y-4">
+        <HashSection id="m5-sec-2" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             5.2 — Processo de Onboarding do Cliente
           </h2>
@@ -145,10 +146,10 @@ export default function Modulo5Page() {
             entregar informações completas no momento do fechamento.
           </p>
           <ChecklistBlock title="Checklist de Handoff — Vendedor → Implantação" items={HANDOFF_CHECKLIST} />
-        </section>
+        </HashSection>
 
         {/* 5.3 */}
-        <section id="m5-sec-3" className="scroll-mt-20 space-y-4">
+        <HashSection id="m5-sec-3" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             5.3 — Definição de Sucesso por Perfil de Cliente (ICP)
           </h2>
@@ -164,10 +165,10 @@ export default function Modulo5Page() {
           <Callout tone="blue" title="Como usar esta tabela">
             {SUCCESS_TABLE_USAGE}
           </Callout>
-        </section>
+        </HashSection>
 
         {/* 5.4 */}
-        <section id="m5-sec-4" className="scroll-mt-20 space-y-4">
+        <HashSection id="m5-sec-4" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             5.4 — Suporte Contínuo: O Diferencial da Omni
           </h2>
@@ -193,10 +194,10 @@ export default function Modulo5Page() {
             <p>Ao cliente: {SUPPORT_HANDOFF_SCRIPT_CLIENT}</p>
           </Callout>
           <List title="Internamente: abrir chamado ou enviar mensagem ao time de Tatuí com" items={SUPPORT_HANDOFF_INTERNAL_FIELDS} />
-        </section>
+        </HashSection>
 
         {/* 5.5 */}
-        <section id="m5-sec-5" className="scroll-mt-20 space-y-4">
+        <HashSection id="m5-sec-5" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             5.5 — Playbook de Expansão de Conta (Upsell &amp; Cross-sell)
           </h2>
@@ -217,10 +218,10 @@ export default function Modulo5Page() {
               <p>Se neutro/negativo: {CHECKIN_90D_SCRIPT.neutroNegativo}</p>
             </div>
           </Callout>
-        </section>
+        </HashSection>
 
         {/* 5.6 */}
-        <section id="m5-sec-6" className="scroll-mt-20 space-y-4">
+        <HashSection id="m5-sec-6" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             5.6 — Identificação de Risco de Churn e Plano de Ação
           </h2>
@@ -239,10 +240,10 @@ export default function Modulo5Page() {
           <Callout tone="pink" title="💬 Script de abordagem de cliente em risco">
             {CHURN_RISK_SCRIPT}
           </Callout>
-        </section>
+        </HashSection>
 
         {/* 5.7 */}
-        <section id="m5-sec-7" className="scroll-mt-20 space-y-4">
+        <HashSection id="m5-sec-7" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             5.7 — Métricas e KPIs do Pós-venda
           </h2>
@@ -257,10 +258,10 @@ export default function Modulo5Page() {
           <Table headers={["Métrica", "Fórmula / Critério", "Meta sugerida", "Frequência"]} rows={KPI_SUPORTE_RETENCAO} />
           <p className="text-sm font-medium">KPIs de Expansão</p>
           <Table headers={["Métrica", "Fórmula / Critério", "Meta sugerida", "Frequência"]} rows={KPI_EXPANSAO} />
-        </section>
+        </HashSection>
 
         {/* Checklist + Origem */}
-        <section id="m5-sec-8" className="scroll-mt-20 space-y-6">
+        <HashSection id="m5-sec-8" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             ✅ Checklist de Implementação — Módulo 5
           </h2>
@@ -286,7 +287,7 @@ export default function Modulo5Page() {
             <p className="font-medium">Módulo 5 concluído.</p>
             <p className="italic">O pós-venda da Omni não é um custo — é uma vantagem competitiva.</p>
           </Callout>
-        </section>
+        </HashSection>
       </div>
     </>
   );

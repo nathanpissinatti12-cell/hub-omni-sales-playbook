@@ -1,3 +1,4 @@
+import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -73,7 +74,7 @@ export default function Modulo3Page() {
         </div>
 
         {/* 3.1 */}
-        <section id="m3-sec-1" className="scroll-mt-20 space-y-4">
+        <HashSection id="m3-sec-1" className="scroll-mt-20 space-y-4" defaultOpen>
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.1 — Perfil Ideal do Closer da Omni
           </h2>
@@ -87,10 +88,10 @@ export default function Modulo3Page() {
           <SignalList title="Características comportamentais obrigatórias" items={CLOSER_BEHAVIORAL} />
           <SignalList title="Características técnicas obrigatórias" items={CLOSER_TECHNICAL} />
           <SignalList title="O que o closer da Omni NÃO é" items={CLOSER_NOT} />
-        </section>
+        </HashSection>
 
         {/* 3.2 */}
-        <section id="m3-sec-2" className="scroll-mt-20 space-y-4">
+        <HashSection id="m3-sec-2" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.2 — Estrutura do Ciclo de Vendas da Omni
           </h2>
@@ -102,10 +103,10 @@ export default function Modulo3Page() {
             headers={["Etapa", "Funil", "Descrição"]}
             rows={SALES_CYCLE.map((s) => [s.etapa, s.funil, s.descricao])}
           />
-        </section>
+        </HashSection>
 
         {/* 3.3 */}
-        <section id="m3-sec-3" className="scroll-mt-20 space-y-4">
+        <HashSection id="m3-sec-3" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.3 — Campos Obrigatórios no HubSpot por Etapa
           </h2>
@@ -124,10 +125,10 @@ export default function Modulo3Page() {
               </ul>
             </div>
           ))}
-        </section>
+        </HashSection>
 
         {/* 3.4 */}
-        <section id="m3-sec-4" className="scroll-mt-20 space-y-4">
+        <HashSection id="m3-sec-4" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.4 — Registro de Atividades no HubSpot
           </h2>
@@ -150,10 +151,10 @@ export default function Modulo3Page() {
             mensagens, notas) depende de disciplina do vendedor e cobrança ativa do gestor.
             Isso deve ser endereçado nos rituais de gestão e no onboarding de novos closers.
           </Callout>
-        </section>
+        </HashSection>
 
         {/* 3.5 */}
-        <section id="m3-sec-5" className="scroll-mt-20 space-y-6">
+        <HashSection id="m3-sec-5" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.5 — Reunião 1 — Diagnóstico (O &quot;Raio-X&quot;)
           </h2>
@@ -260,10 +261,10 @@ export default function Modulo3Page() {
               ))}
             </ul>
           </div>
-        </section>
+        </HashSection>
 
         {/* 3.6 */}
-        <section id="m3-sec-6" className="scroll-mt-20 space-y-6">
+        <HashSection id="m3-sec-6" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.6 — Reunião 2 — Demonstração da Solução
           </h2>
@@ -336,10 +337,10 @@ export default function Modulo3Page() {
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>Se resposta for &quot;depende&quot; ou &quot;vou avaliar&quot;:</p>
             <Callout tone="gray">&quot;Do que depende? O que falta para fazer sentido?&quot;</Callout>
           </div>
-        </section>
+        </HashSection>
 
         {/* 3.7 */}
-        <section id="m3-sec-7" className="scroll-mt-20 space-y-6">
+        <HashSection id="m3-sec-7" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.7 — Técnicas de Negociação e Fechamento
           </h2>
@@ -409,10 +410,10 @@ export default function Modulo3Page() {
               ))}
             </div>
           </div>
-        </section>
+        </HashSection>
 
         {/* 3.8 */}
-        <section id="m3-sec-8" className="scroll-mt-20 space-y-4">
+        <HashSection id="m3-sec-8" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.8 — Gestão de Pipeline e CRM
           </h2>
@@ -422,10 +423,10 @@ export default function Modulo3Page() {
           </p>
           <SignalList title="Responsabilidades do closer no HubSpot" items={CLOSER_HUBSPOT_RESPONSIBILITIES} />
           <SignalList title="Dashboards acompanhados pelo closer e gestor" items={CLOSER_DASHBOARDS} />
-        </section>
+        </HashSection>
 
         {/* 3.9 */}
-        <section id="m3-sec-9" className="scroll-mt-20 space-y-4">
+        <HashSection id="m3-sec-9" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             3.9 — Métricas e KPIs do Closer
           </h2>
@@ -433,10 +434,10 @@ export default function Modulo3Page() {
             headers={["Categoria", "Métrica", "Frequência"]}
             rows={CLOSER_KPIS.map((k) => [k.categoria, k.metrica, k.frequencia])}
           />
-        </section>
+        </HashSection>
 
         {/* Checklist */}
-        <section id="m3-sec-10" className="scroll-mt-20 space-y-6">
+        <HashSection id="m3-sec-10" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Checklist de Implementação — Módulo 3
           </h2>
@@ -445,7 +446,7 @@ export default function Modulo3Page() {
           <ChecklistBlock title="HubSpot" items={CHECKLIST_M3_HUBSPOT} />
           <ChecklistBlock title="Negociação" items={CHECKLIST_M3_NEGOCIACAO} />
           <ChecklistBlock title="Gestão" items={CHECKLIST_M3_GESTAO} />
-        </section>
+        </HashSection>
 
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
           Omni Assessoria — Playbook de Vendas — Módulo 3 — Vendas / Closers — Versão 1.0

@@ -1,3 +1,4 @@
+import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -128,7 +129,7 @@ export default function Modulo4Page() {
         </div>
 
         {/* 4.1 */}
-        <section id="m4-sec-1" className="scroll-mt-20 space-y-8">
+        <HashSection id="m4-sec-1" className="scroll-mt-20 space-y-8" defaultOpen>
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             4.1 — Portfólio Completo da Omni Assessoria
           </h2>
@@ -266,10 +267,10 @@ export default function Modulo4Page() {
               {EVOLUAI_IMPACT_PHRASE}
             </Callout>
           </div>
-        </section>
+        </HashSection>
 
         {/* 4.2 */}
-        <section id="m4-sec-2" className="scroll-mt-20 space-y-4">
+        <HashSection id="m4-sec-2" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             4.2 — API Oficial Meta para WhatsApp — Guia Completo para o Vendedor
           </h2>
@@ -387,10 +388,10 @@ export default function Modulo4Page() {
 
           <p className="text-sm font-medium">Estratégias para Reduzir o Custo Meta — Dica de Valor na Venda</p>
           <Steps items={META_COST_STRATEGIES} />
-        </section>
+        </HashSection>
 
         {/* 4.3 */}
-        <section id="m4-sec-3" className="scroll-mt-20 space-y-4">
+        <HashSection id="m4-sec-3" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             4.3 — Precificação Onvox
           </h2>
@@ -418,10 +419,10 @@ export default function Modulo4Page() {
             dias. Documentos para contratação: RG e CPF do representante legal (digitalizado) e
             Contrato Social (digitalizado).
           </p>
-        </section>
+        </HashSection>
 
         {/* 4.4 */}
-        <section id="m4-sec-4" className="scroll-mt-20 space-y-4">
+        <HashSection id="m4-sec-4" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             4.4 — Precificação TakeFlow
           </h2>
@@ -453,10 +454,10 @@ export default function Modulo4Page() {
             por campanha na API Oficial da Meta, estimando quantidade de mensagens, categoria,
             leads estimados e Custo por Lead (CPL), com base na tabela oficial da Meta.
           </p>
-        </section>
+        </HashSection>
 
         {/* 4.5 */}
-        <section id="m4-sec-5" className="scroll-mt-20 space-y-4">
+        <HashSection id="m4-sec-5" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             4.5 — Precificação evolu.AI
           </h2>
@@ -467,10 +468,10 @@ export default function Modulo4Page() {
           </Callout>
           <List title="Processo Comercial da evolu.AI" items={EVOLUAI_PROCESS} />
           <List title="Para Quem Indicar a evolu.AI" items={EVOLUAI_FOR_WHOM} />
-        </section>
+        </HashSection>
 
         {/* 4.6 */}
-        <section id="m4-sec-6" className="scroll-mt-20 space-y-4">
+        <HashSection id="m4-sec-6" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             4.6 — Como Identificar Qual Solução se Encaixa em Cada Perfil de Cliente
           </h2>
@@ -479,10 +480,10 @@ export default function Modulo4Page() {
           <List title="Para identificar oportunidade Onvox" items={DIAGNOSTIC_QUESTIONS_ONVOX} />
           <List title="Para identificar oportunidade TakeFlow" items={DIAGNOSTIC_QUESTIONS_TAKEFLOW} />
           <List title="Para identificar oportunidade evolu.AI" items={DIAGNOSTIC_QUESTIONS_EVOLUAI} />
-        </section>
+        </HashSection>
 
         {/* 4.7 */}
-        <section id="m4-sec-7" className="scroll-mt-20 space-y-6">
+        <HashSection id="m4-sec-7" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             4.7 — Como Construir e Apresentar o Business Case com ROI Concreto
           </h2>
@@ -530,7 +531,7 @@ export default function Modulo4Page() {
             <List items={EVOLUAI_ROI_CALC} />
             <List title="Outros Argumentos de Valor" items={EVOLUAI_OTHER_ARGUMENTS} />
           </div>
-        </section>
+        </HashSection>
       </div>
     </>
   );

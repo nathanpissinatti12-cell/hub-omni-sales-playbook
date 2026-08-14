@@ -1,3 +1,4 @@
+import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
@@ -69,7 +70,7 @@ export default function Modulo2Page() {
         </div>
 
         {/* 2.1 */}
-        <section id="m2-sec-1" className="scroll-mt-20 space-y-4">
+        <HashSection id="m2-sec-1" className="scroll-mt-20 space-y-4" defaultOpen>
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.1 — Contexto e Filosofia da Pré-venda na Omni
           </h2>
@@ -96,10 +97,10 @@ export default function Modulo2Page() {
             Sale formalizadas no treinamento de 2026 — é o que diferencia o BDR Omni do
             telemarketing tradicional.
           </p>
-        </section>
+        </HashSection>
 
         {/* 2.2 */}
-        <section id="m2-sec-2" className="scroll-mt-20 space-y-4">
+        <HashSection id="m2-sec-2" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.2 — Perfil Ideal do BDR da Omni
           </h2>
@@ -123,10 +124,10 @@ export default function Modulo2Page() {
             e o momento da operação. O modelo de remuneração é OTE (On-Target Earnings),
             detalhado na seção 2.11.
           </p>
-        </section>
+        </HashSection>
 
         {/* 2.3 */}
-        <section id="m2-sec-3" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-3" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.3 — Processo de Prospecção Outbound
           </h2>
@@ -194,10 +195,10 @@ export default function Modulo2Page() {
               cadência, não substitutos da ligação.
             </p>
           </div>
-        </section>
+        </HashSection>
 
         {/* 2.4 */}
-        <section id="m2-sec-4" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-4" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.4 — A Abordagem Oficial Omni (Cold Call)
           </h2>
@@ -262,10 +263,10 @@ export default function Modulo2Page() {
               autoridade contextual.
             </p>
           </div>
-        </section>
+        </HashSection>
 
         {/* 2.5 */}
-        <section id="m2-sec-5" className="scroll-mt-20 space-y-4">
+        <HashSection id="m2-sec-5" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.5 — Cold E-mail
           </h2>
@@ -289,10 +290,10 @@ export default function Modulo2Page() {
               </div>
             ))}
           </div>
-        </section>
+        </HashSection>
 
         {/* 2.6 */}
-        <section id="m2-sec-6" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-6" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.6 — LinkedIn e WhatsApp
           </h2>
@@ -320,10 +321,10 @@ export default function Modulo2Page() {
               </div>
             ))}
           </div>
-        </section>
+        </HashSection>
 
         {/* 2.7 */}
-        <section id="m2-sec-7" className="scroll-mt-20 space-y-4">
+        <HashSection id="m2-sec-7" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.7 — Tratamento de Objeções
           </h2>
@@ -342,10 +343,10 @@ export default function Modulo2Page() {
               </div>
             ))}
           </div>
-        </section>
+        </HashSection>
 
         {/* 2.8 */}
-        <section id="m2-sec-8" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-8" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.8 — Framework de Qualificação: GPCT_BA_C&amp;I
           </h2>
@@ -390,10 +391,10 @@ export default function Modulo2Page() {
               ))}
             </ol>
           </div>
-        </section>
+        </HashSection>
 
         {/* 2.9 */}
-        <section id="m2-sec-9" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-9" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.9 — Critérios de SAL e Handoff para o Closer
           </h2>
@@ -439,10 +440,10 @@ export default function Modulo2Page() {
               ))}
             </ul>
           </div>
-        </section>
+        </HashSection>
 
         {/* 2.10 */}
-        <section id="m2-sec-10" className="scroll-mt-20 space-y-4">
+        <HashSection id="m2-sec-10" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.10 — Classificação de Prioridade de Leads (A / B / C)
           </h2>
@@ -455,10 +456,10 @@ export default function Modulo2Page() {
             ter problema sério com operadora atual), o lead pode subir de C para A
             independente do tempo de contrato. Dor aguda &gt; timing contratual.
           </p>
-        </section>
+        </HashSection>
 
         {/* 2.11 */}
-        <section id="m2-sec-11" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-11" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.11 — Métricas e KPIs do BDR
           </h2>
@@ -490,10 +491,10 @@ export default function Modulo2Page() {
             O modelo de remuneração OTE (On-Target Earnings) está centralizado no Módulo 06 —
             Cultura, Gestão e Rituais Comerciais (seção 6.5).
           </p>
-        </section>
+        </HashSection>
 
         {/* 2.12 */}
-        <section id="m2-sec-12" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-12" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.12 — Checklist de Implementação para o Gestor de Pré-vendas
           </h2>
@@ -505,10 +506,10 @@ export default function Modulo2Page() {
           <ChecklistBlock title="Rotina semanal de gestão" items={CHECKLIST_ROTINA} />
           <ChecklistBlock title="Auditoria mensal de qualidade" items={CHECKLIST_AUDITORIA} />
           <ChecklistBlock title="Ferramentas obrigatórias por BDR" items={CHECKLIST_TOOLS} />
-        </section>
+        </HashSection>
 
         {/* 2.13 */}
-        <section id="m2-sec-13" className="scroll-mt-20 space-y-4">
+        <HashSection id="m2-sec-13" className="scroll-mt-20 space-y-4">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             2.13 — Erros Mais Comuns no Pré-vendas Omni (antiplaybook)
           </h2>
@@ -517,10 +518,10 @@ export default function Modulo2Page() {
               <li key={e}>{e}</li>
             ))}
           </ul>
-        </section>
+        </HashSection>
 
         {/* Procedência + Pontos de Atenção */}
-        <section id="m2-sec-14" className="scroll-mt-20 space-y-6">
+        <HashSection id="m2-sec-14" className="scroll-mt-20 space-y-6">
           <h2 className="border-b pb-2 text-xl font-semibold" style={{ borderColor: "var(--border)", color: "var(--accent)" }}>
             Procedência das Práticas
           </h2>
@@ -540,7 +541,7 @@ export default function Modulo2Page() {
               ))}
             </ul>
           </div>
-        </section>
+        </HashSection>
 
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
           Omni Assessoria — Playbook de Vendas — Módulo 2 — Pré-vendas (SDR/BDR)
