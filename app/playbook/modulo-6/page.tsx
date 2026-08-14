@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
@@ -16,6 +17,7 @@ import {
   PIPELOVERS_ROUTINE,
   G4_SKILLS_PRACTICE,
   PIPELOVERS_VS_G4,
+  MODULE_6_SECTIONS,
 } from "@/lib/playbookModule6";
 
 function List({ title, items }: { title?: string; items: string[] }) {
@@ -129,6 +131,8 @@ export default function Modulo6Page() {
           <p className="text-sm font-medium">Como as duas ferramentas se complementam</p>
           <Table headers={["Pipelovers", "G4 Skills"]} rows={PIPELOVERS_VS_G4} />
         </HashSection>
+
+        <SectionNav sections={MODULE_6_SECTIONS} />
       </div>
     </>
   );

@@ -2,12 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Target, Users, Handshake, Package, HeartHandshake, Trophy, type LucideIcon } from "lucide-react";
 import { ICPS, MODULES, MODULE_1_SECTIONS } from "@/lib/playbookModule1";
 import { MODULE_2_SECTIONS } from "@/lib/playbookModule2";
 import { MODULE_3_SECTIONS } from "@/lib/playbookModule3";
 import { MODULE_4_SECTIONS } from "@/lib/playbookModule4";
 import { MODULE_5_SECTIONS } from "@/lib/playbookModule5";
 import { MODULE_6_SECTIONS } from "@/lib/playbookModule6";
+
+const MODULE_ICONS: Record<number, LucideIcon> = {
+  1: Target,
+  2: Users,
+  3: Handshake,
+  4: Package,
+  5: HeartHandshake,
+  6: Trophy,
+};
 
 export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) {
   // Sempre comeca recolhido, mesmo na pagina do proprio modulo ativo -
@@ -23,19 +33,28 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
         <ul className="space-y-1">
           {MODULES.map((m) => {
             const isActive = m.id === activeModuleId;
+            const Icon = MODULE_ICONS[m.id];
             const activeStyle = isActive
-              ? { background: "var(--accent)", color: "white", fontWeight: 500 }
-              : { color: "var(--text)" };
+              ? {
+                  background: "rgba(255, 212, 0, 0.12)",
+                  color: "var(--text)",
+                  fontWeight: 600,
+                  borderLeft: "3px solid var(--accent)",
+                }
+              : { color: "var(--text)", borderLeft: "3px solid transparent" };
 
             if (!m.available || !m.href) {
               return (
                 <li key={m.id}>
                   <span
-                    className="flex items-center justify-between rounded-md px-2 py-1.5"
-                    style={{ color: "var(--text-muted)" }}
+                    className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 opacity-60"
+                    style={{ color: "var(--text-muted)", borderLeft: "3px solid transparent" }}
                   >
-                    <span>Módulo {m.id} — {m.title}</span>
-                    <span className="text-xs">em breve</span>
+                    <span className="flex items-center gap-2">
+                      {Icon && <Icon size={16} className="shrink-0" />}
+                      <span>Módulo {m.id} — {m.title}</span>
+                    </span>
+                    <span className="shrink-0 text-xs">em breve</span>
                   </span>
                 </li>
               );
@@ -47,11 +66,16 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
                   <button
                     type="button"
                     onClick={() => setExpanded((v) => !v)}
-                    className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left"
+                    className="flex w-full items-center justify-between gap-2 rounded-md px-2.5 py-2 text-left transition-colors"
                     style={activeStyle}
                   >
-                    <span>Módulo {m.id} — {m.title}</span>
-                    <span className="text-xs">{expanded ? "▲" : "▼"}</span>
+                    <span className="flex items-center gap-2">
+                      {Icon && <Icon size={16} className="shrink-0" style={{ color: "var(--accent)" }} />}
+                      <span>Módulo {m.id} — {m.title}</span>
+                    </span>
+                    <span className="shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
+                      {expanded ? "▲" : "▼"}
+                    </span>
                   </button>
                 </li>
               );
@@ -59,8 +83,13 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
 
             return (
               <li key={m.id}>
-                <Link href={m.href} className="block rounded-md px-2 py-1.5" style={activeStyle}>
-                  Módulo {m.id} — {m.title}
+                <Link
+                  href={m.href}
+                  className="flex items-center gap-2 rounded-md px-2.5 py-2 transition-colors hover:brightness-110"
+                  style={activeStyle}
+                >
+                  {Icon && <Icon size={16} className="shrink-0" style={{ color: "var(--text-muted)" }} />}
+                  <span>Módulo {m.id} — {m.title}</span>
                 </Link>
               </li>
             );
@@ -76,7 +105,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
           <ul className="space-y-1" style={{ color: "var(--text-muted)" }}>
             {MODULE_6_SECTIONS.map((s) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} className="block rounded-md px-2 py-1 hover:underline">
+                <a href={`#${s.id}`} className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                   {s.label}
                 </a>
               </li>
@@ -93,7 +122,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
           <ul className="space-y-1" style={{ color: "var(--text-muted)" }}>
             {MODULE_5_SECTIONS.map((s) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} className="block rounded-md px-2 py-1 hover:underline">
+                <a href={`#${s.id}`} className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                   {s.label}
                 </a>
               </li>
@@ -110,7 +139,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
           <ul className="space-y-1" style={{ color: "var(--text-muted)" }}>
             {MODULE_4_SECTIONS.map((s) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} className="block rounded-md px-2 py-1 hover:underline">
+                <a href={`#${s.id}`} className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                   {s.label}
                 </a>
               </li>
@@ -127,7 +156,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
           <ul className="space-y-1" style={{ color: "var(--text-muted)" }}>
             {MODULE_3_SECTIONS.map((s) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} className="block rounded-md px-2 py-1 hover:underline">
+                <a href={`#${s.id}`} className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                   {s.label}
                 </a>
               </li>
@@ -144,7 +173,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
           <ul className="space-y-1" style={{ color: "var(--text-muted)" }}>
             {MODULE_2_SECTIONS.map((s) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} className="block rounded-md px-2 py-1 hover:underline">
+                <a href={`#${s.id}`} className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                   {s.label}
                 </a>
               </li>
@@ -161,20 +190,20 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
           <ul className="space-y-1" style={{ color: "var(--text-muted)" }}>
             {MODULE_1_SECTIONS.map((s) => (
               <li key={s.id}>
-                <a href={`#${s.id}`} className="block rounded-md px-2 py-1 hover:underline">
+                <a href={`#${s.id}`} className="block rounded-md px-2.5 py-1.5 transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                   {s.label}
                 </a>
                 {s.id === "sec-2" && (
                   <ul className="ml-3 space-y-1 border-l pl-2" style={{ borderColor: "var(--border)" }}>
                     {ICPS.map((icp) => (
                       <li key={icp.id}>
-                        <a href={`#${icp.id}`} className="block rounded-md px-2 py-1 text-xs hover:underline">
+                        <a href={`#${icp.id}`} className="block rounded-md px-2.5 py-1 text-xs transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                           {icp.name.split("—")[0].trim()}
                         </a>
                       </li>
                     ))}
                     <li>
-                      <a href="#sec-2-1" className="block rounded-md px-2 py-1 text-xs hover:underline">
+                      <a href="#sec-2-1" className="block rounded-md px-2.5 py-1 text-xs transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                         2.1 Mapa de Decisores
                       </a>
                     </li>
@@ -183,12 +212,12 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
                 {s.id === "sec-4" && (
                   <ul className="ml-3 space-y-1 border-l pl-2" style={{ borderColor: "var(--border)" }}>
                     <li>
-                      <a href="#sec-4-1" className="block rounded-md px-2 py-1 text-xs hover:underline">
+                      <a href="#sec-4-1" className="block rounded-md px-2.5 py-1 text-xs transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                         4.1 Narrativa em 5 passos
                       </a>
                     </li>
                     <li>
-                      <a href="#sec-4-2" className="block rounded-md px-2 py-1 text-xs hover:underline">
+                      <a href="#sec-4-2" className="block rounded-md px-2.5 py-1 text-xs transition-colors hover:bg-[var(--border)] hover:text-[var(--text)]">
                         4.2 Raio-X Operacional
                       </a>
                     </li>

@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
@@ -89,6 +90,7 @@ import {
   TAKEFLOW_META_SAVINGS_EXAMPLE,
   EVOLUAI_ROI_CALC,
   EVOLUAI_OTHER_ARGUMENTS,
+  MODULE_4_SECTIONS,
 } from "@/lib/playbookModule4";
 
 function List({ title, items }: { title?: string; items: string[] }) {
@@ -532,6 +534,8 @@ export default function Modulo4Page() {
             <List title="Outros Argumentos de Valor" items={EVOLUAI_OTHER_ARGUMENTS} />
           </div>
         </HashSection>
+
+        <SectionNav sections={MODULE_4_SECTIONS} />
       </div>
     </>
   );

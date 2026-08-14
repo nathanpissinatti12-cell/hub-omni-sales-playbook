@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
@@ -35,6 +36,7 @@ import {
   ANTI_PLAYBOOK,
   ORIGENS_M2_OFICIAIS,
   ORIGENS_M2_EXTERNAS,
+  MODULE_2_SECTIONS,
 } from "@/lib/playbookModule2";
 
 function ChecklistBlock({ title, items }: { title: string; items: string[] }) {
@@ -546,6 +548,8 @@ export default function Modulo2Page() {
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
           Omni Assessoria — Playbook de Vendas — Módulo 2 — Pré-vendas (SDR/BDR)
         </p>
+
+        <SectionNav sections={MODULE_2_SECTIONS} />
       </div>
     </>
   );

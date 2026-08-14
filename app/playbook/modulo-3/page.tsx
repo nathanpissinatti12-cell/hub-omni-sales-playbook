@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import { ObjectionAccordion } from "@/components/playbook/ObjectionAccordion";
@@ -28,6 +29,7 @@ import {
   CHECKLIST_M3_HUBSPOT,
   CHECKLIST_M3_NEGOCIACAO,
   CHECKLIST_M3_GESTAO,
+  MODULE_3_SECTIONS,
 } from "@/lib/playbookModule3";
 
 function ChecklistBlock({ title, items }: { title: string; items: string[] }) {
@@ -451,6 +453,8 @@ export default function Modulo3Page() {
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
           Omni Assessoria — Playbook de Vendas — Módulo 3 — Vendas / Closers — Versão 1.0
         </p>
+
+        <SectionNav sections={MODULE_3_SECTIONS} />
       </div>
     </>
   );

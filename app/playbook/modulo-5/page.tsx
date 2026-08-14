@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
@@ -33,6 +34,7 @@ import {
   CHECKLIST_CULTURA_RITUAIS,
   ORIGIN_OMNI_M5,
   ORIGIN_EXTERNAL_M5,
+  MODULE_5_SECTIONS,
 } from "@/lib/playbookModule5";
 
 function List({ title, items }: { title?: string; items: string[] }) {
@@ -288,6 +290,8 @@ export default function Modulo5Page() {
             <p className="italic">O pós-venda da Omni não é um custo — é uma vantagem competitiva.</p>
           </Callout>
         </HashSection>
+
+        <SectionNav sections={MODULE_5_SECTIONS} />
       </div>
     </>
   );

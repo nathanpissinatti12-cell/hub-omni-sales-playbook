@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
 import { Callout } from "@/components/playbook/Callout";
 import {
@@ -11,6 +12,7 @@ import {
   RAIO_X,
   CHECKLIST_M1,
   ORIGENS,
+  MODULE_1_SECTIONS,
 } from "@/lib/playbookModule1";
 
 export default function Modulo1Page() {
@@ -266,7 +268,9 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
           />
         </HashSection>
 
-        <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
+        <SectionNav sections={MODULE_1_SECTIONS} />
+
+        <p className="pt-1 text-center text-xs" style={{ color: "var(--text-muted)" }}>
           Omni Assessoria — Playbook de Vendas — Módulo 1 — Versão 1.0
         </p>
       </div>

@@ -66,3 +66,24 @@ body {
   font-size: 0.75rem;
   font-weight: 700;
 }
+
+/* Cabeçalho de cada "Seção N" — leve destaque de fundo em vez de só uma
+   linha embaixo, pra marcar melhor o início de um bloco de conteúdo novo. */
+.playbook-content h2 {
+  padding: 0.625rem 0.875rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, rgba(255, 212, 0, 0.1), transparent 75%);
+}
+
+/* Itens de checklist (☐ + texto, className="flex gap-2") viram cartões em
+   vez de linha corrida, mais fácil de "riscar" mentalmente em campo. */
+.playbook-content li.flex.gap-2 {
+  border-radius: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  transition: background-color 0.15s ease;
+}
+.playbook-content li.flex.gap-2:hover {
+  background: var(--bg);
+}
