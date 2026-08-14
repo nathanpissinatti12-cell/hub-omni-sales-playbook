@@ -72,6 +72,15 @@ export async function getUserById(id: string): Promise<AdminUser | null> {
   return rows[0] ?? null;
 }
 
+export async function updateUserPassword(id: string, newPassword: string): Promise<boolean> {
+  const passwordHash = hashPassword(newPassword);
+  const { rowCount } = await adminPool.query(
+    `UPDATE admin_users SET password_hash = $2, updated_at = now() WHERE id = $1`,
+    [id, passwordHash]
+  );
+  return (rowCount ?? 0) > 0;
+}
+
 export async function getUserForLogin(email: string): Promise<(AdminUser & { password_hash: string }) | null> {
   const { rows } = await adminPool.query(
     `SELECT ${USER_COLUMNS}, password_hash FROM admin_users WHERE lower(email) = lower($1)`,
