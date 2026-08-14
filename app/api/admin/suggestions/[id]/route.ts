@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { updateSuggestionStatus } from "@/db/adminQueries";
+import { deleteSuggestion, updateSuggestionStatus } from "@/db/adminQueries";
 
 export const dynamic = "force-dynamic";
 
@@ -18,4 +18,12 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: "Sugestão não encontrada." }, { status: 404 });
   }
   return NextResponse.json(updated);
+}
+
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  const deleted = await deleteSuggestion(params.id);
+  if (!deleted) {
+    return NextResponse.json({ error: "Sugestão não encontrada." }, { status: 404 });
+  }
+  return NextResponse.json({ ok: true });
 }

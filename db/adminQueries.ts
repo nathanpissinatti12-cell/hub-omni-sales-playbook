@@ -158,3 +158,8 @@ export async function updateSuggestionStatus(
   );
   return rows[0] ?? null;
 }
+
+export async function deleteSuggestion(id: string): Promise<boolean> {
+  const { rowCount } = await adminPool.query(`DELETE FROM suggestions WHERE id = $1`, [id]);
+  return (rowCount ?? 0) > 0;
+}

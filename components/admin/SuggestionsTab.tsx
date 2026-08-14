@@ -57,6 +57,17 @@ function SuggestionRow({ suggestion, onChanged }: { suggestion: Suggestion; onCh
     }
   }
 
+  async function handleDelete() {
+    if (!confirm("Excluir esta sugestão? Essa ação não pode ser desfeita.")) return;
+    setUpdating(true);
+    try {
+      const res = await fetch(`/api/admin/suggestions/${suggestion.id}`, { method: "DELETE" });
+      if (res.ok) onChanged();
+    } finally {
+      setUpdating(false);
+    }
+  }
+
   return (
     <div
       className="rounded-lg border p-4"
@@ -116,6 +127,15 @@ function SuggestionRow({ suggestion, onChanged }: { suggestion: Suggestion; onCh
             Reabrir
           </button>
         )}
+        <button
+          type="button"
+          disabled={updating}
+          onClick={handleDelete}
+          className="ml-auto rounded-md border px-3 py-1 text-xs font-semibold disabled:opacity-50"
+          style={{ borderColor: "#e5484d", color: "#e5484d" }}
+        >
+          Excluir
+        </button>
       </div>
     </div>
   );
