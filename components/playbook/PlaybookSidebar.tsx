@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
 import { ICPS, MODULES, MODULE_1_SECTIONS } from "@/lib/playbookModule1";
 import { MODULE_2_SECTIONS } from "@/lib/playbookModule2";
@@ -7,6 +10,10 @@ import { MODULE_5_SECTIONS } from "@/lib/playbookModule5";
 import { MODULE_6_SECTIONS } from "@/lib/playbookModule6";
 
 export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) {
+  // Sempre comeca recolhido, mesmo na pagina do proprio modulo ativo -
+  // o usuario precisa clicar no nome do modulo pra abrir a lista de secoes.
+  const [expanded, setExpanded] = useState(false);
+
   return (
     <aside className="w-full shrink-0 space-y-6 text-sm lg:w-64">
       <div>
@@ -16,21 +23,13 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
         <ul className="space-y-1">
           {MODULES.map((m) => {
             const isActive = m.id === activeModuleId;
-            return (
-              <li key={m.id}>
-                {m.available && m.href ? (
-                  <Link
-                    href={m.href}
-                    className="block rounded-md px-2 py-1.5"
-                    style={
-                      isActive
-                        ? { background: "var(--accent)", color: "white", fontWeight: 500 }
-                        : { color: "var(--text)" }
-                    }
-                  >
-                    Módulo {m.id} — {m.title}
-                  </Link>
-                ) : (
+            const activeStyle = isActive
+              ? { background: "var(--accent)", color: "white", fontWeight: 500 }
+              : { color: "var(--text)" };
+
+            if (!m.available || !m.href) {
+              return (
+                <li key={m.id}>
                   <span
                     className="flex items-center justify-between rounded-md px-2 py-1.5"
                     style={{ color: "var(--text-muted)" }}
@@ -38,14 +37,38 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
                     <span>Módulo {m.id} — {m.title}</span>
                     <span className="text-xs">em breve</span>
                   </span>
-                )}
+                </li>
+              );
+            }
+
+            if (isActive) {
+              return (
+                <li key={m.id}>
+                  <button
+                    type="button"
+                    onClick={() => setExpanded((v) => !v)}
+                    className="flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left"
+                    style={activeStyle}
+                  >
+                    <span>Módulo {m.id} — {m.title}</span>
+                    <span className="text-xs">{expanded ? "▲" : "▼"}</span>
+                  </button>
+                </li>
+              );
+            }
+
+            return (
+              <li key={m.id}>
+                <Link href={m.href} className="block rounded-md px-2 py-1.5" style={activeStyle}>
+                  Módulo {m.id} — {m.title}
+                </Link>
               </li>
             );
           })}
         </ul>
       </div>
 
-      {activeModuleId === 6 && (
+      {expanded && activeModuleId === 6 && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
             Navegação — Módulo 6
@@ -62,7 +85,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
         </div>
       )}
 
-      {activeModuleId === 5 && (
+      {expanded && activeModuleId === 5 && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
             Navegação — Módulo 5
@@ -79,7 +102,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
         </div>
       )}
 
-      {activeModuleId === 4 && (
+      {expanded && activeModuleId === 4 && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
             Navegação — Módulo 4
@@ -96,7 +119,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
         </div>
       )}
 
-      {activeModuleId === 3 && (
+      {expanded && activeModuleId === 3 && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
             Navegação — Módulo 3
@@ -113,7 +136,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
         </div>
       )}
 
-      {activeModuleId === 2 && (
+      {expanded && activeModuleId === 2 && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
             Navegação — Módulo 2
@@ -130,7 +153,7 @@ export function PlaybookSidebar({ activeModuleId }: { activeModuleId: number }) 
         </div>
       )}
 
-      {activeModuleId === 1 && (
+      {expanded && activeModuleId === 1 && (
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
             Navegação — Módulo 1
