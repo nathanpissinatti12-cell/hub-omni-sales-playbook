@@ -8,6 +8,7 @@ import { MODULES } from "@/lib/playbookModule1";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { latestUpdates } from "@/lib/contentUpdates";
 import { sectionLabel } from "@/lib/moduleSections";
+import { WelcomeBanner } from "@/components/playbook/WelcomeBanner";
 
 const SUGGESTION_STATUS_LABEL: Record<string, string> = {
   nova: "Enviada — aguardando análise",
@@ -72,6 +73,8 @@ export default async function PlaybookHubPage() {
             Continue de onde parou ou explore os módulos liberados para o seu nível de acesso.
           </p>
         </div>
+
+        <WelcomeBanner />
 
         {/* Destaques — o que mudou */}
         {highlights.length > 0 && (
