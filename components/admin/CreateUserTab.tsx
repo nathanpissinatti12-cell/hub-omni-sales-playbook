@@ -97,7 +97,7 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
   const selectedBdrDescription = BDR_LEVEL_OPTIONS.find((o) => o.value === bdrLevel)?.description;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
       <div className="space-y-1">
         <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
           Nome
@@ -107,6 +107,7 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
           onChange={(e) => setName(e.target.value)}
           placeholder="Nome completo"
           required
+          autoComplete="off"
           className="w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
           style={{ borderColor: "var(--border)" }}
         />
@@ -122,6 +123,7 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="novo@email.com"
           required
+          autoComplete="off"
           className="w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
           style={{ borderColor: "var(--border)" }}
         />
@@ -138,6 +140,7 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
           placeholder="Mínimo 6 caracteres"
           required
           minLength={6}
+          autoComplete="new-password"
           className="w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
           style={{ borderColor: "var(--border)" }}
         />
@@ -278,7 +281,7 @@ function BulkCreateForm({ onCreated }: { onCreated: () => void }) {
   const failCount = results ? results.length - successCount : 0;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" autoComplete="off">
       <div className="space-y-1">
         <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
           Senha padrão (aplicada a todos)
@@ -290,6 +293,7 @@ function BulkCreateForm({ onCreated }: { onCreated: () => void }) {
           placeholder="Mínimo 6 caracteres"
           required
           minLength={6}
+          autoComplete="new-password"
           className="w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
           style={{ borderColor: "var(--border)" }}
         />
