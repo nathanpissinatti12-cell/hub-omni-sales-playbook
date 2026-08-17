@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Target, Users, Handshake, Package, HeartHandshake, Trophy, Lock, Check, type LucideIcon } from "lucide-react";
 import { isModuleAllowed } from "@/lib/playbookAccess";
 import { MODULE_SECTION_COUNTS } from "@/lib/moduleSectionCounts";
+import { PlaybookSearch } from "./PlaybookSearch";
 import { ICPS, MODULES, MODULE_1_SECTIONS } from "@/lib/playbookModule1";
 import { MODULE_2_SECTIONS } from "@/lib/playbookModule2";
 import { MODULE_3_SECTIONS } from "@/lib/playbookModule3";
@@ -41,6 +42,8 @@ export function PlaybookSidebar({ activeModuleId, accessLevel }: { activeModuleI
 
   return (
     <aside className="w-full shrink-0 space-y-6 text-sm lg:w-64">
+      <PlaybookSearch accessLevel={accessLevel} />
+
       <div>
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
           Módulos
