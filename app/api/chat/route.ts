@@ -25,7 +25,7 @@ export async function POST(req: Request) {
       Authorization: `Bearer ${process.env.DEEPSEEK_API_KEY}`,
     },
     body: JSON.stringify({
-      model: "deepseek-chat",
+      model: "deepseek-v4-flash",
       max_tokens: 1024,
       stream: true,
       messages: [
