@@ -6,6 +6,7 @@ import { isModuleAllowed } from "@/lib/playbookAccess";
 import { MODULE_SECTION_COUNTS } from "@/lib/moduleSectionCounts";
 import { MODULES } from "@/lib/playbookModule1";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { latestUpdates } from "@/lib/contentUpdates";
 
 const SUGGESTION_STATUS_LABEL: Record<string, string> = {
   nova: "Enviada — aguardando análise",
@@ -50,6 +51,9 @@ export default async function PlaybookHubPage() {
 
   const firstName = (user?.name || "").split(" ")[0] || "";
 
+  const moduleById = new Map(MODULES.map((m) => [m.id, m]));
+  const highlights = latestUpdates(5).filter((u) => visibleModules.some((m) => m.id === u.moduleId));
+
   return (
     <>
       <PlaybookSidebar activeModuleId={0} accessLevel={accessLevel} />
@@ -66,6 +70,34 @@ export default async function PlaybookHubPage() {
             Continue de onde parou ou explore os módulos liberados para o seu nível de acesso.
           </p>
         </div>
+
+        {/* Destaques — o que mudou */}
+        {highlights.length > 0 && (
+          <div className="rounded-lg border p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+            <p className="text-sm font-semibold">✨ O que mudou recentemente</p>
+            <ul className="mt-3 space-y-2">
+              {highlights.map((u) => {
+                const m = moduleById.get(u.moduleId);
+                return (
+                  <li key={`${u.moduleId}-${u.sectionId}`}>
+                    <Link
+                      href={`${m?.href ?? "/playbook"}#${u.sectionId}`}
+                      className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:brightness-110"
+                      style={{ borderColor: "var(--border)" }}
+                    >
+                      <span>
+                        Módulo {u.moduleId} — {u.note}
+                      </span>
+                      <span className="shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
+                        {new Date(`${u.date}T00:00:00`).toLocaleDateString("pt-BR")}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
 
         {/* Progresso geral */}
         <div className="rounded-lg border p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>

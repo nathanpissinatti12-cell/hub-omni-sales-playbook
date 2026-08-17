@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePlaybookModuleId } from "./PlaybookModuleContext";
+import { CONTENT_UPDATES, isRecentUpdate } from "@/lib/contentUpdates";
 
 // Mostra só a seção cujo #hash da URL aponta pra ela (ou pra algo dentro dela,
 // como um sub-tópico ou ICP específico) - as demais ficam escondidas. Sem hash
@@ -53,8 +54,21 @@ export function HashSection({
     }).catch(() => {});
   }, [visible, moduleId, id]);
 
+  const update = CONTENT_UPDATES.find(
+    (u) => u.moduleId === moduleId && u.sectionId === id && isRecentUpdate(u.date)
+  );
+
   return (
     <section id={id} ref={ref} className={className} hidden={!visible}>
+      {update && (
+        <span
+          className="mb-2 inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+          style={{ background: "rgba(255, 212, 0, 0.15)", color: "var(--accent)" }}
+          title={update.note}
+        >
+          ✨ Atualizado em {new Date(`${update.date}T00:00:00`).toLocaleDateString("pt-BR")}
+        </span>
+      )}
       {children}
     </section>
   );
