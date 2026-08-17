@@ -221,6 +221,23 @@ export default async function PlaybookHubPage() {
           </div>
         </div>
 
+        {/* Ferramentas */}
+        <Link
+          href="/playbook/empresa"
+          className="flex items-center justify-between gap-2 rounded-lg border p-4 transition-colors hover:brightness-110"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <span>
+            <span className="text-sm font-semibold">🔎 Pesquisar Empresa</span>
+            <span className="mt-0.5 block text-xs" style={{ color: "var(--text-muted)" }}>
+              Consulte dados oficiais e um resumo de um prospect antes de uma call
+            </span>
+          </span>
+          <span className="text-xs" style={{ color: "var(--accent)" }}>
+            Abrir →
+          </span>
+        </Link>
+
         {/* Todos os módulos */}
         <div>
           <p className="mb-3 text-sm font-semibold">Todos os módulos</p>

@@ -252,3 +252,54 @@ export async function toggleFavorite(userId: string, moduleId: number, sectionId
   );
   return true;
 }
+
+// ---------- Pesquisa de empresa ----------
+
+export type CompanyLookup = {
+  domain: string;
+  cnpj: string | null;
+  registry_data: Record<string, unknown> | null;
+  summary: string | null;
+  site_fetch_ok: boolean;
+  created_at: string;
+};
+
+export async function getCompanyLookup(domain: string): Promise<CompanyLookup | null> {
+  const { rows } = await adminPool.query(
+    `SELECT domain, cnpj, registry_data, summary, site_fetch_ok, created_at
+     FROM company_lookups WHERE domain = $1`,
+    [domain]
+  );
+  return rows[0] ?? null;
+}
+
+export async function saveCompanyLookup(input: {
+  domain: string;
+  cnpj: string | null;
+  registryData: Record<string, unknown> | null;
+  summary: string | null;
+  siteFetchOk: boolean;
+  lookedUpBy: string;
+}): Promise<CompanyLookup> {
+  const { rows } = await adminPool.query(
+    `INSERT INTO company_lookups (domain, cnpj, registry_data, summary, site_fetch_ok, looked_up_by)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT (domain) DO UPDATE SET
+       cnpj = EXCLUDED.cnpj,
+       registry_data = EXCLUDED.registry_data,
+       summary = EXCLUDED.summary,
+       site_fetch_ok = EXCLUDED.site_fetch_ok,
+       looked_up_by = EXCLUDED.looked_up_by,
+       created_at = now()
+     RETURNING domain, cnpj, registry_data, summary, site_fetch_ok, created_at`,
+    [
+      input.domain,
+      input.cnpj,
+      input.registryData ? JSON.stringify(input.registryData) : null,
+      input.summary,
+      input.siteFetchOk,
+      input.lookedUpBy,
+    ]
+  );
+  return rows[0];
+}
