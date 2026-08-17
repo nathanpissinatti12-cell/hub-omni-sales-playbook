@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import {
   ACCESS_LEVEL_OPTIONS,
   BDR_LEVEL_OPTIONS,
@@ -9,8 +9,6 @@ import {
 } from "./adminTypes";
 
 export function CreateUserTab({ onCreated }: { onCreated: () => void }) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [photoDataUrl, setPhotoDataUrl] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,16 +17,7 @@ export function CreateUserTab({ onCreated }: { onCreated: () => void }) {
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
-  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setPhotoDataUrl(reader.result as string);
-    reader.readAsDataURL(file);
-  }
-
   function resetForm() {
-    setPhotoDataUrl(null);
     setName("");
     setEmail("");
     setPassword("");
@@ -48,7 +37,6 @@ export function CreateUserTab({ onCreated }: { onCreated: () => void }) {
           name,
           email,
           password,
-          photoDataUrl,
           accessLevel,
           bdrLevel: accessLevel === "bdr" ? bdrLevel : undefined,
         }),
@@ -73,33 +61,6 @@ export function CreateUserTab({ onCreated }: { onCreated: () => void }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div
-        className="flex items-center gap-4 rounded-lg border p-4"
-        style={{ borderColor: "var(--border)" }}
-      >
-        <button
-          type="button"
-          onClick={() => fileInputRef.current?.click()}
-          className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border text-2xl"
-          style={{ borderColor: "var(--border)", background: "var(--bg)" }}
-          aria-label="Selecionar foto do usuário"
-        >
-          {photoDataUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={photoDataUrl} alt="" className="h-full w-full object-cover" />
-          ) : (
-            "📷"
-          )}
-        </button>
-        <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
-        <div>
-          <p className="text-sm font-medium">Foto do usuário</p>
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Opcional — clique no círculo para selecionar
-          </p>
-        </div>
-      </div>
-
       <div className="space-y-1">
         <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
           Nome

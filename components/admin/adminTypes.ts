@@ -5,7 +5,6 @@ export type AdminUser = {
   id: string;
   name: string;
   email: string;
-  photo_data_url: string | null;
   access_level: AccessLevel;
   bdr_level: BdrLevel | null;
   active: boolean;

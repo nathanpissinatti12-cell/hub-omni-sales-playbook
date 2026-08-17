@@ -111,12 +111,7 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
             className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border text-sm"
             style={{ borderColor: "var(--border)", background: "var(--bg)" }}
           >
-            {user.photo_data_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={user.photo_data_url} alt="" className="h-full w-full object-cover" />
-            ) : (
-              user.name.charAt(0).toUpperCase()
-            )}
+            {user.name.charAt(0).toUpperCase()}
           </div>
           <div>
             <p className="text-sm font-semibold">{user.name}</p>

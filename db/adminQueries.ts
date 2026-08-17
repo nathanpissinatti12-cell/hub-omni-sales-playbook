@@ -8,7 +8,6 @@ export type AdminUser = {
   id: string;
   name: string;
   email: string;
-  photo_data_url: string | null;
   access_level: AccessLevel;
   bdr_level: BdrLevel | null;
   active: boolean;
@@ -16,7 +15,7 @@ export type AdminUser = {
   updated_at: string;
 };
 
-const USER_COLUMNS = "id, name, email, photo_data_url, access_level, bdr_level, active, created_at, updated_at";
+const USER_COLUMNS = "id, name, email, access_level, bdr_level, active, created_at, updated_at";
 
 export async function listUsers(): Promise<AdminUser[]> {
   const { rows } = await adminPool.query(
@@ -29,20 +28,18 @@ export async function createUser(input: {
   name: string;
   email: string;
   password: string;
-  photoDataUrl: string | null;
   accessLevel: AccessLevel;
   bdrLevel: BdrLevel | null;
 }): Promise<AdminUser> {
   const passwordHash = hashPassword(input.password);
   const { rows } = await adminPool.query(
-    `INSERT INTO admin_users (name, email, password_hash, photo_data_url, access_level, bdr_level)
-     VALUES ($1, $2, $3, $4, $5, $6)
+    `INSERT INTO admin_users (name, email, password_hash, access_level, bdr_level)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING ${USER_COLUMNS}`,
     [
       input.name,
       input.email,
       passwordHash,
-      input.photoDataUrl,
       input.accessLevel,
       input.accessLevel === "bdr" ? input.bdrLevel : null,
     ]

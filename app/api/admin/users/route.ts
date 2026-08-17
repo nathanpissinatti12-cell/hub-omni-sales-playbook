@@ -16,7 +16,6 @@ export async function POST(req: Request) {
     name?: string;
     email?: string;
     password?: string;
-    photoDataUrl?: string | null;
     accessLevel?: string;
     bdrLevel?: string;
   } | null;
@@ -45,7 +44,6 @@ export async function POST(req: Request) {
       name,
       email,
       password,
-      photoDataUrl: body?.photoDataUrl ?? null,
       accessLevel,
       bdrLevel: accessLevel === "bdr" ? bdrLevel! : null,
     });
