@@ -20,6 +20,21 @@ export function normalizeDomain(input: string): string | null {
   return value;
 }
 
+export type LookupQuery = { type: "domain"; value: string } | { type: "cnpj"; value: string };
+
+// Aceita tanto domínio (ex. empresa.com.br) quanto CNPJ (com ou sem
+// pontuação) no mesmo campo — decide qual é qual pela quantidade de dígitos.
+export function parseLookupInput(input: string): LookupQuery | null {
+  const trimmed = input.trim();
+  const digitsOnly = trimmed.replace(/\D/g, "");
+  if (digitsOnly.length === 14 && /^[\d.\/-]+$/.test(trimmed)) {
+    return { type: "cnpj", value: digitsOnly };
+  }
+  const domain = normalizeDomain(trimmed);
+  if (domain) return { type: "domain", value: domain };
+  return null;
+}
+
 async function fetchWithTimeout(url: string): Promise<Response | null> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -84,14 +99,14 @@ export async function fetchRegistryData(cnpj: string): Promise<Record<string, un
 }
 
 export async function summarizeCompany(
-  domain: string,
+  label: string,
   siteText: string | null,
   registryData: Record<string, unknown> | null
 ): Promise<string | null> {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   if (!apiKey) return null;
 
-  const parts: string[] = [`Domínio pesquisado: ${domain}`];
+  const parts: string[] = [label];
   if (registryData) parts.push(`Dados oficiais da Receita Federal (JSON): ${JSON.stringify(registryData)}`);
   if (siteText) parts.push(`Texto extraído do site da empresa: ${siteText}`);
   if (!registryData && !siteText) return null;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 type LookupResult = {
-  domain: string;
+  domain: string | null;
   cnpj: string | null;
   registry_data: Record<string, unknown> | null;
   summary: string | null;
@@ -23,15 +23,19 @@ const REGISTRY_LABELS: Record<string, string> = {
   ddd_telefone_1: "Telefone",
 };
 
+function formatCnpj(cnpj: string): string {
+  return cnpj.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, "$1.$2.$3/$4-$5");
+}
+
 export function CompanyLookupForm() {
-  const [domain, setDomain] = useState("");
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<LookupResult | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!domain.trim() || loading) return;
+    if (!query.trim() || loading) return;
     setLoading(true);
     setError(null);
     setResult(null);
@@ -39,7 +43,7 @@ export function CompanyLookupForm() {
       const res = await fetch("/api/company-lookup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ domain: domain.trim() }),
+        body: JSON.stringify({ domain: query.trim() }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -54,13 +58,15 @@ export function CompanyLookupForm() {
     }
   }
 
+  const title = result?.domain ?? (result?.cnpj ? formatCnpj(result.cnpj) : "");
+
   return (
     <div className="space-y-6">
       <form onSubmit={handleSubmit} className="flex flex-col gap-2 sm:flex-row" autoComplete="off">
         <input
-          value={domain}
-          onChange={(e) => setDomain(e.target.value)}
-          placeholder="dominio-da-empresa.com.br"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="dominio-da-empresa.com.br ou CNPJ"
           required
           autoComplete="off"
           className="flex-1 rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
@@ -85,7 +91,7 @@ export function CompanyLookupForm() {
       {result && (
         <div className="space-y-4 rounded-lg border p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold">{result.domain}</p>
+            <p className="text-sm font-semibold">{title}</p>
             {result.cached && (
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
                 resultado em cache
@@ -129,8 +135,8 @@ export function CompanyLookupForm() {
 
           {!result.summary && !result.registry_data && (
             <p className="text-sm" style={{ color: "var(--text-muted)" }}>
-              Não conseguimos coletar informações sobre esse domínio — confirme se o endereço está correto ou
-              tente novamente mais tarde.
+              Não conseguimos coletar informações — confirme se o dado está correto ou tente novamente mais
+              tarde.
             </p>
           )}
         </div>

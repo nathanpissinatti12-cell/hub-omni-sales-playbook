@@ -256,7 +256,7 @@ export async function toggleFavorite(userId: string, moduleId: number, sectionId
 // ---------- Pesquisa de empresa ----------
 
 export type CompanyLookup = {
-  domain: string;
+  domain: string | null;
   cnpj: string | null;
   registry_data: Record<string, unknown> | null;
   summary: string | null;
@@ -273,8 +273,17 @@ export async function getCompanyLookup(domain: string): Promise<CompanyLookup | 
   return rows[0] ?? null;
 }
 
+export async function getCompanyLookupByCnpj(cnpj: string): Promise<CompanyLookup | null> {
+  const { rows } = await adminPool.query(
+    `SELECT domain, cnpj, registry_data, summary, site_fetch_ok, created_at
+     FROM company_lookups WHERE cnpj = $1 ORDER BY created_at DESC LIMIT 1`,
+    [cnpj]
+  );
+  return rows[0] ?? null;
+}
+
 export async function saveCompanyLookup(input: {
-  domain: string;
+  domain: string | null;
   cnpj: string | null;
   registryData: Record<string, unknown> | null;
   summary: string | null;

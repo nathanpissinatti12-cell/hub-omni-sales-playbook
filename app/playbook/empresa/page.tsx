@@ -15,8 +15,8 @@ export default async function PesquisaEmpresaPage() {
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Pesquisar Empresa</h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-            Digite o domínio de um prospect para ver dados oficiais (Receita Federal) e um resumo gerado por
-            IA a partir do próprio site da empresa — útil antes de uma ligação.
+            Digite o domínio ou o CNPJ de um prospect para ver dados oficiais (Receita Federal) e um resumo
+            gerado por IA — útil antes de uma ligação.
           </p>
         </div>
 
