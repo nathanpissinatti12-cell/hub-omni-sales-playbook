@@ -8,6 +8,7 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [remember, setRemember] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +20,7 @@ function LoginForm() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, remember }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
@@ -80,6 +81,16 @@ function LoginForm() {
             style={{ borderColor: "var(--border)" }}
           />
         </div>
+
+        <label className="flex items-center gap-2 text-sm">
+          <input
+            type="checkbox"
+            checked={remember}
+            onChange={(e) => setRemember(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Lembrar de mim (não pedir login de novo por 30 dias)
+        </label>
 
         {error && (
           <p className="text-sm" style={{ color: "#e5484d" }}>
