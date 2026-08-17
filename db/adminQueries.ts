@@ -216,3 +216,33 @@ export async function getAllProgress(): Promise<ProgressEntry[]> {
   );
   return rows;
 }
+
+// ---------- Favoritos ----------
+
+export type FavoriteEntry = {
+  module_id: number;
+  section_id: string;
+  created_at: string;
+};
+
+export async function getUserFavorites(userId: string): Promise<FavoriteEntry[]> {
+  const { rows } = await adminPool.query(
+    `SELECT module_id, section_id, created_at FROM playbook_favorites
+     WHERE user_id = $1 ORDER BY created_at DESC`,
+    [userId]
+  );
+  return rows;
+}
+
+export async function toggleFavorite(userId: string, moduleId: number, sectionId: string): Promise<boolean> {
+  const { rowCount } = await adminPool.query(
+    `DELETE FROM playbook_favorites WHERE user_id = $1 AND module_id = $2 AND section_id = $3`,
+    [userId, moduleId, sectionId]
+  );
+  if ((rowCount ?? 0) > 0) return false;
+  await adminPool.query(
+    `INSERT INTO playbook_favorites (user_id, module_id, section_id) VALUES ($1, $2, $3)`,
+    [userId, moduleId, sectionId]
+  );
+  return true;
+}

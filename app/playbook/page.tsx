@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSiteSession } from "@/lib/getSiteSession";
-import { getUserById, getUserProgress, getSuggestionsByUser } from "@/db/adminQueries";
+import { getUserById, getUserProgress, getSuggestionsByUser, getUserFavorites } from "@/db/adminQueries";
 import { isModuleAllowed } from "@/lib/playbookAccess";
 import { MODULE_SECTION_COUNTS } from "@/lib/moduleSectionCounts";
 import { MODULES } from "@/lib/playbookModule1";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
 import { latestUpdates } from "@/lib/contentUpdates";
+import { sectionLabel } from "@/lib/moduleSections";
 
 const SUGGESTION_STATUS_LABEL: Record<string, string> = {
   nova: "Enviada — aguardando análise",
@@ -18,10 +19,11 @@ export default async function PlaybookHubPage() {
   const session = await getSiteSession();
   if (!session) redirect("/login");
 
-  const [user, progress, suggestions] = await Promise.all([
+  const [user, progress, suggestions, favorites] = await Promise.all([
     getUserById(session.uid),
     getUserProgress(session.uid),
     getSuggestionsByUser(session.uid, 5),
+    getUserFavorites(session.uid),
   ]);
 
   const accessLevel = session.accessLevel;
@@ -118,7 +120,7 @@ export default async function PlaybookHubPage() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Continuar de onde parou */}
           <div className="rounded-lg border p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
             <p className="text-sm font-semibold">Continuar de onde parou</p>
@@ -153,6 +155,40 @@ export default async function PlaybookHubPage() {
                     </li>
                   );
                 })}
+              </ul>
+            )}
+          </div>
+
+          {/* Favoritos */}
+          <div className="rounded-lg border p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
+            <p className="text-sm font-semibold">★ Meus favoritos</p>
+            {favorites.filter((f) => visibleModules.some((m) => m.id === f.module_id)).length === 0 ? (
+              <p className="mt-3 text-sm" style={{ color: "var(--text-muted)" }}>
+                Nenhum favorito ainda. Clique em &quot;☆ Favoritar&quot; dentro de uma seção para achá-la
+                rápido aqui depois.
+              </p>
+            ) : (
+              <ul className="mt-3 space-y-2">
+                {favorites
+                  .filter((f) => visibleModules.some((m) => m.id === f.module_id))
+                  .slice(0, 6)
+                  .map((f) => {
+                    const m = moduleById.get(f.module_id);
+                    return (
+                      <li key={`${f.module_id}-${f.section_id}`}>
+                        <Link
+                          href={`${m?.href ?? "/playbook"}#${f.section_id}`}
+                          className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm transition-colors hover:brightness-110"
+                          style={{ borderColor: "var(--border)" }}
+                        >
+                          <span className="truncate">{sectionLabel(f.module_id, f.section_id)}</span>
+                          <span className="shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
+                            Mód. {f.module_id}
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
               </ul>
             )}
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { usePlaybookModuleId } from "./PlaybookModuleContext";
+import { usePlaybookModuleId, usePlaybookFavorites } from "./PlaybookModuleContext";
 import { CONTENT_UPDATES, isRecentUpdate } from "@/lib/contentUpdates";
 
 // Mostra só a seção cujo #hash da URL aponta pra ela (ou pra algo dentro dela,
@@ -24,6 +24,7 @@ export function HashSection({
   const [visible, setVisible] = useState(!!defaultOpen);
   const moduleId = usePlaybookModuleId();
   const reportedRef = useRef(false);
+  const { isFavorite, toggleFavorite } = usePlaybookFavorites();
 
   useEffect(() => {
     function evaluate() {
@@ -57,18 +58,33 @@ export function HashSection({
   const update = CONTENT_UPDATES.find(
     (u) => u.moduleId === moduleId && u.sectionId === id && isRecentUpdate(u.date)
   );
+  const favorited = isFavorite(id);
 
   return (
     <section id={id} ref={ref} className={className} hidden={!visible}>
-      {update && (
-        <span
-          className="mb-2 inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-          style={{ background: "rgba(255, 212, 0, 0.15)", color: "var(--accent)" }}
-          title={update.note}
+      <div className="mb-2 flex items-center justify-between gap-2">
+        {update ? (
+          <span
+            className="inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+            style={{ background: "rgba(255, 212, 0, 0.15)", color: "var(--accent)" }}
+            title={update.note}
+          >
+            ✨ Atualizado em {new Date(`${update.date}T00:00:00`).toLocaleDateString("pt-BR")}
+          </span>
+        ) : (
+          <span />
+        )}
+        <button
+          type="button"
+          onClick={() => toggleFavorite(id)}
+          className="shrink-0 rounded-md px-2 py-1 text-sm transition-colors hover:brightness-110"
+          style={{ color: favorited ? "var(--accent)" : "var(--text-muted)" }}
+          aria-pressed={favorited}
+          title={favorited ? "Remover dos favoritos" : "Marcar como favorito"}
         >
-          ✨ Atualizado em {new Date(`${update.date}T00:00:00`).toLocaleDateString("pt-BR")}
-        </span>
-      )}
+          {favorited ? "★ Favorito" : "☆ Favoritar"}
+        </button>
+      </div>
       {children}
     </section>
   );
