@@ -121,6 +121,15 @@ export async function listHistory(limit = 100): Promise<AdminHistoryEntry[]> {
   return rows;
 }
 
+export async function deleteHistoryEntry(id: string): Promise<boolean> {
+  const { rowCount } = await adminPool.query(`DELETE FROM admin_history WHERE id = $1`, [id]);
+  return (rowCount ?? 0) > 0;
+}
+
+export async function clearHistory(): Promise<void> {
+  await adminPool.query(`DELETE FROM admin_history`);
+}
+
 // ---------- Sugestões ----------
 
 export type Suggestion = {

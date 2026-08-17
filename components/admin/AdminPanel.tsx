@@ -143,7 +143,9 @@ export function AdminPanel() {
         {tab === "sugestoes" && (
           <SuggestionsTab suggestions={suggestions} loading={suggestionsLoading} onChanged={loadSuggestions} />
         )}
-        {tab === "historico" && <HistoryTab history={history} loading={historyLoading} />}
+        {tab === "historico" && (
+          <HistoryTab history={history} loading={historyLoading} onChanged={loadHistory} />
+        )}
       </div>
     </div>
   );
