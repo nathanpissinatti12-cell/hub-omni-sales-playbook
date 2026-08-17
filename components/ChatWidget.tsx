@@ -31,7 +31,7 @@ export function ChatWidget() {
         body: JSON.stringify({ messages: nextMessages }),
       });
 
-      if (!res.body) throw new Error("Sem resposta do servidor");
+      if (!res.ok || !res.body) throw new Error("Sem resposta do servidor");
 
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
