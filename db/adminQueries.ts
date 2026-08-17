@@ -133,25 +133,36 @@ export type Suggestion = {
   message: string;
   status: "nova" | "lida" | "arquivada";
   created_at: string;
+  user_id: string | null;
 };
 
 export async function createSuggestion(input: {
   name?: string | null;
   email?: string | null;
   message: string;
+  userId?: string | null;
 }): Promise<Suggestion> {
   const { rows } = await adminPool.query(
-    `INSERT INTO suggestions (name, email, message)
-     VALUES ($1, $2, $3)
-     RETURNING id, name, email, message, status, created_at`,
-    [input.name ?? null, input.email ?? null, input.message]
+    `INSERT INTO suggestions (name, email, message, user_id)
+     VALUES ($1, $2, $3, $4)
+     RETURNING id, name, email, message, status, created_at, user_id`,
+    [input.name ?? null, input.email ?? null, input.message, input.userId ?? null]
   );
   return rows[0];
 }
 
+export async function getSuggestionsByUser(userId: string, limit = 5): Promise<Suggestion[]> {
+  const { rows } = await adminPool.query(
+    `SELECT id, name, email, message, status, created_at, user_id FROM suggestions
+     WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2`,
+    [userId, limit]
+  );
+  return rows;
+}
+
 export async function listSuggestions(): Promise<Suggestion[]> {
   const { rows } = await adminPool.query(
-    `SELECT id, name, email, message, status, created_at FROM suggestions ORDER BY created_at DESC`
+    `SELECT id, name, email, message, status, created_at, user_id FROM suggestions ORDER BY created_at DESC`
   );
   return rows;
 }
@@ -162,7 +173,7 @@ export async function updateSuggestionStatus(
 ): Promise<Suggestion | null> {
   const { rows } = await adminPool.query(
     `UPDATE suggestions SET status = $2 WHERE id = $1
-     RETURNING id, name, email, message, status, created_at`,
+     RETURNING id, name, email, message, status, created_at, user_id`,
     [id, status]
   );
   return rows[0] ?? null;

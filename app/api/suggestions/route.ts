@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSuggestion } from "@/db/adminQueries";
+import { getSiteSession } from "@/lib/getSiteSession";
 
 export const dynamic = "force-dynamic";
 
@@ -20,10 +21,13 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Mensagem muito longa." }, { status: 400 });
   }
 
+  const session = await getSiteSession();
+
   const suggestion = await createSuggestion({
     name: body?.name?.trim() || null,
     email: body?.email?.trim() || null,
     message,
+    userId: session?.uid ?? null,
   });
 
   return NextResponse.json({ ok: true, id: suggestion.id }, { status: 201 });
