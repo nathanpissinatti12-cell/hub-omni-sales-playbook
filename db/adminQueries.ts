@@ -172,3 +172,36 @@ export async function deleteSuggestion(id: string): Promise<boolean> {
   const { rowCount } = await adminPool.query(`DELETE FROM suggestions WHERE id = $1`, [id]);
   return (rowCount ?? 0) > 0;
 }
+
+// ---------- Progresso no playbook ----------
+
+export type ProgressEntry = {
+  user_id: string;
+  module_id: number;
+  section_id: string;
+  viewed_at: string;
+};
+
+export async function recordProgress(userId: string, moduleId: number, sectionId: string): Promise<void> {
+  await adminPool.query(
+    `INSERT INTO playbook_progress (user_id, module_id, section_id)
+     VALUES ($1, $2, $3)
+     ON CONFLICT (user_id, module_id, section_id) DO UPDATE SET viewed_at = now()`,
+    [userId, moduleId, sectionId]
+  );
+}
+
+export async function getUserProgress(userId: string): Promise<ProgressEntry[]> {
+  const { rows } = await adminPool.query(
+    `SELECT user_id, module_id, section_id, viewed_at FROM playbook_progress WHERE user_id = $1`,
+    [userId]
+  );
+  return rows;
+}
+
+export async function getAllProgress(): Promise<ProgressEntry[]> {
+  const { rows } = await adminPool.query(
+    `SELECT user_id, module_id, section_id, viewed_at FROM playbook_progress`
+  );
+  return rows;
+}

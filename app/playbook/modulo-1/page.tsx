@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { PlaybookModuleProvider } from "@/components/playbook/PlaybookModuleContext";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
@@ -22,6 +23,7 @@ export default async function Modulo1Page() {
     <>
       <PlaybookSidebar activeModuleId={1} accessLevel={session?.accessLevel ?? ""} />
 
+      <PlaybookModuleProvider moduleId={1}>
       <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
@@ -276,6 +278,7 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
           Omni Assessoria — Playbook de Vendas — Módulo 1 — Versão 1.0
         </p>
       </div>
+      </PlaybookModuleProvider>
     </>
   );
 }

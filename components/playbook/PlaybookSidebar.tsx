@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Target, Users, Handshake, Package, HeartHandshake, Trophy, Lock, type LucideIcon } from "lucide-react";
+import { Target, Users, Handshake, Package, HeartHandshake, Trophy, Lock, Check, type LucideIcon } from "lucide-react";
 import { isModuleAllowed } from "@/lib/playbookAccess";
+import { MODULE_SECTION_COUNTS } from "@/lib/moduleSectionCounts";
 import { ICPS, MODULES, MODULE_1_SECTIONS } from "@/lib/playbookModule1";
 import { MODULE_2_SECTIONS } from "@/lib/playbookModule2";
 import { MODULE_3_SECTIONS } from "@/lib/playbookModule3";
@@ -24,6 +25,19 @@ export function PlaybookSidebar({ activeModuleId, accessLevel }: { activeModuleI
   // Sempre comeca recolhido, mesmo na pagina do proprio modulo ativo -
   // o usuario precisa clicar no nome do modulo pra abrir a lista de secoes.
   const [expanded, setExpanded] = useState(false);
+
+  const [seenByModule, setSeenByModule] = useState<Record<number, number>>({});
+
+  useEffect(() => {
+    fetch("/api/progress")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((rows: { module_id: number }[]) => {
+        const counts: Record<number, number> = {};
+        for (const row of rows) counts[row.module_id] = (counts[row.module_id] ?? 0) + 1;
+        setSeenByModule(counts);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <aside className="w-full shrink-0 space-y-6 text-sm lg:w-64">
@@ -79,6 +93,20 @@ export function PlaybookSidebar({ activeModuleId, accessLevel }: { activeModuleI
               );
             }
 
+            const seen = seenByModule[m.id] ?? 0;
+            const total = MODULE_SECTION_COUNTS[m.id] ?? 0;
+            const complete = total > 0 && seen >= total;
+            const progressBadge =
+              total > 0 && seen > 0 ? (
+                complete ? (
+                  <Check size={13} className="shrink-0" style={{ color: "#22c55e" }} aria-hidden />
+                ) : (
+                  <span className="shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
+                    {seen}/{total}
+                  </span>
+                )
+              ) : null;
+
             if (isActive) {
               return (
                 <li key={m.id}>
@@ -92,8 +120,11 @@ export function PlaybookSidebar({ activeModuleId, accessLevel }: { activeModuleI
                       {Icon && <Icon size={16} className="shrink-0" style={{ color: "var(--accent)" }} />}
                       <span>Módulo {m.id} — {m.title}</span>
                     </span>
-                    <span className="shrink-0 text-xs" style={{ color: "var(--text-muted)" }}>
-                      {expanded ? "▲" : "▼"}
+                    <span className="flex shrink-0 items-center gap-2">
+                      {progressBadge}
+                      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                        {expanded ? "▲" : "▼"}
+                      </span>
                     </span>
                   </button>
                 </li>
@@ -104,11 +135,14 @@ export function PlaybookSidebar({ activeModuleId, accessLevel }: { activeModuleI
               <li key={m.id}>
                 <Link
                   href={m.href}
-                  className="flex items-center gap-2 rounded-md px-2.5 py-2 transition-colors hover:brightness-110"
+                  className="flex items-center justify-between gap-2 rounded-md px-2.5 py-2 transition-colors hover:brightness-110"
                   style={activeStyle}
                 >
-                  {Icon && <Icon size={16} className="shrink-0" style={{ color: "var(--text-muted)" }} />}
-                  <span>Módulo {m.id} — {m.title}</span>
+                  <span className="flex items-center gap-2">
+                    {Icon && <Icon size={16} className="shrink-0" style={{ color: "var(--text-muted)" }} />}
+                    <span>Módulo {m.id} — {m.title}</span>
+                  </span>
+                  {progressBadge}
                 </Link>
               </li>
             );

@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePlaybookModuleId } from "./PlaybookModuleContext";
 
 // Mostra só a seção cujo #hash da URL aponta pra ela (ou pra algo dentro dela,
 // como um sub-tópico ou ICP específico) - as demais ficam escondidas. Sem hash
 // na URL, só a seção marcada com defaultOpen aparece (a primeira da página).
+// Também registra progresso: na primeira vez que a seção fica visível numa
+// sessão de navegação, avisa /api/progress pra contar como "vista".
 export function HashSection({
   id,
   className,
@@ -18,6 +21,8 @@ export function HashSection({
 }) {
   const ref = useRef<HTMLElement>(null);
   const [visible, setVisible] = useState(!!defaultOpen);
+  const moduleId = usePlaybookModuleId();
+  const reportedRef = useRef(false);
 
   useEffect(() => {
     function evaluate() {
@@ -37,6 +42,16 @@ export function HashSection({
     window.addEventListener("hashchange", evaluate);
     return () => window.removeEventListener("hashchange", evaluate);
   }, [id, defaultOpen]);
+
+  useEffect(() => {
+    if (!visible || reportedRef.current || moduleId == null) return;
+    reportedRef.current = true;
+    fetch("/api/progress", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ moduleId, sectionId: id }),
+    }).catch(() => {});
+  }, [visible, moduleId, id]);
 
   return (
     <section id={id} ref={ref} className={className} hidden={!visible}>

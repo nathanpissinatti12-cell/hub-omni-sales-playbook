@@ -31,6 +31,13 @@ export type Suggestion = {
   created_at: string;
 };
 
+export type ProgressEntry = {
+  user_id: string;
+  module_id: number;
+  section_id: string;
+  viewed_at: string;
+};
+
 export const ACCESS_LEVEL_OPTIONS: { value: AccessLevel; label: string; description: string }[] = [
   { value: "bdr", label: "BDR", description: "Módulos 01, 02, 06" },
   { value: "closer", label: "Closer", description: "Módulos 01, 03, 04, 05, 06" },
@@ -49,4 +56,5 @@ export const ACTION_LABELS: Record<string, string> = {
   permissao_alterada: "Permissão alterada",
   usuario_desativado: "Usuário desativado",
   usuario_reativado: "Usuário reativado",
+  senha_redefinida: "Senha redefinida",
 };

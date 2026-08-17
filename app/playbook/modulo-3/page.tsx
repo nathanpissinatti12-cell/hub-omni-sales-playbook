@@ -1,5 +1,6 @@
 import { HashSection } from "@/components/playbook/HashSection";
 import { PlaybookSidebar } from "@/components/playbook/PlaybookSidebar";
+import { PlaybookModuleProvider } from "@/components/playbook/PlaybookModuleContext";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { SectionNav } from "@/components/playbook/SectionNav";
 import { Table } from "@/components/playbook/Table";
@@ -68,6 +69,7 @@ export default async function Modulo3Page() {
     <>
       <PlaybookSidebar activeModuleId={3} accessLevel={session?.accessLevel ?? ""} />
 
+      <PlaybookModuleProvider moduleId={3}>
       <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
@@ -458,6 +460,7 @@ export default async function Modulo3Page() {
 
         <SectionNav sections={MODULE_3_SECTIONS} />
       </div>
+      </PlaybookModuleProvider>
     </>
   );
 }
