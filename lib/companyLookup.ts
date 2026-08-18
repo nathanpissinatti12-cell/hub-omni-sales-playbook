@@ -117,7 +117,12 @@ export async function summarizeCompany(
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: "deepseek-v4-flash",
-        max_tokens: 500,
+        // v4-flash gasta parte do orçamento de tokens "pensando" antes de
+        // escrever a resposta (reasoning_content) — com prompts grandes
+        // (empresa com muitos sócios, por ex.) um limite baixo esgota tudo
+        // em raciocínio e a resposta final sai vazia. 500 não é suficiente;
+        // testado até 1800 e sobra margem mesmo pra registros grandes.
+        max_tokens: 2000,
         messages: [
           {
             role: "system",
@@ -134,7 +139,8 @@ export async function summarizeCompany(
     });
     if (!res.ok) return null;
     const data = await res.json();
-    return data.choices?.[0]?.message?.content ?? null;
+    const content = data.choices?.[0]?.message?.content;
+    return typeof content === "string" && content.trim() ? content : null;
   } catch {
     return null;
   }
