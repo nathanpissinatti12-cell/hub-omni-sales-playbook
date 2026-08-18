@@ -132,17 +132,20 @@ export async function getCampaignSummary(
   const { rows } = await pool.query(
     `
     SELECT
-      (SELECT count(DISTINCT dominio)::int FROM empresas WHERE campanha_id = $1) AS total_empresas,
       (
         SELECT count(DISTINCT dominio)::int FROM fila_processamento
-        WHERE ${NORMALIZE_NAME("campanha")} = $2 AND lead_status = 'criado meetime'
+        WHERE ${NORMALIZE_NAME("campanha")} = $1
+      ) AS total_empresas,
+      (
+        SELECT count(DISTINCT dominio)::int FROM fila_processamento
+        WHERE ${NORMALIZE_NAME("campanha")} = $1 AND lead_status = 'criado meetime'
       ) AS criados_meetime,
       (
         SELECT count(DISTINCT dominio)::int FROM fila_processamento
-        WHERE ${NORMALIZE_NAME("campanha")} = $2 AND lead_status = ANY($3)
+        WHERE ${NORMALIZE_NAME("campanha")} = $1 AND lead_status = ANY($2)
       ) AS perdidos
     `,
-    [campaignId, normalizeName(campaignName), LOSS_STATUSES]
+    [normalizeName(campaignName), LOSS_STATUSES]
   );
   return rows[0];
 }
