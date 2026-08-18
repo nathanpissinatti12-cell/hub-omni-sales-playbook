@@ -26,6 +26,11 @@ export async function POST(req: Request) {
     },
     body: JSON.stringify({
       model: "deepseek-v4-flash",
+      // v4-flash "pensa" antes de responder e isso consome max_tokens — com
+      // prompt grande (o playbook inteiro) já vimos isso esgotar o limite
+      // sozinho e a resposta sair vazia (ver lib/companyLookup.ts). Desligado
+      // aqui também, preventivamente.
+      thinking: { type: "disabled" },
       max_tokens: 1024,
       stream: true,
       messages: [

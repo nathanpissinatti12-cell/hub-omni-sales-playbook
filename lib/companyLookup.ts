@@ -117,11 +117,12 @@ export async function summarizeCompany(
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: "deepseek-v4-flash",
-        // v4-flash gasta parte do orçamento de tokens "pensando" antes de
-        // escrever a resposta (reasoning_content) — com prompts grandes
-        // (empresa com muitos sócios, por ex.) um limite baixo esgota tudo
-        // em raciocínio e a resposta final sai vazia. 500 não é suficiente;
-        // testado até 1800 e sobra margem mesmo pra registros grandes.
+        // v4-flash "pensa" antes de responder (reasoning_content) e isso
+        // consome o orçamento de max_tokens — com prompt grande (empresa com
+        // muitos sócios) já vi o raciocínio sozinho esgotar 22 mil tokens e a
+        // resposta final sair vazia. Desligar o "thinking" evita esse modo de
+        // falha inteiro, além de sair mais barato (sem tokens de raciocínio).
+        thinking: { type: "disabled" },
         max_tokens: 2000,
         messages: [
           {
