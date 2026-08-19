@@ -63,6 +63,16 @@ const C = {
   floor: "#131315",
 };
 
+/** Cor estável por setor (mesmo texto sempre gera a mesma cor). */
+function corDoSetor(setor: string): string {
+  let hash = 0;
+  for (let i = 0; i < setor.length; i++) {
+    hash = (hash * 31 + setor.charCodeAt(i)) >>> 0;
+  }
+  const hue = hash % 360;
+  return `hsl(${hue}, 68%, 58%)`;
+}
+
 type Face = { color?: string; background?: string };
 
 /** Caixa isométrica: (x,y,z) é o canto do fundo, na base. */
@@ -175,7 +185,15 @@ function IsoTile({
 }
 
 /** Cena de uma estação de trabalho, desenhada de trás para frente. */
-function Estacao({ qtd, active }: { qtd: number; active: boolean }) {
+function Estacao({
+  qtd,
+  active,
+  setorColor,
+}: {
+  qtd: number;
+  active: boolean;
+  setorColor: string | null;
+}) {
   const vazio = qtd === 0;
   const dual = qtd >= 5;
 
@@ -211,6 +229,16 @@ function Estacao({ qtd, active }: { qtd: number; active: boolean }) {
         className="iso-desk-art"
         style={{ position: "absolute", left: 0, top: 0, width: 0, height: 0 }}
       >
+      {setorColor && (
+        <IsoTile
+          x={-62}
+          y={-52}
+          w={126}
+          d={104}
+          background={`color-mix(in srgb, ${setorColor} 26%, transparent)`}
+          border={`1px solid color-mix(in srgb, ${setorColor} 55%, transparent)`}
+        />
+      )}
       {active && (
         <IsoTile
           x={-62}
@@ -407,6 +435,10 @@ export function MapaView({
     return localPos[c.id] ?? { x: c.pos_x ?? 50, y: c.pos_y ?? 50 };
   }
 
+  const setores = Array.from(
+    new Set(colaboradores.map((c) => c.setor?.trim()).filter((s): s is string => !!s))
+  ).sort();
+
   function clamp(v: number) {
     return Math.min(96, Math.max(4, v));
   }
@@ -433,6 +465,21 @@ export function MapaView({
         Vista isométrica do escritório. Arraste cada mesa para a posição real; clique para ver/editar
         os equipamentos do colaborador.
       </p>
+
+      {setores.length > 0 && (
+        <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1">
+          {setores.map((s) => (
+            <span key={s} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+              <span
+                className="inline-block h-2.5 w-2.5 rounded-full"
+                style={{ background: corDoSetor(s) }}
+              />
+              {s}
+            </span>
+          ))}
+        </div>
+      )}
+
       <div
         ref={containerRef}
         onPointerMove={handlePointerMove}
@@ -496,6 +543,7 @@ export function MapaView({
           const qtd = itens.filter((i) => i.colaborador_id === c.id).length;
           const active = c.id === selectedId;
           const dragging = draggingId === c.id;
+          const setorColor = c.setor?.trim() ? corDoSetor(c.setor.trim()) : null;
           return (
             <button
               key={c.id}
@@ -535,7 +583,7 @@ export function MapaView({
                   display: "block",
                 }}
               >
-                <Estacao qtd={qtd} active={active} />
+                <Estacao qtd={qtd} active={active} setorColor={setorColor} />
               </span>
 
               {/* Etiqueta: cores fixas para continuar legível sobre o piso escuro,
@@ -545,12 +593,20 @@ export function MapaView({
                 style={{
                   background: active ? "var(--accent)" : "rgba(16,16,18,0.86)",
                   color: active ? "var(--on-accent)" : "#f2f2ee",
-                  border: `1px solid ${active ? "var(--accent)" : "rgba(255,255,255,0.14)"}`,
+                  border: `1px solid ${active ? "var(--accent)" : setorColor ?? "rgba(255,255,255,0.14)"}`,
                   boxShadow: "0 2px 8px rgba(0,0,0,0.45)",
                   backdropFilter: "blur(2px)",
                 }}
               >
-                <span className="max-w-[112px] truncate text-[11px] font-semibold">{c.nome}</span>
+                <span className="flex max-w-[112px] items-center gap-1 truncate text-[11px] font-semibold">
+                  {setorColor && !active && (
+                    <span
+                      className="h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ background: setorColor }}
+                    />
+                  )}
+                  <span className="truncate">{c.nome}</span>
+                </span>
                 <span
                   className="text-[9px] font-medium uppercase tracking-wide"
                   style={{
