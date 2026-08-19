@@ -57,6 +57,32 @@ export function EquipamentosPanel() {
     }
   }
 
+  async function handleAddBaia() {
+    // Cluster 2x2 representando uma baia de 4 lugares, tipo as do escritório.
+    const offsets = [
+      { x: -6, y: -6 },
+      { x: 6, y: -6 },
+      { x: -6, y: 6 },
+      { x: 6, y: 6 },
+    ];
+    const criados: Colaborador[] = [];
+    for (let i = 0; i < offsets.length; i++) {
+      const res = await fetch("/api/equipamentos/colaboradores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nome: `Vaga ${i + 1}`,
+          setor: "Baia nova",
+          posX: 50 + offsets[i].x,
+          posY: 50 + offsets[i].y,
+        }),
+      });
+      if (res.ok) criados.push(await res.json());
+    }
+    setColaboradores((prev) => [...prev, ...criados]);
+    setView("mapa");
+  }
+
   async function handleMove(id: string, posX: number, posY: number) {
     setColaboradores((prev) =>
       prev.map((c) => (c.id === id ? { ...c, pos_x: posX, pos_y: posY } : c))
@@ -199,6 +225,14 @@ export function EquipamentosPanel() {
           style={{ background: "var(--accent)", color: "var(--on-accent)" }}
         >
           Adicionar colaborador
+        </button>
+        <button
+          type="button"
+          onClick={handleAddBaia}
+          className="rounded-md border px-4 py-2 text-sm font-semibold"
+          style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+        >
+          Nova baia (4 lugares)
         </button>
       </form>
 
