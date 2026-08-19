@@ -110,8 +110,14 @@ export function ColaboradorPainel({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            if (!novoTipo.trim()) return;
-            onAddItem(colaborador.id, novoTipo.trim(), novaDescricao.trim());
+            const tipos = novoTipo
+              .split(",")
+              .map((t) => t.trim())
+              .filter(Boolean);
+            if (tipos.length === 0) return;
+            // Descrição só faz sentido quando é um único equipamento por vez.
+            const descricao = tipos.length === 1 ? novaDescricao.trim() : "";
+            tipos.forEach((tipo) => onAddItem(colaborador.id, tipo, descricao));
             setNovoTipo("");
             setNovaDescricao("");
           }}
@@ -120,14 +126,14 @@ export function ColaboradorPainel({
           <input
             value={novoTipo}
             onChange={(e) => setNovoTipo(e.target.value)}
-            placeholder="Tipo (ex: monitor, headset)"
+            placeholder="Tipo (separe vários com vírgula: monitor, teclado, mouse)"
             className="w-full rounded-md border bg-transparent px-3 py-1.5 text-sm outline-none"
             style={{ borderColor: "var(--border)" }}
           />
           <input
             value={novaDescricao}
             onChange={(e) => setNovaDescricao(e.target.value)}
-            placeholder="Descrição/modelo (opcional)"
+            placeholder="Descrição/modelo (opcional, só se for 1 equipamento)"
             className="w-full rounded-md border bg-transparent px-3 py-1.5 text-sm outline-none"
             style={{ borderColor: "var(--border)" }}
           />
