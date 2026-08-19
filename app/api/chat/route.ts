@@ -1,4 +1,5 @@
 import { CHAT_SYSTEM_PROMPT } from "@/lib/chatKnowledge";
+import { getSiteSession } from "@/lib/getSiteSession";
 
 export const dynamic = "force-dynamic";
 
@@ -7,6 +8,11 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 const MAX_MESSAGES = 20;
 
 export async function POST(req: Request) {
+  const session = await getSiteSession();
+  if (!session) {
+    return new Response("Não autenticado.", { status: 401 });
+  }
+
   if (!process.env.DEEPSEEK_API_KEY) {
     return new Response("DEEPSEEK_API_KEY não configurada no servidor.", { status: 500 });
   }
