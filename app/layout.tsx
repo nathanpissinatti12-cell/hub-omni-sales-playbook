@@ -32,6 +32,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Admin
             </Link>
+            <Link href="/equipamentos" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
+              Equipamentos
+            </Link>
             {session && (
               <span className="ml-auto">
                 <SiteLogoutButton />

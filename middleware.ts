@@ -6,8 +6,13 @@ import { allowedModules } from "@/lib/playbookAccess";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // --- /admin: senha única compartilhada, inalterado ---
-  if (pathname.startsWith("/admin") || pathname.startsWith("/api/admin")) {
+  // --- /admin e /equipamentos: mesma senha única compartilhada ---
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/api/admin") ||
+    pathname.startsWith("/equipamentos") ||
+    pathname.startsWith("/api/equipamentos")
+  ) {
     const isLoginPage = pathname === "/admin/login";
     const isLoginApi = pathname === "/api/admin/login";
     if (isLoginPage || isLoginApi) {
@@ -18,7 +23,7 @@ export async function middleware(req: NextRequest) {
     const authenticated = await isValidSessionCookieValue(cookie);
 
     if (!authenticated) {
-      if (pathname.startsWith("/api/admin")) {
+      if (pathname.startsWith("/api/admin") || pathname.startsWith("/api/equipamentos")) {
         return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
       }
       const loginUrl = new URL("/admin/login", req.url);
@@ -70,5 +75,13 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*", "/dashboard/:path*", "/api/dashboard/:path*", "/playbook/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/api/admin/:path*",
+    "/equipamentos/:path*",
+    "/api/equipamentos/:path*",
+    "/dashboard/:path*",
+    "/api/dashboard/:path*",
+    "/playbook/:path*",
+  ],
 };
