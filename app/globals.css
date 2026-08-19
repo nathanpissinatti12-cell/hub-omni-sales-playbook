@@ -54,6 +54,22 @@ body {
   font-family: "Omni Atyp", ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Planta baixa isométrica (Controle de Equipamentos): leve "levantada" da
+   estação no hover, para dar retorno tátil sem mexer na posição salva. */
+.iso-desk-art {
+  transition: transform 0.14s ease, filter 0.14s ease;
+  will-change: transform;
+}
+.iso-desk:hover .iso-desk-art {
+  transform: translateY(-10px);
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.5));
+}
+.iso-desk:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
 /* Tópicos do playbook (h3/h4 e rótulos "font-medium" de bloco) em amarelo,
    maiúsculo e compacto — resposta abaixo permanece na cor de leitura normal. */
 .playbook-content h3.font-medium,
