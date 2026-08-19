@@ -93,6 +93,38 @@ export function EquipamentosPanel() {
     if (selectedId === id) setSelectedId(null);
   }
 
+  async function handleDuplicateColaborador(id: string) {
+    const origem = colaboradores.find((c) => c.id === id);
+    if (!origem) return;
+
+    const posX = Math.min(96, (origem.pos_x ?? 50) + 6);
+    const posY = Math.min(96, (origem.pos_y ?? 50) + 6);
+    const res = await fetch("/api/equipamentos/colaboradores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: `${origem.nome} (cópia)`, setor: origem.setor, posX, posY }),
+    });
+    if (!res.ok) return;
+    const novo: Colaborador = await res.json();
+    setColaboradores((prev) => [...prev, novo]);
+
+    const itensOrigem = itens.filter((i) => i.colaborador_id === id);
+    for (const item of itensOrigem) {
+      const itemRes = await fetch("/api/equipamentos/itens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tipo: item.tipo, descricao: item.descricao, colaboradorId: novo.id }),
+      });
+      if (itemRes.ok) {
+        const criado: EquipamentoItem = await itemRes.json();
+        setItens((prev) => [criado, ...prev]);
+      }
+    }
+
+    setSelectedId(novo.id);
+    setView("mapa");
+  }
+
   async function handleAddItem(colaboradorId: string, tipo: string, descricao: string) {
     const res = await fetch("/api/equipamentos/itens", {
       method: "POST",
@@ -200,6 +232,7 @@ export function EquipamentosPanel() {
               itens={itens.filter((i) => i.colaborador_id === selected?.id)}
               onUpdate={handleUpdateColaborador}
               onDelete={handleDeleteColaborador}
+              onDuplicate={handleDuplicateColaborador}
               onAddItem={handleAddItem}
               onUnassignItem={handleUnassignItem}
               onDeleteItem={handleDeleteItem}

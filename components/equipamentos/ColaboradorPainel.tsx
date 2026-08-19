@@ -8,6 +8,7 @@ export function ColaboradorPainel({
   itens,
   onUpdate,
   onDelete,
+  onDuplicate,
   onAddItem,
   onUnassignItem,
   onDeleteItem,
@@ -17,6 +18,7 @@ export function ColaboradorPainel({
   itens: EquipamentoItem[];
   onUpdate: (id: string, input: { nome: string; setor: string | null }) => void;
   onDelete: (id: string) => void;
+  onDuplicate: (id: string) => void;
   onAddItem: (colaboradorId: string, tipo: string, descricao: string) => void;
   onUnassignItem: (itemId: string) => void;
   onDeleteItem: (itemId: string) => void;
@@ -150,8 +152,17 @@ export function ColaboradorPainel({
 
       <button
         type="button"
-        onClick={() => onDelete(colaborador.id)}
+        onClick={() => onDuplicate(colaborador.id)}
         className="mt-4 w-full rounded-md border px-3 py-1.5 text-xs font-semibold"
+        style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+      >
+        Duplicar colaborador (com os mesmos equipamentos)
+      </button>
+
+      <button
+        type="button"
+        onClick={() => onDelete(colaborador.id)}
+        className="mt-2 w-full rounded-md border px-3 py-1.5 text-xs font-semibold"
         style={{ borderColor: "#e5484d", color: "#e5484d" }}
       >
         Remover colaborador
