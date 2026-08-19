@@ -15,6 +15,21 @@ export function EquipamentosPanel() {
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [novoNome, setNovoNome] = useState("");
+  const [fullscreen, setFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (!fullscreen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setFullscreen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [fullscreen]);
 
   const loadAll = useCallback(async () => {
     setLoading(true);
@@ -208,6 +223,17 @@ export function EquipamentosPanel() {
             </button>
           ))}
         </div>
+
+        {view === "mapa" && (
+          <button
+            type="button"
+            onClick={() => setFullscreen(true)}
+            className="rounded-md border px-3 py-1.5 text-xs font-semibold"
+            style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          >
+            Expandir tela cheia
+          </button>
+        )}
       </div>
 
       <form onSubmit={handleAddColaborador} className="mt-6 flex flex-wrap gap-2">
@@ -240,6 +266,48 @@ export function EquipamentosPanel() {
         <p className="mt-8 text-sm" style={{ color: "var(--text-muted)" }}>
           Carregando...
         </p>
+      ) : fullscreen ? (
+        <div
+          className="fixed inset-0 z-50 flex flex-col gap-4 p-4 lg:p-6"
+          style={{ background: "var(--bg)" }}
+        >
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Planta baixa — tela cheia</h2>
+            <button
+              type="button"
+              onClick={() => setFullscreen(false)}
+              className="rounded-md border px-3 py-1.5 text-xs font-semibold"
+              style={{ borderColor: "var(--border)", color: "var(--text)" }}
+            >
+              Fechar (Esc)
+            </button>
+          </div>
+          <div className="flex min-h-0 flex-1 flex-col gap-4 lg:grid lg:grid-cols-[1fr_320px]">
+            <div className="min-h-0 flex-1">
+              <MapaView
+                colaboradores={colaboradores}
+                itens={itens}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                onMove={handleMove}
+                fullscreen
+              />
+            </div>
+            <div className="min-h-0 overflow-y-auto">
+              <ColaboradorPainel
+                colaborador={selected}
+                itens={itens.filter((i) => i.colaborador_id === selected?.id)}
+                onUpdate={handleUpdateColaborador}
+                onDelete={handleDeleteColaborador}
+                onDuplicate={handleDuplicateColaborador}
+                onAddItem={handleAddItem}
+                onUnassignItem={handleUnassignItem}
+                onDeleteItem={handleDeleteItem}
+                onClose={() => setSelectedId(null)}
+              />
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
           <div>

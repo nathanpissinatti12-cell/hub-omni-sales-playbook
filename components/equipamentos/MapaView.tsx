@@ -390,12 +390,14 @@ export function MapaView({
   selectedId,
   onSelect,
   onMove,
+  fullscreen = false,
 }: {
   colaboradores: Colaborador[];
   itens: EquipamentoItem[];
   selectedId: string | null;
   onSelect: (id: string) => void;
   onMove: (id: string, posX: number, posY: number) => void;
+  fullscreen?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
@@ -426,7 +428,7 @@ export function MapaView({
   }
 
   return (
-    <div>
+    <div className={fullscreen ? "flex h-full flex-col" : undefined}>
       <p className="mb-2 text-xs" style={{ color: "var(--text-muted)" }}>
         Vista isométrica do escritório. Arraste cada mesa para a posição real; clique para ver/editar
         os equipamentos do colaborador.
@@ -436,10 +438,11 @@ export function MapaView({
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
-        className="relative w-full select-none overflow-hidden rounded-lg border"
+        className={`relative w-full select-none overflow-hidden rounded-lg border ${fullscreen ? "flex-1" : ""}`}
         style={{
-          aspectRatio: "16 / 10",
-          minHeight: 320,
+          aspectRatio: fullscreen ? undefined : "16 / 10",
+          height: fullscreen ? "100%" : undefined,
+          minHeight: fullscreen ? undefined : 320,
           borderColor: "var(--border)",
           backgroundColor: C.floor,
           backgroundImage: [
