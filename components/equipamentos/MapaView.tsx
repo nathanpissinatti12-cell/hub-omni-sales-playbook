@@ -63,14 +63,21 @@ const C = {
   floor: "#131315",
 };
 
-/** Cor estável por setor (mesmo texto sempre gera a mesma cor). */
-function corDoSetor(setor: string): string {
-  let hash = 0;
-  for (let i = 0; i < setor.length; i++) {
-    hash = (hash * 31 + setor.charCodeAt(i)) >>> 0;
-  }
-  const hue = hash % 360;
-  return `hsl(${hue}, 68%, 58%)`;
+/**
+ * Cores por setor: cada setor pega o próximo matiz no "ângulo dourado"
+ * (~137.5°), o que espalha as cores ao máximo mesmo com muitos setores —
+ * evita tons vizinhos parecidos que um hash puro por texto pode gerar.
+ * A ordem vem de `setores` (lista ordenada e estável de nomes únicos).
+ */
+function construirCoresDosSetores(setores: string[]): Record<string, string> {
+  const mapa: Record<string, string> = {};
+  setores.forEach((setor, i) => {
+    const hue = (i * 137.508) % 360;
+    const sat = 62 + (i % 3) * 9; // 62 / 71 / 80
+    const light = 50 + (i % 2) * 11; // 50 / 61
+    mapa[setor] = `hsl(${hue}, ${sat}%, ${light}%)`;
+  });
+  return mapa;
 }
 
 type Face = { color?: string; background?: string };
@@ -438,6 +445,7 @@ export function MapaView({
   const setores = Array.from(
     new Set(colaboradores.map((c) => c.setor?.trim()).filter((s): s is string => !!s))
   ).sort();
+  const coresDosSetores = construirCoresDosSetores(setores);
 
   function clamp(v: number) {
     return Math.min(96, Math.max(4, v));
@@ -472,7 +480,7 @@ export function MapaView({
             <span key={s} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
               <span
                 className="inline-block h-2.5 w-2.5 rounded-full"
-                style={{ background: corDoSetor(s) }}
+                style={{ background: coresDosSetores[s] }}
               />
               {s}
             </span>
@@ -543,7 +551,7 @@ export function MapaView({
           const qtd = itens.filter((i) => i.colaborador_id === c.id).length;
           const active = c.id === selectedId;
           const dragging = draggingId === c.id;
-          const setorColor = c.setor?.trim() ? corDoSetor(c.setor.trim()) : null;
+          const setorColor = c.setor?.trim() ? coresDosSetores[c.setor.trim()] : null;
           return (
             <button
               key={c.id}
