@@ -6,6 +6,7 @@ export type Colaborador = {
   setor: string | null;
   pos_x: number | null;
   pos_y: number | null;
+  is_deposito: boolean;
   created_at: string;
   updated_at: string;
 };
@@ -19,7 +20,7 @@ export type EquipamentoItem = {
   updated_at: string;
 };
 
-const COLABORADOR_COLUMNS = "id, nome, setor, pos_x, pos_y, created_at, updated_at";
+const COLABORADOR_COLUMNS = "id, nome, setor, pos_x, pos_y, is_deposito, created_at, updated_at";
 const ITEM_COLUMNS = "id, tipo, descricao, colaborador_id, created_at, updated_at";
 
 export async function listColaboradores(): Promise<Colaborador[]> {
@@ -34,12 +35,13 @@ export async function createColaborador(input: {
   setor: string | null;
   posX: number | null;
   posY: number | null;
+  isDeposito?: boolean;
 }): Promise<Colaborador> {
   const { rows } = await adminPool.query(
-    `INSERT INTO equip_colaboradores (nome, setor, pos_x, pos_y)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO equip_colaboradores (nome, setor, pos_x, pos_y, is_deposito)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING ${COLABORADOR_COLUMNS}`,
-    [input.nome, input.setor, input.posX, input.posY]
+    [input.nome, input.setor, input.posX, input.posY, input.isDeposito ?? false]
   );
   return rows[0];
 }

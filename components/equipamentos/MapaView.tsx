@@ -191,6 +191,103 @@ function IsoTile({
   );
 }
 
+/** Baú de equipamentos de reserva: baú de madeira com friso e fecho metálico. */
+function Bau({ active }: { active: boolean }) {
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 0,
+        top: 0,
+        width: 0,
+        height: 0,
+        transform: `scale(${SCALE})`,
+        transformOrigin: "0 0",
+        pointerEvents: "none",
+      }}
+    >
+      <div
+        style={{
+          position: "absolute",
+          left: -70,
+          top: -22,
+          width: 140,
+          height: 78,
+          borderRadius: "50%",
+          background: "radial-gradient(ellipse at center, rgba(0,0,0,0.55), rgba(0,0,0,0) 68%)",
+          filter: "blur(6px)",
+          pointerEvents: "none",
+        }}
+      />
+
+      <div className="iso-desk-art" style={{ position: "absolute", left: 0, top: 0, width: 0, height: 0 }}>
+        {active && (
+          <IsoTile
+            x={-46}
+            y={-36}
+            w={92}
+            d={72}
+            background="color-mix(in srgb, var(--accent) 18%, transparent)"
+            border="1px solid var(--accent)"
+          />
+        )}
+
+        {/* corpo do baú */}
+        <IsoBox
+          x={-34}
+          y={-24}
+          w={68}
+          d={48}
+          h={28}
+          top={{ background: C.woodTop }}
+          faceX={{ color: C.woodX }}
+          faceY={{ color: C.woodY }}
+        />
+
+        {/* friso metálico no meio do corpo */}
+        <IsoBox
+          x={-34}
+          y={-24}
+          z={12}
+          w={68}
+          d={48}
+          h={4}
+          top={{ color: C.metalTop }}
+          faceX={{ color: C.metalX }}
+          faceY={{ color: C.metalY }}
+        />
+
+        {/* tampa, levemente maior que o corpo */}
+        <IsoBox
+          x={-37}
+          y={-27}
+          z={28}
+          w={74}
+          d={54}
+          h={10}
+          top={{ background: C.woodTop }}
+          faceX={{ color: C.woodX }}
+          faceY={{ color: C.woodY }}
+          shadow="inset 0 0 0 1px rgba(255,255,255,0.07)"
+        />
+
+        {/* fecho amarelo, na cor de destaque da marca */}
+        <IsoBox
+          x={-3}
+          y={-24}
+          z={14}
+          w={6}
+          d={3}
+          h={8}
+          top={{ color: "var(--accent)" }}
+          faceX={{ color: "var(--accent)" }}
+          faceY={{ background: "color-mix(in srgb, var(--accent) 70%, black)" }}
+        />
+      </div>
+    </div>
+  );
+}
+
 /** Cena de uma estação de trabalho, desenhada de trás para frente. */
 function Estacao({
   qtd,
@@ -591,7 +688,11 @@ export function MapaView({
                   display: "block",
                 }}
               >
-                <Estacao qtd={qtd} active={active} setorColor={setorColor} />
+                {c.is_deposito ? (
+                  <Bau active={active} />
+                ) : (
+                  <Estacao qtd={qtd} active={active} setorColor={setorColor} />
+                )}
               </span>
 
               {/* Etiqueta: cores fixas para continuar legível sobre o piso escuro,

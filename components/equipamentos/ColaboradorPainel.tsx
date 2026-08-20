@@ -10,9 +10,10 @@ export function ColaboradorPainel({
   onDelete,
   onDuplicate,
   onAddItem,
-  onUnassignItem,
+  onReassignItem,
   onDeleteItem,
   onClose,
+  bauId,
 }: {
   colaborador: Colaborador | null;
   itens: EquipamentoItem[];
@@ -20,9 +21,10 @@ export function ColaboradorPainel({
   onDelete: (id: string) => void;
   onDuplicate: (id: string) => void;
   onAddItem: (colaboradorId: string, tipo: string, descricao: string) => void;
-  onUnassignItem: (itemId: string) => void;
+  onReassignItem: (itemId: string, colaboradorId: string | null) => void;
   onDeleteItem: (itemId: string) => void;
   onClose: () => void;
+  bauId: string | null;
 }) {
   const [nome, setNome] = useState("");
   const [setor, setSetor] = useState("");
@@ -42,11 +44,13 @@ export function ColaboradorPainel({
     );
   }
 
+  const isBau = colaborador.is_deposito;
+
   return (
     <div className="rounded-lg border p-4" style={{ borderColor: "var(--border)" }}>
       <div className="flex items-start justify-between gap-2">
         <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-          Colaborador
+          {isBau ? "Baú de reserva" : "Colaborador"}
         </p>
         <button
           type="button"
@@ -66,14 +70,21 @@ export function ColaboradorPainel({
           className="w-full rounded-md border bg-transparent px-3 py-1.5 text-sm font-semibold outline-none"
           style={{ borderColor: "var(--border)" }}
         />
-        <input
-          value={setor}
-          onChange={(e) => setSetor(e.target.value)}
-          onBlur={() => nome.trim() && onUpdate(colaborador.id, { nome: nome.trim(), setor: setor.trim() || null })}
-          placeholder="Setor (opcional)"
-          className="w-full rounded-md border bg-transparent px-3 py-1.5 text-sm outline-none"
-          style={{ borderColor: "var(--border)" }}
-        />
+        {!isBau && (
+          <input
+            value={setor}
+            onChange={(e) => setSetor(e.target.value)}
+            onBlur={() => nome.trim() && onUpdate(colaborador.id, { nome: nome.trim(), setor: setor.trim() || null })}
+            placeholder="Setor (opcional)"
+            className="w-full rounded-md border bg-transparent px-3 py-1.5 text-sm outline-none"
+            style={{ borderColor: "var(--border)" }}
+          />
+        )}
+        {isBau && (
+          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+            Equipamentos de reserva, sem colaborador atribuído.
+          </p>
+        )}
       </div>
 
       <div className="mt-4">
@@ -97,9 +108,15 @@ export function ColaboradorPainel({
                   {i.descricao ? <span style={{ color: "var(--text-muted)" }}> — {i.descricao}</span> : null}
                 </span>
                 <span className="flex gap-2 text-xs">
-                  <button type="button" onClick={() => onUnassignItem(i.id)} style={{ color: "var(--text-muted)" }}>
-                    devolver
-                  </button>
+                  {!isBau && (
+                    <button
+                      type="button"
+                      onClick={() => onReassignItem(i.id, bauId)}
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {bauId ? "mandar pro baú" : "devolver"}
+                    </button>
+                  )}
                   <button type="button" onClick={() => onDeleteItem(i.id)} style={{ color: "#e5484d" }}>
                     excluir
                   </button>
@@ -150,14 +167,16 @@ export function ColaboradorPainel({
         </form>
       </div>
 
-      <button
-        type="button"
-        onClick={() => onDuplicate(colaborador.id)}
-        className="mt-4 w-full rounded-md border px-3 py-1.5 text-xs font-semibold"
-        style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
-      >
-        Duplicar colaborador (com os mesmos equipamentos)
-      </button>
+      {!isBau && (
+        <button
+          type="button"
+          onClick={() => onDuplicate(colaborador.id)}
+          className="mt-4 w-full rounded-md border px-3 py-1.5 text-xs font-semibold"
+          style={{ borderColor: "var(--accent)", color: "var(--accent)" }}
+        >
+          Duplicar colaborador (com os mesmos equipamentos)
+        </button>
+      )}
 
       <button
         type="button"
@@ -165,7 +184,7 @@ export function ColaboradorPainel({
         className="mt-2 w-full rounded-md border px-3 py-1.5 text-xs font-semibold"
         style={{ borderColor: "#e5484d", color: "#e5484d" }}
       >
-        Remover colaborador
+        {isBau ? "Remover baú" : "Remover colaborador"}
       </button>
     </div>
   );

@@ -4,6 +4,7 @@ export type Colaborador = {
   setor: string | null;
   pos_x: number | null;
   pos_y: number | null;
+  is_deposito: boolean;
   created_at: string;
   updated_at: string;
 };

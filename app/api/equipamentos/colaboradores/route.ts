@@ -14,6 +14,7 @@ export async function POST(req: Request) {
     setor?: string;
     posX?: number;
     posY?: number;
+    isDeposito?: boolean;
   } | null;
 
   const nome = body?.nome?.trim();
@@ -26,6 +27,7 @@ export async function POST(req: Request) {
     setor: body?.setor?.trim() || null,
     posX: typeof body?.posX === "number" ? body.posX : null,
     posY: typeof body?.posY === "number" ? body.posY : null,
+    isDeposito: body?.isDeposito === true,
   });
   return NextResponse.json(colaborador, { status: 201 });
 }

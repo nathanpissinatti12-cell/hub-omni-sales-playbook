@@ -53,6 +53,7 @@ export function EquipamentosPanel() {
     () => colaboradores.find((c) => c.id === selectedId) ?? null,
     [colaboradores, selectedId]
   );
+  const bauId = colaboradores.find((c) => c.is_deposito)?.id ?? null;
 
   async function handleAddColaborador(e: React.FormEvent) {
     e.preventDefault();
@@ -95,6 +96,21 @@ export function EquipamentosPanel() {
       if (res.ok) criados.push(await res.json());
     }
     setColaboradores((prev) => [...prev, ...criados]);
+    setView("mapa");
+  }
+
+  const temBau = colaboradores.some((c) => c.is_deposito);
+
+  async function handleAddBau() {
+    const res = await fetch("/api/equipamentos/colaboradores", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nome: "Baú de Reserva", posX: 92, posY: 12, isDeposito: true }),
+    });
+    if (!res.ok) return;
+    const criado: Colaborador = await res.json();
+    setColaboradores((prev) => [...prev, criado]);
+    setSelectedId(criado.id);
     setView("mapa");
   }
 
@@ -178,13 +194,13 @@ export function EquipamentosPanel() {
     }
   }
 
-  async function handleUnassignItem(itemId: string) {
+  async function handleReassignItem(itemId: string, colaboradorId: string | null) {
     const item = itens.find((i) => i.id === itemId);
     if (!item) return;
     const res = await fetch(`/api/equipamentos/itens/${itemId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ tipo: item.tipo, descricao: item.descricao, colaboradorId: null }),
+      body: JSON.stringify({ tipo: item.tipo, descricao: item.descricao, colaboradorId }),
     });
     if (res.ok) {
       const updated: EquipamentoItem = await res.json();
@@ -260,6 +276,16 @@ export function EquipamentosPanel() {
         >
           Nova baia (4 lugares)
         </button>
+        {!temBau && (
+          <button
+            type="button"
+            onClick={handleAddBau}
+            className="rounded-md border px-4 py-2 text-sm font-semibold"
+            style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          >
+            Criar baú de reserva
+          </button>
+        )}
       </form>
 
       {loading ? (
@@ -301,9 +327,10 @@ export function EquipamentosPanel() {
                 onDelete={handleDeleteColaborador}
                 onDuplicate={handleDuplicateColaborador}
                 onAddItem={handleAddItem}
-                onUnassignItem={handleUnassignItem}
+                onReassignItem={handleReassignItem}
                 onDeleteItem={handleDeleteItem}
                 onClose={() => setSelectedId(null)}
+                bauId={bauId}
               />
             </div>
           </div>
@@ -336,9 +363,10 @@ export function EquipamentosPanel() {
               onDelete={handleDeleteColaborador}
               onDuplicate={handleDuplicateColaborador}
               onAddItem={handleAddItem}
-              onUnassignItem={handleUnassignItem}
+              onReassignItem={handleReassignItem}
               onDeleteItem={handleDeleteItem}
               onClose={() => setSelectedId(null)}
+              bauId={bauId}
             />
           </div>
         </div>
