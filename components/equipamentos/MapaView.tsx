@@ -63,6 +63,11 @@ const C = {
   floor: "#131315",
 };
 
+/** Cores fixas para setores específicos (sobrepõem o esquema automático abaixo). */
+const CORES_FIXAS_DOS_SETORES: Record<string, string> = {
+  bko: "#000000",
+};
+
 /**
  * Cores por setor: cada setor pega o próximo matiz no "ângulo dourado"
  * (~137.5°), o que espalha as cores ao máximo mesmo com muitos setores —
@@ -72,6 +77,11 @@ const C = {
 function construirCoresDosSetores(setores: string[]): Record<string, string> {
   const mapa: Record<string, string> = {};
   setores.forEach((setor, i) => {
+    const fixa = CORES_FIXAS_DOS_SETORES[setor.trim().toLowerCase()];
+    if (fixa) {
+      mapa[setor] = fixa;
+      return;
+    }
     const hue = (i * 137.508) % 360;
     const sat = 62 + (i % 3) * 9; // 62 / 71 / 80
     const light = 50 + (i % 2) * 11; // 50 / 61
