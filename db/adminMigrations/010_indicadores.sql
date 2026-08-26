@@ -22,3 +22,17 @@ CREATE TABLE IF NOT EXISTS indicadores_valores (
 );
 
 CREATE INDEX IF NOT EXISTS indicadores_valores_mes_idx ON indicadores_valores (mes);
+
+-- RLS ligado e SEM policy, de propósito.
+--
+-- O banco fica num projeto Supabase, e toda tabela no schema public é exposta
+-- pela API REST (PostgREST) para quem tiver a anon key — que é pública por
+-- natureza. Esta tabela guarda metas de MRR/ARR, CAC e desempenho individual
+-- nominal, então não pode ser legível por esse caminho.
+--
+-- Sem nenhuma policy, o PostgREST (papéis anon/authenticated) não lê nem
+-- escreve nada. O app continua funcionando normalmente porque não usa a API
+-- REST: conecta direto no Postgres via ADMIN_DATABASE_URL, e o dono da tabela
+-- faz bypass de RLS. O controle de quem enxerga o painel continua sendo o
+-- middleware + a checagem de accessLevel='root' na rota de API.
+ALTER TABLE indicadores_valores ENABLE ROW LEVEL SECURITY;
