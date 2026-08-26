@@ -279,13 +279,11 @@ export function PainelIndicadores() {
         </p>
         <div className="flex flex-wrap items-end gap-4">
           <Campo label="Mês de registro">
-            <select value={mesAtivo} onChange={(e) => setMesAtivo(e.target.value)} className={inputCls} style={inputStyle}>
-              {meses.map((m) => (
-                <option key={m} value={m}>
-                  {rotuloMes(m)}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={mesAtivo}
+              onChange={setMesAtivo}
+              opcoes={meses.map((m) => ({ valor: m, rotulo: rotuloMes(m) }))}
+            />
           </Campo>
           <Campo label="Início">
             <input type="date" value={dtIni} onChange={(e) => setDtIni(e.target.value)} className={inputCls} style={inputStyle} />
@@ -342,13 +340,11 @@ export function PainelIndicadores() {
       >
         <div className="mb-4 max-w-xs">
           <Campo label="Pessoa">
-            <select value={pessoaSel} onChange={(e) => setPessoaSel(e.target.value)} className={inputCls} style={inputStyle}>
-              {PESSOAS.map((p) => (
-                <option key={p.chave} value={p.chave}>
-                  {p.nome}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={pessoaSel}
+              onChange={setPessoaSel}
+              opcoes={PESSOAS.map((p) => ({ valor: p.chave, rotulo: p.nome }))}
+            />
           </Campo>
         </div>
         <Tabela
@@ -366,13 +362,11 @@ export function PainelIndicadores() {
         <Secao
           titulo="Comparativo entre pessoas"
           acao={
-            <select value={kpiComp} onChange={(e) => setKpiComp(e.target.value)} className={inputCls} style={inputStyle}>
-              {kpisComparaveis.map((k) => (
-                <option key={k.id} value={k.id}>
-                  {k.nome}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={kpiComp}
+              onChange={setKpiComp}
+              opcoes={kpisComparaveis.map((k) => ({ valor: k.id, rotulo: k.nome }))}
+            />
           }
         >
           <GraficoComparativo dados={comparativo} />
@@ -399,13 +393,11 @@ export function PainelIndicadores() {
         <Secao
           titulo="Evolução mensal"
           acao={
-            <select value={indEvo} onChange={(e) => setIndEvo(e.target.value)} className={inputCls} style={inputStyle}>
-              {indicadoresPlanos().map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.nome}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={indEvo}
+              onChange={setIndEvo}
+              opcoes={indicadoresPlanos().map((r) => ({ valor: r.id, rotulo: r.nome }))}
+            />
           }
         >
           <GraficoEvolucao serie={serieEvolucao} />
@@ -440,6 +432,39 @@ export function PainelIndicadores() {
 
 const inputCls = "rounded-md border bg-transparent px-3 py-2 text-sm outline-none";
 const inputStyle = { borderColor: "var(--border)", color: "var(--text)" } as const;
+
+// Os <select> levam fundo sólido (não transparente) porque a lista aberta é
+// desenhada pelo sistema operacional, fora do fluxo do painel: sem cor própria
+// ela herda branco e o texto claro do tema escuro some. O color-scheme do
+// globals.css já resolve isso na maioria dos navegadores — isto é a garantia.
+const selectStyle = {
+  borderColor: "var(--border)",
+  color: "var(--text)",
+  background: "var(--surface)",
+} as const;
+
+const optionStyle = { background: "var(--surface)", color: "var(--text)" } as const;
+
+/** <select> com as cores do tema aplicadas também nas opções. */
+function Select({
+  value,
+  onChange,
+  opcoes,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  opcoes: { valor: string; rotulo: string }[];
+}) {
+  return (
+    <select value={value} onChange={(e) => onChange(e.target.value)} className={inputCls} style={selectStyle}>
+      {opcoes.map((o) => (
+        <option key={o.valor} value={o.valor} style={optionStyle}>
+          {o.rotulo}
+        </option>
+      ))}
+    </select>
+  );
+}
 
 function Painel({
   titulo,

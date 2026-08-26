@@ -27,6 +27,12 @@
 }
 
 :root {
+  /* Faz o navegador desenhar os controles nativos (lista aberta do <select>,
+     seletor de data, barra de rolagem) no mesmo tema do site. Sem isso eles
+     saem sempre no tema claro: no escuro, as <option> ficavam com texto claro
+     sobre fundo branco e só apareciam sob o cursor. */
+  color-scheme: light dark;
+
   --bg: #f7f7f5;
   --surface: #ffffff;
   --border: #e5e5e0;
