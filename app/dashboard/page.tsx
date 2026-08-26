@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Target, Building2, UserX, Percent } from "lucide-react";
 import {
   getCampaignPerformance,
@@ -37,11 +38,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-10">
-      <div>
-        <h1 className="text-2xl font-semibold">Dashboard de Prospecção</h1>
-        <p className="mt-1" style={{ color: "var(--text-muted)" }}>
-          Dados ao vivo da base de campanhas e enriquecimento de leads (Apollo).
-        </p>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold">Dashboard de Prospecção</h1>
+          <p className="mt-1" style={{ color: "var(--text-muted)" }}>
+            Dados ao vivo da base de campanhas e enriquecimento de leads (Apollo).
+          </p>
+        </div>
+        <Link
+          href="/dashboard/indicadores"
+          className="rounded-md px-4 py-2 text-sm font-semibold"
+          style={{ background: "var(--accent)", color: "var(--on-accent)" }}
+        >
+          Painel de Indicadores
+        </Link>
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

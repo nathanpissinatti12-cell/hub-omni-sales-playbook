@@ -1,0 +1,24 @@
+-- Painel de Indicadores N3/N4/N5.
+--
+-- Modelo chave-valor por mês: cada lançamento é uma linha
+-- (mes, tipo, chave) -> valor. Isso evita ter que alterar o schema toda vez
+-- que um indicador novo entra ou sai do painel — a definição de quais
+-- indicadores existem vive em lib/indicadores.ts, não no banco.
+--
+--   mes   : '2026-08' (competência do lançamento)
+--   tipo  : 'real' (realizado lançado) | 'meta' (override manual da meta)
+--   chave : id do indicador. Para N3/N4 é direto ('n3_mrr_out');
+--           para N5 vem prefixado pela pessoa ('sara_reun').
+
+CREATE TABLE IF NOT EXISTS indicadores_valores (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  mes TEXT NOT NULL,
+  tipo TEXT NOT NULL CHECK (tipo IN ('real', 'meta')),
+  chave TEXT NOT NULL,
+  valor NUMERIC,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by UUID,
+  UNIQUE (mes, tipo, chave)
+);
+
+CREATE INDEX IF NOT EXISTS indicadores_valores_mes_idx ON indicadores_valores (mes);
