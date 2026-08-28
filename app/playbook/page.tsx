@@ -238,6 +238,22 @@ export default async function PlaybookHubPage() {
           </span>
         </Link>
 
+        <Link
+          href="/playbook/fit-score"
+          className="flex items-center justify-between gap-2 rounded-lg border p-4 transition-colors hover:brightness-110"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <span>
+            <span className="text-sm font-semibold">📶 Fit Score Meetime</span>
+            <span className="mt-0.5 block text-xs" style={{ color: "var(--text-muted)" }}>
+              Entenda o que a nota do lead significa e por que ele está no topo da fila
+            </span>
+          </span>
+          <span className="text-xs" style={{ color: "var(--accent)" }}>
+            Abrir →
+          </span>
+        </Link>
+
         {/* Todos os módulos */}
         <div>
           <p className="mb-3 text-sm font-semibold">Todos os módulos</p>
