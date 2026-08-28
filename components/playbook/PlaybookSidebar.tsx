@@ -164,6 +164,13 @@ export function PlaybookSidebar({ activeModuleId, accessLevel }: { activeModuleI
         >
           🔎 Pesquisar Empresa
         </Link>
+        <Link
+          href="/playbook/fit-score"
+          className="flex items-center gap-2 rounded-md px-2.5 py-2 transition-colors hover:brightness-110"
+          style={{ color: "var(--text)", borderLeft: "3px solid transparent" }}
+        >
+          📶 Fit Score Meetime
+        </Link>
       </div>
 
       {expanded && activeModuleId === 6 && (
