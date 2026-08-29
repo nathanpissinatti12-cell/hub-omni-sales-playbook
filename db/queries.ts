@@ -106,15 +106,57 @@ export type RegionRow = {
 // registros antigos ainda têm os dois nomes antigos — unificamos aqui na exibição.
 const EMAIL_INVALIDO_VARIANTES = ["sem email valido", "Adicionado na Planilha", "Adionano na Planilha"];
 
-const LOSS_STATUSES = ["sem contato", "sem decisor", "sem pessoas", ...EMAIL_INVALIDO_VARIANTES];
-
-// Monta a expressão SQL que normaliza lead_status, usando o parâmetro na posição
-// `paramIndex` (1-based) para a lista de variantes de "sem email valido".
-const LEAD_STATUS_NORMALIZADO = (paramIndex: number) => `
+// A mesma empresa pode ter VÁRIAS linhas na fila: o Apollo insere uma por
+// contato encontrado, então um domínio com 2 contatos entra 2x na mesma carga.
+// Como cada linha tem seu próprio lead_status, contar `count(DISTINCT dominio)`
+// agrupado por status faz a empresa aparecer em duas categorias ao mesmo tempo —
+// a cópia que virou lead e a cópia que bateu em "já existe na base" — e a soma
+// das categorias estoura o total de empresas submetidas.
+//
+// Por isso cada empresa recebe UM desfecho: o melhor que ela alcançou. Quem
+// subiu pra Meetime conta como "criado meetime" mesmo que a segunda cópia tenha
+// parado no meio do caminho.
+const DESFECHO_RANK = (paramIndex: number) => `
   CASE
-    WHEN lead_status = ANY($${paramIndex}) THEN 'sem email valido'
-    ELSE COALESCE(lead_status, 'Não classificado')
+    WHEN lead_status = 'criado meetime'       THEN 1
+    WHEN lead_status = 'já existe na meetime' THEN 2
+    WHEN lead_status = 'já existe na base'    THEN 3
+    WHEN lead_status = ANY($${paramIndex})    THEN 4
+    WHEN lead_status = 'sem pessoas'          THEN 5
+    WHEN lead_status = 'sem decisor'          THEN 6
+    WHEN lead_status = 'sem contato'          THEN 7
+    ELSE 9
   END
+`;
+
+// Traduz o rank de volta pro lead_status exibido (as chaves de
+// LEAD_STATUS_LABELS na tela da campanha).
+const DESFECHO_LABEL = `
+  CASE rank
+    WHEN 1 THEN 'criado meetime'
+    WHEN 2 THEN 'já existe na meetime'
+    WHEN 3 THEN 'já existe na base'
+    WHEN 4 THEN 'sem email valido'
+    WHEN 5 THEN 'sem pessoas'
+    WHEN 6 THEN 'sem decisor'
+    WHEN 7 THEN 'sem contato'
+    ELSE 'Não classificado'
+  END
+`;
+
+// Ranks que representam perda de verdade: a empresa foi processada e não gerou
+// lead. "já existe na base" e "já existe na meetime" ficam de fora porque são
+// duplicata de campanha anterior, não perda.
+const RANK_PERDIDO_MIN = 4;
+const RANK_PERDIDO_MAX = 7;
+
+// Uma linha por empresa, com o desfecho já resolvido. Usado pelo resumo e pela
+// quebra por status, para os dois falarem o mesmo número.
+const DESFECHO_POR_EMPRESA = (paramIndex: number) => `
+  SELECT dominio, min(${DESFECHO_RANK(paramIndex)}) AS rank
+  FROM fila_processamento
+  WHERE ${NORMALIZE_NAME("campanha")} = $1
+  GROUP BY dominio
 `;
 
 export async function getCampaignById(id: string): Promise<CampaignRow | null> {
@@ -131,21 +173,16 @@ export async function getCampaignSummary(
 ): Promise<CampaignSummaryRow> {
   const { rows } = await pool.query(
     `
+    WITH desfecho AS (${DESFECHO_POR_EMPRESA(2)})
     SELECT
+      (SELECT count(*)::int FROM desfecho) AS total_empresas,
+      (SELECT count(*)::int FROM desfecho WHERE rank = 1) AS criados_meetime,
       (
-        SELECT count(DISTINCT dominio)::int FROM fila_processamento
-        WHERE ${NORMALIZE_NAME("campanha")} = $1
-      ) AS total_empresas,
-      (
-        SELECT count(DISTINCT dominio)::int FROM fila_processamento
-        WHERE ${NORMALIZE_NAME("campanha")} = $1 AND lead_status = 'criado meetime'
-      ) AS criados_meetime,
-      (
-        SELECT count(DISTINCT dominio)::int FROM fila_processamento
-        WHERE ${NORMALIZE_NAME("campanha")} = $1 AND lead_status = ANY($2)
+        SELECT count(*)::int FROM desfecho
+        WHERE rank BETWEEN ${RANK_PERDIDO_MIN} AND ${RANK_PERDIDO_MAX}
       ) AS perdidos
     `,
-    [normalizeName(campaignName), LOSS_STATUSES]
+    [normalizeName(campaignName), EMAIL_INVALIDO_VARIANTES]
   );
   return rows[0];
 }
@@ -172,10 +209,10 @@ export async function getCampaignQueueStatusBreakdown(campaignName: string): Pro
 export async function getCampaignLeadStatusBreakdown(campaignName: string): Promise<QueueStatusRow[]> {
   const { rows } = await pool.query(
     `
-    SELECT ${LEAD_STATUS_NORMALIZADO(2)} AS status, count(DISTINCT dominio)::int AS total
-    FROM fila_processamento
-    WHERE ${NORMALIZE_NAME("campanha")} = $1
-    GROUP BY ${LEAD_STATUS_NORMALIZADO(2)}
+    WITH desfecho AS (${DESFECHO_POR_EMPRESA(2)})
+    SELECT ${DESFECHO_LABEL} AS status, count(*)::int AS total
+    FROM desfecho
+    GROUP BY rank
     ORDER BY total DESC
     `,
     [normalizeName(campaignName), EMAIL_INVALIDO_VARIANTES]
