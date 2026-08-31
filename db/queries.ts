@@ -1,5 +1,6 @@
 import { pool } from "./client";
 import { classifyCnae } from "./cnaeGroups";
+import { tierTelefone } from "@/lib/phoneTier";
 
 // fila_processamento.campanha é digitado à mão e diverge de campanhas.nome
 // em maiúsculas/espaçamento (ex.: "ICPs -imobiliaria" vs "ICPS - imobiliaria"),
@@ -218,6 +219,41 @@ export async function getCampaignLeadStatusBreakdown(campaignName: string): Prom
     [normalizeName(campaignName), EMAIL_INVALIDO_VARIANTES]
   );
   return rows;
+}
+
+export type FitScoreTierRow = {
+  tier: "apollo_celular" | "so_fixo" | "outra_fonte_celular" | "sem_dado";
+  total: number;
+};
+
+// Só dá pra saber, com certeza, se o lead tinha celular do Apollo, só fixo, ou
+// celular de outra fonte — a nota exata (6 vs 5, 4 vs 3) depende da origem do
+// e-mail, que o fluxo não grava em `empresas`. Ver lib/phoneTier.ts.
+export async function getCampaignFitScoreBreakdown(campaignName: string): Promise<FitScoreTierRow[]> {
+  const { rows } = (await pool.query(
+    `
+    WITH desfecho AS (${DESFECHO_POR_EMPRESA(2)})
+    SELECT e.telefone_decisor, e.todos_telefones
+    FROM desfecho d
+    JOIN empresas e ON e.dominio = d.dominio
+    WHERE d.rank = 1
+    `,
+    [normalizeName(campaignName), EMAIL_INVALIDO_VARIANTES]
+  )) as { rows: { telefone_decisor: string | null; todos_telefones: string | null }[] };
+
+  const counts: Record<FitScoreTierRow["tier"], number> = {
+    apollo_celular: 0,
+    so_fixo: 0,
+    outra_fonte_celular: 0,
+    sem_dado: 0,
+  };
+  for (const row of rows) {
+    counts[tierTelefone(row.telefone_decisor, row.todos_telefones)]++;
+  }
+
+  return (Object.keys(counts) as FitScoreTierRow["tier"][])
+    .map((tier) => ({ tier, total: counts[tier] }))
+    .filter((r) => r.total > 0);
 }
 
 export type CampaignOriginBreakdownRow = {

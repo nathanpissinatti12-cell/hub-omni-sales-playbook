@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import {
   getCampaignById,
   getCampaignCnaeGroups,
+  getCampaignFitScoreBreakdown,
   getCampaignLeadStatusBreakdown,
   getCampaignOriginBreakdown,
   getCampaignQueueStatusBreakdown,
@@ -13,6 +14,7 @@ import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
+import { FitScoreChart } from "@/components/charts/FitScoreChart";
 
 export const dynamic = "force-dynamic";
 
@@ -38,14 +40,16 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const campaign = await getCampaignById(params.id);
   if (!campaign) notFound();
 
-  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown, originBreakdown] = await Promise.all([
-    getCampaignSummary(campaign.id, campaign.nome),
-    getCampaignQueueStatusBreakdown(campaign.nome),
-    getCampaignLeadStatusBreakdown(campaign.nome),
-    getCampaignCnaeGroups(campaign.id),
-    getCampaignRegionBreakdown(campaign.id),
-    getCampaignOriginBreakdown(campaign.nome),
-  ]);
+  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown, originBreakdown, fitScoreBreakdown] =
+    await Promise.all([
+      getCampaignSummary(campaign.id, campaign.nome),
+      getCampaignQueueStatusBreakdown(campaign.nome),
+      getCampaignLeadStatusBreakdown(campaign.nome),
+      getCampaignCnaeGroups(campaign.id),
+      getCampaignRegionBreakdown(campaign.id),
+      getCampaignOriginBreakdown(campaign.nome),
+      getCampaignFitScoreBreakdown(campaign.nome),
+    ]);
 
   const originTotal = getCampaignOriginTotal(campaign.nome);
 
@@ -144,6 +148,18 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
               total: r.total,
             }))}
           />
+        </div>
+
+        <div
+          className="space-y-2 rounded-lg border p-4"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <h2 className="text-lg font-semibold">Qualidade do telefone dos leads criados</h2>
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Só dá pra provar a faixa da nota (Qualidade do Dado), não o valor exato — a nota
+            exata depende também da origem do e-mail, que o fluxo não grava no banco.
+          </p>
+          <FitScoreChart data={fitScoreBreakdown} />
         </div>
 
         <div
