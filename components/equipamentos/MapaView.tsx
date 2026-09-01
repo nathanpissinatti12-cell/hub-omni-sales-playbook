@@ -553,6 +553,7 @@ export function MapaView({
     new Set(colaboradores.map((c) => c.setor?.trim()).filter((s): s is string => !!s))
   ).sort();
   const coresDosSetores = construirCoresDosSetores(setores);
+  const totalColaboradores = colaboradores.filter((c) => !c.is_deposito).length;
 
   function clamp(v: number) {
     return Math.min(96, Math.max(4, v));
@@ -581,19 +582,23 @@ export function MapaView({
         os equipamentos do colaborador.
       </p>
 
-      {setores.length > 0 && (
-        <div className="mb-2 flex flex-wrap gap-x-4 gap-y-1">
-          {setores.map((s) => (
-            <span key={s} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
-              <span
-                className="inline-block h-2.5 w-2.5 rounded-full"
-                style={{ background: coresDosSetores[s] }}
-              />
-              {s}
-            </span>
-          ))}
-        </div>
-      )}
+      <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1">
+        <span
+          className="rounded-md px-2 py-0.5 text-xs font-semibold"
+          style={{ background: "var(--accent)", color: "var(--on-accent)" }}
+        >
+          {totalColaboradores} colaborador{totalColaboradores === 1 ? "" : "es"}
+        </span>
+        {setores.map((s) => (
+          <span key={s} className="flex items-center gap-1.5 text-xs" style={{ color: "var(--text-muted)" }}>
+            <span
+              className="inline-block h-2.5 w-2.5 rounded-full"
+              style={{ background: coresDosSetores[s] }}
+            />
+            {s}
+          </span>
+        ))}
+      </div>
 
       <div
         ref={containerRef}
