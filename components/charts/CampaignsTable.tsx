@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
+import { custoDaCampanha, explicaCusto, formataReais } from "@/lib/custoCampanha";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
@@ -14,10 +15,13 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-4 py-2 font-medium">Empresas enriquecidas</th>
             <th className="px-4 py-2 font-medium">Criados Meetime</th>
             <th className="px-4 py-2 font-medium">Sem contato</th>
+            <th className="px-4 py-2 font-medium">Custo</th>
           </tr>
         </thead>
         <tbody>
-          {data.map((c) => (
+          {data.map((c) => {
+            const custo = custoDaCampanha(c.empresas_consultadas);
+            return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
                 <Link href={`/dashboard/campanhas/${c.id}`} className="hover:underline" style={{ color: "var(--accent)" }}>
@@ -30,8 +34,21 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
               <td className="px-4 py-2">{c.empresas_enriquecidas}</td>
               <td className="px-4 py-2">{c.criados_meetime}</td>
               <td className="px-4 py-2">{c.leads_sem_contato}</td>
+              <td className="px-4 py-2 whitespace-nowrap" title={explicaCusto(custo)}>
+                {custo.reais == null ? (
+                  <span style={{ color: "var(--text-muted)" }}>—</span>
+                ) : (
+                  <>
+                    ~{formataReais(custo.reais)}
+                    <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                      ({Math.round(custo.creditos)} cr)
+                    </span>
+                  </>
+                )}
+              </td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>

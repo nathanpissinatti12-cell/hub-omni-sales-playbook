@@ -20,6 +20,8 @@ export type CampaignPerformanceRow = {
   empresas_enriquecidas: number;
   criados_meetime: number;
   leads_sem_contato: number;
+  /** Empresas que chegaram a consultar o Apollo — base do custo estimado. */
+  empresas_consultadas: number;
   taxa_processamento: string;
 };
 
@@ -41,7 +43,14 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
         count(DISTINCT dominio) FILTER (WHERE status = 'pendente')::int AS pendente,
         count(DISTINCT dominio) FILTER (WHERE status = 'em pausa')::int AS em_pausa,
         count(DISTINCT dominio) FILTER (WHERE status = 'erro')::int AS erro,
-        count(DISTINCT dominio) FILTER (WHERE lead_status = 'criado meetime')::int AS criados_meetime
+        count(DISTINCT dominio) FILTER (WHERE lead_status = 'criado meetime')::int AS criados_meetime,
+        -- empresas que custaram crédito: processadas e NÃO barradas pelo dedup.
+        -- "já existe na base" é bloqueio anterior à chamada do Apollo, então sai
+        -- de graça; "já existe na meetime" só acontece depois do enriquecimento,
+        -- por isso conta como consultada.
+        count(DISTINCT dominio) FILTER (
+          WHERE status IN ('processado', 'erro') AND lead_status IS DISTINCT FROM 'já existe na base'
+        )::int AS empresas_consultadas
       FROM fila_processamento
       GROUP BY campanha_norm
     ),
@@ -69,6 +78,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       COALESCE(e.empresas_enriquecidas, 0) AS empresas_enriquecidas,
       COALESCE(f.criados_meetime, 0) AS criados_meetime,
       COALESCE(l.sem_contato, 0) AS leads_sem_contato,
+      COALESCE(f.empresas_consultadas, 0) AS empresas_consultadas,
       CASE
         WHEN COALESCE(f.total, 0) > 0
           THEN ROUND(100.0 * COALESCE(f.processado, 0) / f.total, 1)
