@@ -37,9 +37,16 @@ export const DEEPSEEK_PRECO_TRIMESTRAL_USD = numeroDoAmbiente("DEEPSEEK_PRECO_TR
 export const DEEPSEEK_CHAMADAS_TRIMESTRE = numeroDoAmbiente("DEEPSEEK_CHAMADAS_TRIMESTRE", 5140);
 
 // ---- Hunter (finder/verifier — chamado quando Apollo e Gemini não acham e-mail) ----
-// Plano Starter, US$49/mês, 2.000 créditos/mês. 1 crédito ≈ 1 chamada de busca
-// (aproximação: o crédito real varia por resultado retornado, mas é a melhor
-// unidade disponível sem instrumentar o fluxo).
+// Plano Starter, US$49/mês, 2.000 créditos/mês.
+//
+// O Hunter só cobra crédito quando a busca ACHA um e-mail (Finder = 1 crédito
+// + Verifier automático = 0,5 crédito = 1,5 crédito por acerto); tentativa sem
+// resultado não é cobrada. Confirmado 2026-09-08 comparando o histórico real
+// de créditos do Hunter (4,5 créditos = 3 acertos × 1,5) contra o banco: bate
+// exatamente com `count(email_decisor_fonte = 'hunter')` = 3 na campanha
+// ICP - Imobiliaria Rib. Por isso a conta usa só os acertos (fonte='hunter'
+// gravada em empresas/resultados), não toda vez que o fluxo tentou o Hunter.
+export const HUNTER_CREDITOS_POR_ACERTO = numeroDoAmbiente("HUNTER_CREDITOS_POR_ACERTO", 1.5);
 export const HUNTER_PRECO_MENSAL_USD = numeroDoAmbiente("HUNTER_PRECO_MENSAL_USD", 49);
 export const HUNTER_CREDITOS_CICLO = numeroDoAmbiente("HUNTER_CREDITOS_CICLO", 2000);
 
@@ -49,27 +56,31 @@ function precoUnitarioReais(precoUsd: number, cota: number): number {
 
 export type CustoCampanha = {
   empresasConsultadas: number;
-  chamadasHunter: number;
+  /** Buscas do Hunter que acharam o e-mail — só essas são cobradas. */
+  acertosHunter: number;
   apolloReais: number;
   deepseekReais: number;
   hunterReais: number;
   totalReais: number;
   creditosApollo: number;
+  creditosHunter: number;
 };
 
-export function custoDaCampanha(empresasConsultadas: number, chamadasHunter: number): CustoCampanha {
+export function custoDaCampanha(empresasConsultadas: number, acertosHunter: number): CustoCampanha {
   const creditosApollo = empresasConsultadas * CREDITOS_POR_EMPRESA;
   const apolloReais = creditosApollo * precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
   const deepseekReais = empresasConsultadas * precoUnitarioReais(DEEPSEEK_PRECO_TRIMESTRAL_USD, DEEPSEEK_CHAMADAS_TRIMESTRE);
-  const hunterReais = chamadasHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);
+  const creditosHunter = acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
+  const hunterReais = creditosHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);
   return {
     empresasConsultadas,
-    chamadasHunter,
+    acertosHunter,
     apolloReais,
     deepseekReais,
     hunterReais,
     totalReais: apolloReais + deepseekReais + hunterReais,
     creditosApollo,
+    creditosHunter,
   };
 }
 
@@ -82,7 +93,7 @@ export function explicaCusto(c: CustoCampanha): string {
   return [
     `Apollo: ${c.empresasConsultadas} empresas × ${CREDITOS_POR_EMPRESA} créditos = ${Math.round(c.creditosApollo)} créditos ≈ ${formataReais(c.apolloReais)}`,
     `DeepSeek: ${c.empresasConsultadas} chamadas ≈ ${formataReais(c.deepseekReais)}`,
-    `Hunter: ${c.chamadasHunter} chamadas ≈ ${formataReais(c.hunterReais)}`,
+    `Hunter: ${c.acertosHunter} e-mails achados × ${HUNTER_CREDITOS_POR_ACERTO} créditos = ${c.creditosHunter.toFixed(1)} créditos ≈ ${formataReais(c.hunterReais)}`,
     `Total ≈ ${formataReais(c.totalReais)} (cotação US$1 = ${formataReais(USD_BRL)}). Empresas bloqueadas pelo dedup não entram na conta.`,
   ].join(" · ");
 }

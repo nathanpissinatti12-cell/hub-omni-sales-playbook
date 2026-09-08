@@ -22,8 +22,8 @@ export type CampaignPerformanceRow = {
   leads_sem_contato: number;
   /** Empresas que chegaram a consultar o Apollo/DeepSeek — base do custo estimado. */
   empresas_consultadas: number;
-  /** Chamadas ao Hunter (Apollo + Gemini não acharam o e-mail do decisor). */
-  chamadas_hunter: number;
+  /** Buscas do Hunter que acharam o e-mail — só essas são cobradas. */
+  acertos_hunter: number;
   taxa_processamento: string;
 };
 
@@ -69,12 +69,14 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       GROUP BY campanha_id
     ),
     hunter_stats AS (
-      -- chamadas ao Hunter: sempre que Apollo e Gemini não acharam o e-mail do
-      -- decisor, o fluxo cai pro Hunter. Fonte '' e NULL contam também — são
-      -- tentativa de Hunter que não achou nada, mas a chamada aconteceu.
-      SELECT campanha_id, count(*)::int AS chamadas_hunter
+      -- acertos do Hunter: o fluxo tenta o Hunter sempre que Apollo e Gemini
+      -- não acham e-mail, mas o Hunter só COBRA crédito quando encontra um
+      -- e-mail de verdade (fonte='hunter'). Tentativa sem resultado (fonte=''
+      -- ou 'empresa', fallback institucional) não é cobrada — confirmado
+      -- 2026-09-08 contra o histórico real de créditos do Hunter.
+      SELECT campanha_id, count(*)::int AS acertos_hunter
       FROM "Apollo Excel Dados Resultados"
-      WHERE COALESCE(email_decisor_fonte, '') NOT IN ('apollo', 'gemini')
+      WHERE email_decisor_fonte = 'hunter'
       GROUP BY campanha_id
     )
     SELECT
@@ -90,7 +92,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       COALESCE(f.criados_meetime, 0) AS criados_meetime,
       COALESCE(l.sem_contato, 0) AS leads_sem_contato,
       COALESCE(f.empresas_consultadas, 0) AS empresas_consultadas,
-      COALESCE(h.chamadas_hunter, 0) AS chamadas_hunter,
+      COALESCE(h.acertos_hunter, 0) AS acertos_hunter,
       CASE
         WHEN COALESCE(f.total, 0) > 0
           THEN ROUND(100.0 * COALESCE(f.processado, 0) / f.total, 1)

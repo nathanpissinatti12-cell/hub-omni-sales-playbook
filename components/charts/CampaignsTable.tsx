@@ -16,11 +16,13 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-4 py-2 font-medium">Criados Meetime</th>
             <th className="px-4 py-2 font-medium">Sem contato</th>
             <th className="px-4 py-2 font-medium">Custo</th>
+            <th className="px-4 py-2 font-medium">Custo/lead</th>
           </tr>
         </thead>
         <tbody>
           {data.map((c) => {
-            const custo = custoDaCampanha(c.empresas_consultadas, c.chamadas_hunter);
+            const custo = custoDaCampanha(c.empresas_consultadas, c.acertos_hunter);
+            const custoPorLead = c.empresas_enriquecidas > 0 ? custo.totalReais / c.empresas_enriquecidas : null;
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
@@ -39,6 +41,13 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                 <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
                   ({Math.round(custo.creditosApollo)} cr Apollo)
                 </span>
+              </td>
+              <td className="px-4 py-2 whitespace-nowrap" title="Custo total ÷ empresas enriquecidas (leads que efetivamente entraram na base)">
+                {custoPorLead == null ? (
+                  <span style={{ color: "var(--text-muted)" }}>—</span>
+                ) : (
+                  `~${formataReais(custoPorLead)}`
+                )}
               </td>
             </tr>
             );
