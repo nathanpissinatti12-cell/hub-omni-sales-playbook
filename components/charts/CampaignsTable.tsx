@@ -21,7 +21,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
         </thead>
         <tbody>
           {data.map((c) => {
-            const conferido = custoConferido(c.nome);
+            const conferido = custoConferido(c.criado_em);
             const custo = conferido ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter) : null;
             const custoPorLead = custo && c.empresas_enriquecidas > 0 ? custo.totalReais / c.empresas_enriquecidas : null;
             return (

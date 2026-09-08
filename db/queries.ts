@@ -12,6 +12,7 @@ export type CampaignPerformanceRow = {
   id: string;
   nome: string;
   status: string;
+  criado_em: string;
   total_fila: number;
   processado: number;
   pendente: number;
@@ -83,6 +84,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       c.id,
       c.nome,
       c.status,
+      c.criado_em,
       COALESCE(f.total, 0) AS total_fila,
       COALESCE(f.processado, 0) AS processado,
       COALESCE(f.pendente, 0) AS pendente,

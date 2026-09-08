@@ -61,13 +61,18 @@ function precoUnitarioReais(precoUsd: number, cota: number): number {
 // contadas em vez de 3 acertos) — melhor não mostrar um custo não conferido
 // do que mostrar um errado com aparência de certeza.
 //
-// Conforme cada campanha nova for conferida do mesmo jeito, adicionar o nome
-// dela aqui (comparando com `campanhas.nome`, sem normalizar maiúsculas/
-// espaços — usar o nome exato).
-export const CAMPANHAS_COM_CUSTO_CONFERIDO = new Set(["ICP - Imobiliaria Rib"]);
+// Em vez de uma lista que precisa ser editada campanha por campanha, o corte
+// é por data: a ICP - Imobiliaria Rib marca o início da contabilização, e
+// toda campanha criada a partir dela (inclusive as futuras) já entra
+// automaticamente. Campanhas anteriores continuam sem custo mostrado.
+export const CUSTO_CONFERIDO_A_PARTIR_DE = numeroDoAmbiente(
+  "CUSTO_CONFERIDO_A_PARTIR_DE_TS",
+  Date.parse("2026-09-08T14:27:28.777Z") // criado_em da ICP - Imobiliaria Rib
+);
 
-export function custoConferido(nomeCampanha: string): boolean {
-  return CAMPANHAS_COM_CUSTO_CONFERIDO.has(nomeCampanha);
+export function custoConferido(criadoEm: string | Date): boolean {
+  const t = criadoEm instanceof Date ? criadoEm.getTime() : Date.parse(criadoEm);
+  return Number.isFinite(t) && t >= CUSTO_CONFERIDO_A_PARTIR_DE;
 }
 
 export type CustoCampanha = {
