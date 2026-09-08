@@ -54,6 +54,22 @@ function precoUnitarioReais(precoUsd: number, cota: number): number {
   return cota > 0 ? (precoUsd / cota) * USD_BRL : 0;
 }
 
+// A fórmula do Hunter só foi conferida contra o consumo real (histórico de
+// créditos do próprio Hunter) na ICP - Imobiliaria Rib, em 2026-09-08. Nas
+// campanhas anteriores essa validação nunca foi feita, então o número podia
+// estar tão errado quanto o bug que acabamos de corrigir (49 tentativas
+// contadas em vez de 3 acertos) — melhor não mostrar um custo não conferido
+// do que mostrar um errado com aparência de certeza.
+//
+// Conforme cada campanha nova for conferida do mesmo jeito, adicionar o nome
+// dela aqui (comparando com `campanhas.nome`, sem normalizar maiúsculas/
+// espaços — usar o nome exato).
+export const CAMPANHAS_COM_CUSTO_CONFERIDO = new Set(["ICP - Imobiliaria Rib"]);
+
+export function custoConferido(nomeCampanha: string): boolean {
+  return CAMPANHAS_COM_CUSTO_CONFERIDO.has(nomeCampanha);
+}
+
 export type CustoCampanha = {
   empresasConsultadas: number;
   /** Buscas do Hunter que acharam o e-mail — só essas são cobradas. */

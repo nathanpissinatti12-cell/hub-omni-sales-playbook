@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
-import { custoDaCampanha, explicaCusto, formataReais } from "@/lib/custoCampanha";
+import { custoConferido, custoDaCampanha, explicaCusto, formataReais } from "@/lib/custoCampanha";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
@@ -21,8 +21,9 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
         </thead>
         <tbody>
           {data.map((c) => {
-            const custo = custoDaCampanha(c.empresas_consultadas, c.acertos_hunter);
-            const custoPorLead = c.empresas_enriquecidas > 0 ? custo.totalReais / c.empresas_enriquecidas : null;
+            const conferido = custoConferido(c.nome);
+            const custo = conferido ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter) : null;
+            const custoPorLead = custo && c.empresas_enriquecidas > 0 ? custo.totalReais / c.empresas_enriquecidas : null;
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
@@ -36,11 +37,20 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
               <td className="px-4 py-2">{c.empresas_enriquecidas}</td>
               <td className="px-4 py-2">{c.criados_meetime}</td>
               <td className="px-4 py-2">{c.leads_sem_contato}</td>
-              <td className="px-4 py-2 whitespace-nowrap" title={explicaCusto(custo)}>
-                ~{formataReais(custo.totalReais)}
-                <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                  ({Math.round(custo.creditosApollo)} cr Apollo)
-                </span>
+              <td
+                className="px-4 py-2 whitespace-nowrap"
+                title={custo ? explicaCusto(custo) : "Cálculo ainda não conferido contra o consumo real desta campanha"}
+              >
+                {custo == null ? (
+                  <span style={{ color: "var(--text-muted)" }}>—</span>
+                ) : (
+                  <>
+                    ~{formataReais(custo.totalReais)}
+                    <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                      ({Math.round(custo.creditosApollo)} cr Apollo)
+                    </span>
+                  </>
+                )}
               </td>
               <td className="px-4 py-2 whitespace-nowrap" title="Custo total ÷ empresas enriquecidas (leads que efetivamente entraram na base)">
                 {custoPorLead == null ? (
