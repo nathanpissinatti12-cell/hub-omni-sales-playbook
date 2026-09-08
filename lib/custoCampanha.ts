@@ -24,10 +24,13 @@ export const USD_BRL = numeroDoAmbiente("USD_BRL", 5.13);
 // Plano mensal informado pelo usuário: US$236, ciclo de 10.060 créditos.
 export const APOLLO_PRECO_MENSAL_USD = numeroDoAmbiente("APOLLO_PRECO_MENSAL_USD", 236);
 export const APOLLO_CREDITOS_CICLO = numeroDoAmbiente("APOLLO_CREDITOS_CICLO", 10060);
-// Créditos gastos, em média, por empresa que chegou a ser consultada — calibrado
-// na ICP - PedBot (299 créditos / 43 empresas), a única com consumo medido de
-// verdade. Varia com o porte das empresas da lista (busca paginada no Apollo).
-export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 6.95);
+// Créditos gastos, em média, por empresa que chegou a ser consultada — recalibrado
+// 2026-09-08 com o consumo real da ICP - Imobiliaria Rib, direto do painel "Uso de
+// créditos" do Apollo (944 créditos em 08/09, filtrado por dia e por usuário) ÷ 234
+// empresas consultadas = 4,03. Substitui a estimativa anterior (6,95, calibrada na
+// ICP - PedBot), que superestimava o custo em quase 2x. Varia com o porte das
+// empresas da lista (busca paginada no Apollo) — remedir quando o perfil mudar muito.
+export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.03);
 
 // ---- DeepSeek (seleciona o decisor — 1 chamada por empresa consultada) ----
 // Recarga de US$5 a cada 3 meses, informada pelo usuário. A cota "por chamada"
