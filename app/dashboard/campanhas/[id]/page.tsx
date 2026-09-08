@@ -11,10 +11,12 @@ import {
   getCampaignSummary,
 } from "@/db/queries";
 import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
+import { getCustoReal } from "@/db/custoCampanhaRealQueries";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
 import { FitScoreChart } from "@/components/charts/FitScoreChart";
+import { CustoRealForm } from "@/components/dashboard/CustoRealForm";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +42,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const campaign = await getCampaignById(params.id);
   if (!campaign) notFound();
 
-  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown, originBreakdown, fitScoreBreakdown] =
+  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown, originBreakdown, fitScoreBreakdown, custoReal] =
     await Promise.all([
       getCampaignSummary(campaign.id, campaign.nome),
       getCampaignQueueStatusBreakdown(campaign.nome),
@@ -49,6 +51,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
       getCampaignRegionBreakdown(campaign.id),
       getCampaignOriginBreakdown(campaign.nome),
       getCampaignFitScoreBreakdown(campaign.nome),
+      getCustoReal(campaign.id),
     ]);
 
   const originTotal = getCampaignOriginTotal(campaign.nome);
@@ -185,6 +188,8 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         <h2 className="text-lg font-semibold">Região das empresas (estado)</h2>
         <RegionChart data={regionBreakdown} />
       </section>
+
+      <CustoRealForm campanhaId={campaign.id} campanhaNome={campaign.nome} inicial={custoReal} />
     </div>
   );
 }

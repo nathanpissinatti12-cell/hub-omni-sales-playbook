@@ -86,6 +86,10 @@ export type CustoCampanha = {
   totalReais: number;
   creditosApollo: number;
   creditosHunter: number;
+  /** true quando Apollo/DeepSeek vêm de valor MEDIDO (custo_campanha_real), não da taxa estimada. */
+  medido?: boolean;
+  deepseekUsdReais?: number;
+  conferidoEm?: string;
 };
 
 export function custoDaCampanha(empresasConsultadas: number, acertosHunter: number): CustoCampanha {
@@ -106,16 +110,56 @@ export function custoDaCampanha(empresasConsultadas: number, acertosHunter: numb
   };
 }
 
+/**
+ * Mesmo cálculo, mas com Apollo/DeepSeek vindos de número MEDIDO (checado nos
+ * painéis de billing dos dois serviços, filtrado pelo dia em que a campanha
+ * rodou) em vez da taxa estimada por empresa/chamada. Hunter continua igual —
+ * já é exato por campanha, direto do banco (conta de `email_decisor_fonte`).
+ */
+export function custoDaCampanhaReal(input: {
+  empresasConsultadas: number;
+  creditosApolloReais: number;
+  deepseekUsdReais: number;
+  acertosHunter: number;
+  conferidoEm: string;
+}): CustoCampanha {
+  const apolloReais = input.creditosApolloReais * precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
+  const deepseekReais = input.deepseekUsdReais * USD_BRL;
+  const creditosHunter = input.acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
+  const hunterReais = creditosHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);
+  return {
+    empresasConsultadas: input.empresasConsultadas,
+    acertosHunter: input.acertosHunter,
+    apolloReais,
+    deepseekReais,
+    hunterReais,
+    totalReais: apolloReais + deepseekReais + hunterReais,
+    creditosApollo: input.creditosApolloReais,
+    creditosHunter,
+    medido: true,
+    deepseekUsdReais: input.deepseekUsdReais,
+    conferidoEm: input.conferidoEm,
+  };
+}
+
 export function formataReais(valor: number): string {
   return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 /** Texto do tooltip com a memória de cálculo, serviço por serviço. */
 export function explicaCusto(c: CustoCampanha): string {
+  if (c.medido) {
+    return [
+      `Apollo: ${Math.round(c.creditosApollo)} créditos medidos no painel ≈ ${formataReais(c.apolloReais)}`,
+      `DeepSeek: US$${(c.deepseekUsdReais ?? 0).toFixed(2)} medidos no painel ≈ ${formataReais(c.deepseekReais)}`,
+      `Hunter: ${c.acertosHunter} e-mails achados × ${HUNTER_CREDITOS_POR_ACERTO} créditos = ${c.creditosHunter.toFixed(1)} créditos ≈ ${formataReais(c.hunterReais)}`,
+      `Total ≈ ${formataReais(c.totalReais)} — valor MEDIDO (conferido em ${c.conferidoEm}), não estimado.`,
+    ].join(" · ");
+  }
   return [
     `Apollo: ${c.empresasConsultadas} empresas × ${CREDITOS_POR_EMPRESA} créditos = ${Math.round(c.creditosApollo)} créditos ≈ ${formataReais(c.apolloReais)}`,
     `DeepSeek: ${c.empresasConsultadas} chamadas ≈ ${formataReais(c.deepseekReais)}`,
     `Hunter: ${c.acertosHunter} e-mails achados × ${HUNTER_CREDITOS_POR_ACERTO} créditos = ${c.creditosHunter.toFixed(1)} créditos ≈ ${formataReais(c.hunterReais)}`,
-    `Total ≈ ${formataReais(c.totalReais)} (cotação US$1 = ${formataReais(USD_BRL)}). Empresas bloqueadas pelo dedup não entram na conta.`,
+    `Total ≈ ${formataReais(c.totalReais)} (estimado, cotação US$1 = ${formataReais(USD_BRL)}). Empresas bloqueadas pelo dedup não entram na conta.`,
   ].join(" · ");
 }

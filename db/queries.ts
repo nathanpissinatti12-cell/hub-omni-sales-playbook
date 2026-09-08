@@ -28,6 +28,16 @@ export type CampaignPerformanceRow = {
   /** Se true, a coluna Custo do dashboard mostra valor pra essa campanha. */
   custo_conferido: boolean;
   taxa_processamento: string;
+  /**
+   * Custo MEDIDO (não estimado), quando alguém já conferiu os painéis de
+   * billing do Apollo/DeepSeek pra essa campanha e gravou em
+   * custo_campanha_real (banco admin — ver db/custoCampanhaRealQueries.ts).
+   * Preenchido depois, em app/dashboard/page.tsx e app/api/dashboard/campaigns,
+   * porque vem de um banco diferente (admin_omni, não baseapollo).
+   */
+  custo_real_apollo_creditos: number | null;
+  custo_real_deepseek_usd: number | null;
+  custo_real_conferido_em: string | null;
 };
 
 // `campanhas.criado_em` é "timestamp without time zone" (guarda hora local do
@@ -116,7 +126,13 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
         WHEN COALESCE(f.total, 0) > 0
           THEN ROUND(100.0 * COALESCE(f.processado, 0) / f.total, 1)
         ELSE 0
-      END AS taxa_processamento
+      END AS taxa_processamento,
+      -- custo_campanha_real vive no banco admin (admin_omni), não aqui — os três
+      -- campos abaixo ficam NULL e são preenchidos por cima em getCampaignPerformance
+      -- (app/dashboard/page.tsx e app/api/dashboard/campaigns), depois de ler o outro banco.
+      NULL::numeric AS custo_real_apollo_creditos,
+      NULL::numeric AS custo_real_deepseek_usd,
+      NULL::date AS custo_real_conferido_em
     FROM campanhas c
     LEFT JOIN fila_stats f ON f.campanha_norm = ${NORMALIZE_NAME("c.nome")}
     LEFT JOIN empresas_stats e ON e.campanha_id = c.id

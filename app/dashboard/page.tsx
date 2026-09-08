@@ -8,6 +8,7 @@ import {
   getGlobalTopStates,
   getSummary,
 } from "@/db/queries";
+import { aplicaCustoReal, listCustosReais } from "@/db/custoCampanhaRealQueries";
 import { CampaignsTable } from "@/components/charts/CampaignsTable";
 import { DailyProcessedChart } from "@/components/charts/DailyProcessedChart";
 import { ContactStatusDonut } from "@/components/charts/ContactStatusDonut";
@@ -17,14 +18,17 @@ import { TopStatesPie } from "@/components/charts/TopStatesPie";
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const [campaigns, summary, dailyProcessed, contactStatus, missingData, topStates] = await Promise.all([
-    getCampaignPerformance(),
-    getSummary(),
-    getGlobalDailyProcessed(),
-    getGlobalContactStatus(),
-    getGlobalMissingDataBreakdown(),
-    getGlobalTopStates(),
-  ]);
+  const [campaignsBrutas, custosReais, summary, dailyProcessed, contactStatus, missingData, topStates] =
+    await Promise.all([
+      getCampaignPerformance(),
+      listCustosReais(),
+      getSummary(),
+      getGlobalDailyProcessed(),
+      getGlobalContactStatus(),
+      getGlobalMissingDataBreakdown(),
+      getGlobalTopStates(),
+    ]);
+  const campaigns = aplicaCustoReal(campaignsBrutas, custosReais);
 
   const globalSuccessRate =
     summary.total_fila > 0 ? ((summary.total_processado / summary.total_fila) * 100).toFixed(0) : "0";
