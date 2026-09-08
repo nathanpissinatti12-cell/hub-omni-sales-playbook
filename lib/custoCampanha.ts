@@ -61,19 +61,17 @@ function precoUnitarioReais(precoUsd: number, cota: number): number {
 // contadas em vez de 3 acertos) — melhor não mostrar um custo não conferido
 // do que mostrar um errado com aparência de certeza.
 //
-// Em vez de uma lista que precisa ser editada campanha por campanha, o corte
-// é por data: a ICP - Imobiliaria Rib marca o início da contabilização, e
-// toda campanha criada a partir dela (inclusive as futuras) já entra
-// automaticamente. Campanhas anteriores continuam sem custo mostrado.
-export const CUSTO_CONFERIDO_A_PARTIR_DE = numeroDoAmbiente(
-  "CUSTO_CONFERIDO_A_PARTIR_DE_TS",
-  Date.parse("2026-09-08T14:27:28.777Z") // criado_em da ICP - Imobiliaria Rib
-);
-
-export function custoConferido(criadoEm: string | Date): boolean {
-  const t = criadoEm instanceof Date ? criadoEm.getTime() : Date.parse(criadoEm);
-  return Number.isFinite(t) && t >= CUSTO_CONFERIDO_A_PARTIR_DE;
-}
+// O corte é por data — a ICP - Imobiliaria Rib marca o início da
+// contabilização, e toda campanha criada a partir dela (inclusive as
+// futuras) já entra automaticamente — mas a COMPARAÇÃO é feita em
+// `getCampaignPerformance` (db/queries.ts), dentro do próprio Postgres, não
+// aqui. `campanhas.criado_em` é "timestamp without time zone" (hora local do
+// Brasil sem indicar o fuso); comparar isso contra um número fixo em JS é uma
+// armadilha, porque o mesmo valor lido em máquinas com TZ diferente (dev
+// local vs. servidor em produção, que roda em UTC) dá timestamps diferentes.
+// Foi exatamente esse bug que fez a campanha sumir da coluna Custo em
+// produção mesmo com o dado certo no banco. `custo_conferido` já vem pronto
+// (boolean) de `getCampaignPerformance` — use-o direto.
 
 export type CustoCampanha = {
   empresasConsultadas: number;

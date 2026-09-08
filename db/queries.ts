@@ -25,8 +25,20 @@ export type CampaignPerformanceRow = {
   empresas_consultadas: number;
   /** Buscas do Hunter que acharam o e-mail — só essas são cobradas. */
   acertos_hunter: number;
+  /** Se true, a coluna Custo do dashboard mostra valor pra essa campanha. */
+  custo_conferido: boolean;
   taxa_processamento: string;
 };
+
+// `campanhas.criado_em` é "timestamp without time zone" (guarda hora local do
+// Brasil, sem indicar o fuso). Comparar isso no lado do Node é uma armadilha:
+// o mesmo valor lido em máquinas com TZ diferente (dev = America/Sao_Paulo,
+// servidor = UTC) rende timestamps diferentes, então um corte por data feito
+// em JS acerta numa máquina e erra em outra — foi exatamente o que aconteceu
+// com a ICP - Imobiliaria Rib sumindo em produção. A comparação abaixo fica
+// inteira dentro do Postgres, comparando a mesma coluna contra ela mesma, o
+// que é imune a fuso horário.
+const CAMPANHA_MARCO_CUSTO = "ICP - Imobiliaria Rib";
 
 export type SummaryRow = {
   campanhas_ativas: number;
@@ -37,7 +49,8 @@ export type SummaryRow = {
 };
 
 export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]> {
-  const { rows } = await pool.query(`
+  const { rows } = await pool.query(
+    `
     WITH fila_stats AS (
       SELECT
         ${NORMALIZE_NAME("campanha")} AS campanha_norm,
@@ -95,6 +108,10 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       COALESCE(l.sem_contato, 0) AS leads_sem_contato,
       COALESCE(f.empresas_consultadas, 0) AS empresas_consultadas,
       COALESCE(h.acertos_hunter, 0) AS acertos_hunter,
+      COALESCE(
+        c.criado_em >= (SELECT criado_em FROM campanhas WHERE nome = $1 LIMIT 1),
+        false
+      ) AS custo_conferido,
       CASE
         WHEN COALESCE(f.total, 0) > 0
           THEN ROUND(100.0 * COALESCE(f.processado, 0) / f.total, 1)
@@ -106,7 +123,9 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
     LEFT JOIN leads_stats l ON l.campanha_id = c.id
     LEFT JOIN hunter_stats h ON h.campanha_id = c.id
     ORDER BY c.criado_em DESC
-  `);
+  `,
+    [CAMPANHA_MARCO_CUSTO]
+  );
   return rows;
 }
 

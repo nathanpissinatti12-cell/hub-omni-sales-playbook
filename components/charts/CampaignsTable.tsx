@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
-import { custoConferido, custoDaCampanha, explicaCusto, formataReais } from "@/lib/custoCampanha";
+import { custoDaCampanha, explicaCusto, formataReais } from "@/lib/custoCampanha";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
@@ -21,8 +21,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
         </thead>
         <tbody>
           {data.map((c) => {
-            const conferido = custoConferido(c.criado_em);
-            const custo = conferido ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter) : null;
+            const custo = c.custo_conferido ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter) : null;
             const custoPorLead = custo && c.empresas_enriquecidas > 0 ? custo.totalReais / c.empresas_enriquecidas : null;
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
