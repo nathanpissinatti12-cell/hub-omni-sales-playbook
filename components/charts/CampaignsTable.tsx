@@ -20,7 +20,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
         </thead>
         <tbody>
           {data.map((c) => {
-            const custo = custoDaCampanha(c.empresas_consultadas);
+            const custo = custoDaCampanha(c.empresas_consultadas, c.chamadas_hunter);
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
@@ -35,16 +35,10 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
               <td className="px-4 py-2">{c.criados_meetime}</td>
               <td className="px-4 py-2">{c.leads_sem_contato}</td>
               <td className="px-4 py-2 whitespace-nowrap" title={explicaCusto(custo)}>
-                {custo.reais == null ? (
-                  <span style={{ color: "var(--text-muted)" }}>—</span>
-                ) : (
-                  <>
-                    ~{formataReais(custo.reais)}
-                    <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                      ({Math.round(custo.creditos)} cr)
-                    </span>
-                  </>
-                )}
+                ~{formataReais(custo.totalReais)}
+                <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
+                  ({Math.round(custo.creditosApollo)} cr Apollo)
+                </span>
               </td>
             </tr>
             );

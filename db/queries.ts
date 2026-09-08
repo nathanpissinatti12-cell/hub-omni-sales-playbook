@@ -20,8 +20,10 @@ export type CampaignPerformanceRow = {
   empresas_enriquecidas: number;
   criados_meetime: number;
   leads_sem_contato: number;
-  /** Empresas que chegaram a consultar o Apollo — base do custo estimado. */
+  /** Empresas que chegaram a consultar o Apollo/DeepSeek — base do custo estimado. */
   empresas_consultadas: number;
+  /** Chamadas ao Hunter (Apollo + Gemini não acharam o e-mail do decisor). */
+  chamadas_hunter: number;
   taxa_processamento: string;
 };
 
@@ -65,6 +67,15 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       SELECT campanha_id, count(DISTINCT dominio)::int AS sem_contato
       FROM leads_sem_contato
       GROUP BY campanha_id
+    ),
+    hunter_stats AS (
+      -- chamadas ao Hunter: sempre que Apollo e Gemini não acharam o e-mail do
+      -- decisor, o fluxo cai pro Hunter. Fonte '' e NULL contam também — são
+      -- tentativa de Hunter que não achou nada, mas a chamada aconteceu.
+      SELECT campanha_id, count(*)::int AS chamadas_hunter
+      FROM "Apollo Excel Dados Resultados"
+      WHERE COALESCE(email_decisor_fonte, '') NOT IN ('apollo', 'gemini')
+      GROUP BY campanha_id
     )
     SELECT
       c.id,
@@ -79,6 +90,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       COALESCE(f.criados_meetime, 0) AS criados_meetime,
       COALESCE(l.sem_contato, 0) AS leads_sem_contato,
       COALESCE(f.empresas_consultadas, 0) AS empresas_consultadas,
+      COALESCE(h.chamadas_hunter, 0) AS chamadas_hunter,
       CASE
         WHEN COALESCE(f.total, 0) > 0
           THEN ROUND(100.0 * COALESCE(f.processado, 0) / f.total, 1)
@@ -88,6 +100,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
     LEFT JOIN fila_stats f ON f.campanha_norm = ${NORMALIZE_NAME("c.nome")}
     LEFT JOIN empresas_stats e ON e.campanha_id = c.id
     LEFT JOIN leads_stats l ON l.campanha_id = c.id
+    LEFT JOIN hunter_stats h ON h.campanha_id = c.id
     ORDER BY c.criado_em DESC
   `);
   return rows;
