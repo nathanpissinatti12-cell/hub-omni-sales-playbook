@@ -33,11 +33,11 @@ export const APOLLO_CREDITOS_CICLO = numeroDoAmbiente("APOLLO_CREDITOS_CICLO", 1
 export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.03);
 
 // ---- DeepSeek (seleciona o decisor — 1 chamada por empresa consultada) ----
-// Recarga de US$5 a cada 3 meses, informada pelo usuário. A cota "por chamada"
-// é derivada do volume real dos últimos 3 meses completos (jun+jul+ago/2026 =
-// 5.140 chamadas), não de um limite de plano — é pré-pago, não assinatura.
-export const DEEPSEEK_PRECO_TRIMESTRAL_USD = numeroDoAmbiente("DEEPSEEK_PRECO_TRIMESTRAL_USD", 5);
-export const DEEPSEEK_CHAMADAS_TRIMESTRE = numeroDoAmbiente("DEEPSEEK_CHAMADAS_TRIMESTRE", 5140);
+// Custo real por chamada, medido 2026-09-08 direto no painel de billing do
+// DeepSeek (US$0,15 / 233 chamadas no dia em que a ICP - Imobiliaria Rib
+// rodou). Substitui a estimativa anterior (recarga trimestral ÷ volume médio),
+// que era só uma aproximação — este é o preço de fato cobrado por chamada.
+export const DEEPSEEK_CUSTO_USD_POR_CHAMADA = numeroDoAmbiente("DEEPSEEK_CUSTO_USD_POR_CHAMADA", 0.000644);
 
 // ---- Hunter (finder/verifier — chamado quando Apollo e Gemini não acham e-mail) ----
 // Plano Starter, US$49/mês, 2.000 créditos/mês.
@@ -91,7 +91,7 @@ export type CustoCampanha = {
 export function custoDaCampanha(empresasConsultadas: number, acertosHunter: number): CustoCampanha {
   const creditosApollo = empresasConsultadas * CREDITOS_POR_EMPRESA;
   const apolloReais = creditosApollo * precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
-  const deepseekReais = empresasConsultadas * precoUnitarioReais(DEEPSEEK_PRECO_TRIMESTRAL_USD, DEEPSEEK_CHAMADAS_TRIMESTRE);
+  const deepseekReais = empresasConsultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA * USD_BRL;
   const creditosHunter = acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
   const hunterReais = creditosHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);
   return {
