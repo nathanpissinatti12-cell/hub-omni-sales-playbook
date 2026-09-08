@@ -13,7 +13,7 @@ export type CustoCampanhaReal = {
 /** Lê todas as campanhas com custo já conferido — usado pra montar a tabela do dashboard. */
 export async function listCustosReais(): Promise<CustoCampanhaReal[]> {
   const { rows } = await adminPool.query(
-    `SELECT campanha_id, campanha_nome, apollo_creditos_reais, deepseek_usd_reais, conferido_em, observacao
+    `SELECT campanha_id, campanha_nome, apollo_creditos_reais, deepseek_usd_reais, conferido_em::text, observacao
      FROM custo_campanha_real`
   );
   return rows;
@@ -21,7 +21,7 @@ export async function listCustosReais(): Promise<CustoCampanhaReal[]> {
 
 export async function getCustoReal(campanhaId: string): Promise<CustoCampanhaReal | null> {
   const { rows } = await adminPool.query(
-    `SELECT campanha_id, campanha_nome, apollo_creditos_reais, deepseek_usd_reais, conferido_em, observacao
+    `SELECT campanha_id, campanha_nome, apollo_creditos_reais, deepseek_usd_reais, conferido_em::text, observacao
      FROM custo_campanha_real WHERE campanha_id = $1`,
     [campanhaId]
   );
