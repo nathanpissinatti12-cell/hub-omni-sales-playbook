@@ -6,12 +6,14 @@ import {
   getCampaignFitScoreBreakdown,
   getCampaignLeadStatusBreakdown,
   getCampaignOriginBreakdown,
+  getCampaignPerformance,
   getCampaignQueueStatusBreakdown,
   getCampaignRegionBreakdown,
   getCampaignSummary,
 } from "@/db/queries";
 import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
 import { getCustoReal } from "@/db/custoCampanhaRealQueries";
+import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
@@ -42,7 +44,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const campaign = await getCampaignById(params.id);
   if (!campaign) notFound();
 
-  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown, originBreakdown, fitScoreBreakdown, custoReal] =
+  const [summary, queueStatus, leadStatus, cnaeGroups, regionBreakdown, originBreakdown, fitScoreBreakdown, custoReal, performance] =
     await Promise.all([
       getCampaignSummary(campaign.id, campaign.nome),
       getCampaignQueueStatusBreakdown(campaign.nome),
@@ -52,9 +54,30 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
       getCampaignOriginBreakdown(campaign.nome),
       getCampaignFitScoreBreakdown(campaign.nome),
       getCustoReal(campaign.id),
+      getCampaignPerformance(),
     ]);
 
   const originTotal = getCampaignOriginTotal(campaign.nome);
+
+  const perf = performance.find((p) => p.id === campaign.id) ?? null;
+  const custo =
+    perf == null
+      ? null
+      : custoReal != null
+        ? custoDaCampanhaReal({
+            empresasConsultadas: perf.empresas_consultadas,
+            creditosApolloReais: Number(custoReal.apollo_creditos_reais),
+            deepseekUsdReais: Number(custoReal.deepseek_usd_reais),
+            acertosHunter: perf.acertos_hunter,
+            conferidoEm: custoReal.conferido_em ?? "",
+          })
+        : perf.custo_conferido
+          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter)
+          : null;
+  // Custo por lead que efetivamente subiu na Meetime — não por "empresa
+  // enriquecida", que inclui quem nunca virou contato de verdade (sem e-mail
+  // válido, sem decisor etc). Ver summary.criados_meetime (rank=1 no desfecho).
+  const custoPorLeadMeetime = custo && summary.criados_meetime > 0 ? custo.totalReais / summary.criados_meetime : null;
 
   const taxaConversaoMeetime =
     summary.total_empresas > 0
@@ -187,6 +210,42 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
       >
         <h2 className="text-lg font-semibold">Região das empresas (estado)</h2>
         <RegionChart data={regionBreakdown} />
+      </section>
+
+      <section
+        className="space-y-2 rounded-lg border p-4"
+        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+      >
+        <h2 className="text-lg font-semibold">Custo da campanha</h2>
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Custo total ÷ leads criados na Meetime — não empresas enriquecidas, que inclui quem nunca
+          virou contato de verdade.
+        </p>
+        {custo == null ? (
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            Ainda sem cálculo conferido pra essa campanha.
+          </p>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Custo total</p>
+              <p className="mt-1 text-xl font-semibold" title={explicaCusto(custo)}>
+                {custo.medido ? "" : "~"}
+                {formataReais(custo.totalReais)}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Leads criados na Meetime</p>
+              <p className="mt-1 text-xl font-semibold">{summary.criados_meetime}</p>
+            </div>
+            <div>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Custo por lead na Meetime</p>
+              <p className="mt-1 text-xl font-semibold">
+                {custoPorLeadMeetime == null ? "—" : `~${formataReais(custoPorLeadMeetime)}`}
+              </p>
+            </div>
+          </div>
+        )}
       </section>
 
       <CustoRealForm campanhaId={campaign.id} campanhaNome={campaign.nome} inicial={custoReal} />

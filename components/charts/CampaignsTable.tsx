@@ -16,7 +16,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-4 py-2 font-medium">Criados Meetime</th>
             <th className="px-4 py-2 font-medium">Sem contato</th>
             <th className="px-4 py-2 font-medium">Custo</th>
-            <th className="px-4 py-2 font-medium">Custo/lead</th>
+            <th className="px-4 py-2 font-medium">Custo/lead Meetime</th>
           </tr>
         </thead>
         <tbody>
@@ -33,7 +33,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                 : c.custo_conferido
                   ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter)
                   : null;
-            const custoPorLead = custo && c.empresas_enriquecidas > 0 ? custo.totalReais / c.empresas_enriquecidas : null;
+            const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
@@ -63,7 +63,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                   </>
                 )}
               </td>
-              <td className="px-4 py-2 whitespace-nowrap" title="Custo total ÷ empresas enriquecidas (leads que efetivamente entraram na base)">
+              <td className="px-4 py-2 whitespace-nowrap" title="Custo total ÷ leads criados na Meetime (não empresas enriquecidas — nem toda enriquecida vira lead na Meetime)">
                 {custoPorLead == null ? (
                   <span style={{ color: "var(--text-muted)" }}>—</span>
                 ) : (
