@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 
 export default function PainelIndicadoresPage() {
   return (
-    <div className="space-y-6">
+    <div className="tema-claro space-y-6">
       <div>
         <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
           ← Voltar ao dashboard

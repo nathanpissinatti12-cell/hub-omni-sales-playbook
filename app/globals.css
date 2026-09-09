@@ -60,6 +60,38 @@ body {
   font-family: "Omni Atyp", ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Tema claro fixo para uma página específica (hoje só o Painel de Indicadores),
+   independente do tema do sistema operacional. Os valores claros do :root são
+   repetidos aqui porque precisam VENCER o @media prefers-color-scheme: dark
+   acima — herdar não bastaria, já que aquele bloco redefine os mesmos tokens.
+   Os gráficos são SVG que usam fill="var(--text)" etc., então trocar os tokens
+   já reveste tabela, cartões e gráficos de uma vez. */
+.tema-claro {
+  color-scheme: light;
+
+  --bg: #f7f7f5;
+  --surface: #ffffff;
+  --border: #e5e5e0;
+  --text: #0a0a0a;
+  --text-muted: #6b6b64;
+  --accent: #d9a900;
+  --on-accent: #0a0a0a;
+
+  color: var(--text);
+}
+
+/* O <body> continua escuro (o resto do site segue o tema do SO), então sem isto
+   sobrariam faixas escuras nas margens do <main> e abaixo do conteúdo. Isto
+   pinta a viewport inteira de claro atrás da página. O z-index negativo mantém
+   o cabeçalho preto do site por cima, que é proposital na identidade visual. */
+.tema-claro::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+  z-index: -1;
+}
+
 /* Planta baixa isométrica (Controle de Equipamentos): leve "levantada" da
    estação no hover, para dar retorno tátil sem mexer na posição salva. */
 .iso-desk-art {
