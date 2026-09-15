@@ -1,6 +1,7 @@
 import { pool } from "./client";
 import { classifyCnae } from "./cnaeGroups";
 import { tierTelefone } from "@/lib/phoneTier";
+import { APOLLO_INICIO_PLANO_NOVO } from "@/lib/custoCampanha";
 
 // fila_processamento.campanha é digitado à mão e diverge de campanhas.nome
 // em maiúsculas/espaçamento (ex.: "ICPs -imobiliaria" vs "ICPS - imobiliaria"),
@@ -27,6 +28,8 @@ export type CampaignPerformanceRow = {
   acertos_hunter: number;
   /** Se true, a coluna Custo do dashboard mostra valor pra essa campanha. */
   custo_conferido: boolean;
+  /** Campanha criada a partir de 04/10/2026 — custo Apollo usa o plano novo (US$295 / 12.500). */
+  ciclo_apollo_novo: boolean;
   taxa_processamento: string;
   /**
    * Custo MEDIDO (não estimado), quando alguém já conferiu os painéis de
@@ -122,6 +125,9 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
         c.criado_em >= (SELECT criado_em FROM campanhas WHERE nome = $1 LIMIT 1),
         false
       ) AS custo_conferido,
+      -- Mesma proteção de fuso do custo_conferido: comparação inteira no Postgres.
+      -- A data vem de APOLLO_INICIO_PLANO_NOVO (lib/custoCampanha.ts).
+      COALESCE(c.criado_em >= $2::timestamp, false) AS ciclo_apollo_novo,
       CASE
         WHEN COALESCE(f.total, 0) > 0
           THEN ROUND(100.0 * COALESCE(f.processado, 0) / f.total, 1)
@@ -140,7 +146,7 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
     LEFT JOIN hunter_stats h ON h.campanha_id = c.id
     ORDER BY c.criado_em DESC
   `,
-    [CAMPANHA_MARCO_CUSTO]
+    [CAMPANHA_MARCO_CUSTO, APOLLO_INICIO_PLANO_NOVO]
   );
   return rows;
 }

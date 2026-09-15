@@ -70,9 +70,10 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
             deepseekUsdReais: Number(custoReal.deepseek_usd_reais),
             acertosHunter: perf.acertos_hunter,
             conferidoEm: custoReal.conferido_em ?? "",
+            cicloApolloNovo: perf.ciclo_apollo_novo,
           })
         : perf.custo_conferido
-          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter)
+          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter, perf.ciclo_apollo_novo)
           : null;
   // Custo por lead que efetivamente subiu na Meetime — não por "empresa
   // enriquecida", que inclui quem nunca virou contato de verdade (sem e-mail

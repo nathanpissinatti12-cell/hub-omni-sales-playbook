@@ -21,11 +21,26 @@ function numeroDoAmbiente(chave: string, padrao: number): number {
 export const USD_BRL = numeroDoAmbiente("USD_BRL", 5.13);
 
 // ---- Apollo ----
-// Plano mensal informado pelo usuário: US$236 (≈ R$1.210,68), ciclo de 10.050
-// créditos — corrigido 2026-09-09 (o card de custos fixos do dashboard batia
-// 10.000, mas o valor real do ciclo, confirmado no painel Apollo, é 10.050).
+// Plano até o ciclo que termina em 03/10/2026: US$236 (4 assentos), ciclo de
+// 10.050 créditos — corrigido 2026-09-09 (o card de custos fixos do dashboard
+// batia 10.000, mas o valor real do ciclo, confirmado no painel Apollo, é 10.050).
 export const APOLLO_PRECO_MENSAL_USD = numeroDoAmbiente("APOLLO_PRECO_MENSAL_USD", 236);
 export const APOLLO_CREDITOS_CICLO = numeroDoAmbiente("APOLLO_CREDITOS_CICLO", 10050);
+// Plano a partir de 04/10/2026 (primeiro ciclo cheio): US$295 (5 assentos ×
+// US$59), 12.500 créditos/mês — informado pelo usuário em 2026-09-15. O preço
+// por crédito quase não muda (US$0,0235 → US$0,0236); o que sobe é o teto
+// mensal. O mês de transição (setembro, rateado) é exceção e não entra aqui.
+// Qual plano vale pra cada campanha é decidido pela data de criação, no Postgres
+// (`ciclo_apollo_novo` em getCampaignPerformance, db/queries.ts).
+export const APOLLO_INICIO_PLANO_NOVO = "2026-10-04";
+export const APOLLO_PRECO_MENSAL_USD_NOVO = numeroDoAmbiente("APOLLO_PRECO_MENSAL_USD_NOVO", 295);
+export const APOLLO_CREDITOS_CICLO_NOVO = numeroDoAmbiente("APOLLO_CREDITOS_CICLO_NOVO", 12500);
+
+function precoCreditoApolloReais(cicloNovo: boolean): number {
+  return cicloNovo
+    ? precoUnitarioReais(APOLLO_PRECO_MENSAL_USD_NOVO, APOLLO_CREDITOS_CICLO_NOVO)
+    : precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
+}
 // Créditos gastos, em média, por empresa que chegou a ser consultada — recalibrado
 // 2026-09-08 com o consumo real da ICP - Imobiliaria Rib, direto do painel "Uso de
 // créditos" do Apollo (944 créditos em 08/09, filtrado por dia e por usuário) ÷ 234
@@ -122,9 +137,9 @@ export type CustoCampanha = {
   creditosTelefoneEstimados: number;
 };
 
-export function custoDaCampanha(empresasConsultadas: number, acertosHunter: number): CustoCampanha {
+export function custoDaCampanha(empresasConsultadas: number, acertosHunter: number, cicloApolloNovo = false): CustoCampanha {
   const creditosApollo = empresasConsultadas * CREDITOS_POR_EMPRESA;
-  const apolloReais = creditosApollo * precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
+  const apolloReais = creditosApollo * precoCreditoApolloReais(cicloApolloNovo);
   const deepseekReais = empresasConsultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA * USD_BRL;
   const creditosHunter = acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
   const hunterReais = creditosHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);
@@ -156,8 +171,10 @@ export function custoDaCampanhaReal(input: {
   deepseekUsdReais: number;
   acertosHunter: number;
   conferidoEm: string;
+  /** Campanha criada a partir de APOLLO_INICIO_PLANO_NOVO — usa o preço/crédito do plano novo. */
+  cicloApolloNovo?: boolean;
 }): CustoCampanha {
-  const apolloReais = input.creditosApolloReais * precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
+  const apolloReais = input.creditosApolloReais * precoCreditoApolloReais(input.cicloApolloNovo ?? false);
   const deepseekReais = input.deepseekUsdReais * USD_BRL;
   const creditosHunter = input.acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
   const hunterReais = creditosHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);

@@ -29,9 +29,10 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                     deepseekUsdReais: c.custo_real_deepseek_usd,
                     acertosHunter: c.acertos_hunter,
                     conferidoEm: c.custo_real_conferido_em ?? "",
+                    cicloApolloNovo: c.ciclo_apollo_novo,
                   })
                 : c.custo_conferido
-                  ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter)
+                  ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter, c.ciclo_apollo_novo)
                   : null;
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             return (
