@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
 import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
+import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
@@ -17,6 +18,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-4 py-2 font-medium">Sem contato</th>
             <th className="px-4 py-2 font-medium">Custo</th>
             <th className="px-4 py-2 font-medium">Custo/lead Meetime</th>
+            <th className="px-4 py-2 font-medium">Encerrada em</th>
           </tr>
         </thead>
         <tbody>
@@ -35,6 +37,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                   ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter, c.ciclo_apollo_novo)
                   : null;
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
+            const encerrada = encerradaEm(c.nome);
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
@@ -70,6 +73,9 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                 ) : (
                   `~${formataReais(custoPorLead)}`
                 )}
+              </td>
+              <td className="px-4 py-2 whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
+                {encerrada == null ? "—" : formataDataEncerramento(encerrada)}
               </td>
             </tr>
             );
