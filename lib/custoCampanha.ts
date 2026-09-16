@@ -77,14 +77,14 @@ export const HUNTER_CREDITOS_CICLO = numeroDoAmbiente("HUNTER_CREDITOS_CICLO", 2
 // já pronta em reais, direto do painel de billing do Gemini.
 export const GEMINI_CUSTO_REAIS_POR_EMPRESA = numeroDoAmbiente("GEMINI_CUSTO_REAIS_POR_EMPRESA", 0.007);
 
-// ---- Apollo: revelação de celular do decisor (direct_dial_credit) ----
-// Pool DIFERENTE do lead_credit usado acima — descoberto 2026-09-09 no painel
-// "Uso de créditos → Detalhes de uso" do Apollo: cada celular revelado custa
-// 8 créditos desse pool específico. Ele NÃO bloqueia a revelação quando
-// esgota (fica 10.000/10.000 há dias e a revelação continua normal — visto em
-// duas campanhas separadas), mas o gasto é real e ainda não tem preço/crédito
-// confirmado — por isso fica só em CRÉDITOS aqui, fora do total em reais, até
-// o usuário confirmar o valor na aba "Sobre créditos" do Apollo.
+// ---- Apollo: revelação de celular do decisor ----
+// RESOLVIDO 2026-09-15 (ver reference_apollo_pools_de_credito.md): telefone
+// sai do MESMO pool usado pra busca/enriquecimento (lead_credit), 8 créditos
+// por revelação — não é um pool separado com preço próprio (a tela "Detalhes
+// de uso" mostra `direct_dial_credit` como contador zerado à parte, mas isso
+// não representa um custo adicional real). Por isso entra no mesmo preço/
+// crédito do Apollo e soma no total — antes ficava "de fora, sem preço
+// confirmado".
 export const TELEFONE_CREDITOS_POR_REVELACAO = numeroDoAmbiente("APOLLO_TELEFONE_CREDITOS_POR_REVELACAO", 8);
 // Taxa de empresas consultadas que efetivamente têm celular revelado —
 // calibrada 2026-09-09 na ICP - Distribuidores Atacadistas Mercados ETP:
@@ -122,29 +122,35 @@ export type CustoCampanha = {
   deepseekReais: number;
   hunterReais: number;
   geminiReais: number;
+  telefoneReais: number;
   totalReais: number;
   creditosApollo: number;
   creditosHunter: number;
+  creditosTelefone: number;
   /** true quando Apollo/DeepSeek vêm de valor MEDIDO (custo_campanha_real), não da taxa estimada. */
   medido?: boolean;
+  /** true quando os créditos de telefone vêm de valor MEDIDO (creditosTelefoneReais.ts), não da taxa estimada por %. */
+  telefoneMedido?: boolean;
   deepseekUsdReais?: number;
   conferidoEm?: string;
-  /**
-   * Prévia de créditos `direct_dial_credit` (revelação de celular) — NÃO
-   * entra em `totalReais` porque o preço/crédito desse pool ainda não foi
-   * confirmado. Ver TELEFONE_CREDITOS_POR_REVELACAO acima.
-   */
-  creditosTelefoneEstimados: number;
 };
 
-export function custoDaCampanha(empresasConsultadas: number, acertosHunter: number, cicloApolloNovo = false): CustoCampanha {
+export function custoDaCampanha(
+  empresasConsultadas: number,
+  acertosHunter: number,
+  cicloApolloNovo = false,
+  creditosTelefoneMedidos?: number | null
+): CustoCampanha {
   const creditosApollo = empresasConsultadas * CREDITOS_POR_EMPRESA;
   const apolloReais = creditosApollo * precoCreditoApolloReais(cicloApolloNovo);
   const deepseekReais = empresasConsultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA * USD_BRL;
   const creditosHunter = acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
   const hunterReais = creditosHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);
   const geminiReais = empresasConsultadas * GEMINI_CUSTO_REAIS_POR_EMPRESA;
-  const creditosTelefoneEstimados = Math.round(empresasConsultadas * TAXA_REVELACAO_TELEFONE * TELEFONE_CREDITOS_POR_REVELACAO);
+  const telefoneMedido = creditosTelefoneMedidos != null;
+  const creditosTelefone =
+    creditosTelefoneMedidos ?? Math.round(empresasConsultadas * TAXA_REVELACAO_TELEFONE * TELEFONE_CREDITOS_POR_REVELACAO);
+  const telefoneReais = creditosTelefone * precoCreditoApolloReais(cicloApolloNovo);
   return {
     empresasConsultadas,
     acertosHunter,
@@ -152,10 +158,12 @@ export function custoDaCampanha(empresasConsultadas: number, acertosHunter: numb
     deepseekReais,
     hunterReais,
     geminiReais,
-    totalReais: apolloReais + deepseekReais + hunterReais + geminiReais,
+    telefoneReais,
+    totalReais: apolloReais + deepseekReais + hunterReais + geminiReais + telefoneReais,
     creditosApollo,
     creditosHunter,
-    creditosTelefoneEstimados,
+    creditosTelefone,
+    telefoneMedido,
   };
 }
 
@@ -173,18 +181,21 @@ export function custoDaCampanhaReal(input: {
   conferidoEm: string;
   /** Campanha criada a partir de APOLLO_INICIO_PLANO_NOVO — usa o preço/crédito do plano novo. */
   cicloApolloNovo?: boolean;
+  /** Créditos de telefone realmente medidos no painel (lib/creditosTelefoneReais.ts) — quem confere Apollo/DeepSeek não necessariamente também confere telefone, então continua opcional. */
+  creditosTelefoneMedidos?: number | null;
 }): CustoCampanha {
   const apolloReais = input.creditosApolloReais * precoCreditoApolloReais(input.cicloApolloNovo ?? false);
   const deepseekReais = input.deepseekUsdReais * USD_BRL;
   const creditosHunter = input.acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
   const hunterReais = creditosHunter * precoUnitarioReais(HUNTER_PRECO_MENSAL_USD, HUNTER_CREDITOS_CICLO);
   // Gemini não tem painel de custo real conferido por campanha ainda — usa a
-  // mesma taxa por empresa da versão estimada, igual ao telefone abaixo.
+  // mesma taxa por empresa da versão estimada.
   const geminiReais = input.empresasConsultadas * GEMINI_CUSTO_REAIS_POR_EMPRESA;
-  // ainda estimado mesmo aqui: quem confere Apollo/DeepSeek no painel não
-  // necessariamente também confere telefone — se algum dia isso for medido
-  // por campanha, adicionar um input separado em vez de reaproveitar este.
-  const creditosTelefoneEstimados = Math.round(input.empresasConsultadas * TAXA_REVELACAO_TELEFONE * TELEFONE_CREDITOS_POR_REVELACAO);
+  const telefoneMedido = input.creditosTelefoneMedidos != null;
+  const creditosTelefone =
+    input.creditosTelefoneMedidos ??
+    Math.round(input.empresasConsultadas * TAXA_REVELACAO_TELEFONE * TELEFONE_CREDITOS_POR_REVELACAO);
+  const telefoneReais = creditosTelefone * precoCreditoApolloReais(input.cicloApolloNovo ?? false);
   return {
     empresasConsultadas: input.empresasConsultadas,
     acertosHunter: input.acertosHunter,
@@ -192,13 +203,15 @@ export function custoDaCampanhaReal(input: {
     deepseekReais,
     hunterReais,
     geminiReais,
-    totalReais: apolloReais + deepseekReais + hunterReais + geminiReais,
+    telefoneReais,
+    totalReais: apolloReais + deepseekReais + hunterReais + geminiReais + telefoneReais,
     creditosApollo: input.creditosApolloReais,
     creditosHunter,
+    creditosTelefone,
+    telefoneMedido,
     medido: true,
     deepseekUsdReais: input.deepseekUsdReais,
     conferidoEm: input.conferidoEm,
-    creditosTelefoneEstimados,
   };
 }
 
@@ -214,7 +227,7 @@ export function explicaCusto(c: CustoCampanha): string {
       `DeepSeek: US$${(c.deepseekUsdReais ?? 0).toFixed(2)} medidos no painel ≈ ${formataReais(c.deepseekReais)}`,
       `Hunter: ${c.acertosHunter} e-mails achados × ${HUNTER_CREDITOS_POR_ACERTO} créditos = ${c.creditosHunter.toFixed(1)} créditos ≈ ${formataReais(c.hunterReais)}`,
       `Gemini: ${c.empresasConsultadas} empresas × ${formataReais(GEMINI_CUSTO_REAIS_POR_EMPRESA)} ≈ ${formataReais(c.geminiReais)}`,
-      `Telefone: ~${c.creditosTelefoneEstimados} créditos direct_dial estimados (${TELEFONE_CREDITOS_POR_REVELACAO}/revelação) — fora do total, preço/crédito ainda não confirmado`,
+      `Telefone: ${Math.round(c.creditosTelefone)} créditos ${c.telefoneMedido ? "medidos no painel" : `estimados (${(TAXA_REVELACAO_TELEFONE * 100).toFixed(0)}% × ${TELEFONE_CREDITOS_POR_REVELACAO}/revelação)`} ≈ ${formataReais(c.telefoneReais)}`,
       `Total ≈ ${formataReais(c.totalReais)} — valor MEDIDO (conferido em ${c.conferidoEm}), não estimado.`,
     ].join(" · ");
   }
@@ -223,7 +236,7 @@ export function explicaCusto(c: CustoCampanha): string {
     `DeepSeek: ${c.empresasConsultadas} chamadas ≈ ${formataReais(c.deepseekReais)}`,
     `Hunter: ${c.acertosHunter} e-mails achados × ${HUNTER_CREDITOS_POR_ACERTO} créditos = ${c.creditosHunter.toFixed(1)} créditos ≈ ${formataReais(c.hunterReais)}`,
     `Gemini: ${c.empresasConsultadas} empresas × ${formataReais(GEMINI_CUSTO_REAIS_POR_EMPRESA)} ≈ ${formataReais(c.geminiReais)}`,
-    `Telefone: ~${c.creditosTelefoneEstimados} créditos direct_dial estimados (${(TAXA_REVELACAO_TELEFONE * 100).toFixed(0)}% das empresas × ${TELEFONE_CREDITOS_POR_REVELACAO}/revelação) — fora do total, preço/crédito ainda não confirmado`,
+    `Telefone: ${Math.round(c.creditosTelefone)} créditos ${c.telefoneMedido ? "medidos no painel" : `estimados (${(TAXA_REVELACAO_TELEFONE * 100).toFixed(0)}% das empresas × ${TELEFONE_CREDITOS_POR_REVELACAO}/revelação)`} ≈ ${formataReais(c.telefoneReais)}`,
     `Total ≈ ${formataReais(c.totalReais)} (estimado, cotação US$1 = ${formataReais(USD_BRL)}). Empresas bloqueadas pelo dedup não entram na conta.`,
   ].join(" · ");
 }

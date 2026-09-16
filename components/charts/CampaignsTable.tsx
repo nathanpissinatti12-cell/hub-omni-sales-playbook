@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
 import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
 import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
+import { creditosTelefoneReais } from "@/lib/creditosTelefoneReais";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
@@ -32,9 +33,10 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                     acertosHunter: c.acertos_hunter,
                     conferidoEm: c.custo_real_conferido_em ?? "",
                     cicloApolloNovo: c.ciclo_apollo_novo,
+                    creditosTelefoneMedidos: creditosTelefoneReais(c.nome),
                   })
                 : c.custo_conferido
-                  ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter, c.ciclo_apollo_novo)
+                  ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter, c.ciclo_apollo_novo, creditosTelefoneReais(c.nome))
                   : null;
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             const encerrada = encerradaEm(c.nome);
@@ -62,7 +64,8 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                     {custo.medido ? "" : "~"}
                     {formataReais(custo.totalReais)}
                     <span className="ml-1 text-xs" style={{ color: "var(--text-muted)" }}>
-                      ({Math.round(custo.creditosApollo)} cr Apollo{custo.medido ? ", medido" : ""})
+                      ({Math.round(custo.creditosApollo)} cr Apollo{custo.medido ? ", medido" : ""}
+                      {custo.telefoneMedido ? ` + ${Math.round(custo.creditosTelefone)} cr telefone, medido` : ""})
                     </span>
                   </>
                 )}
