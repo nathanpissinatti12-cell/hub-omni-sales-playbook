@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
 import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
 import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
+import { getCustoRealManual } from "@/lib/custoRealManual";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
@@ -23,8 +24,17 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
         </thead>
         <tbody>
           {data.map((c) => {
-            const custo =
-              c.custo_real_apollo_creditos != null && c.custo_real_deepseek_usd != null
+            const manual = getCustoRealManual(c.nome);
+            const custo = manual
+              ? custoDaCampanhaReal({
+                  empresasConsultadas: c.empresas_consultadas,
+                  creditosApolloReais: manual.creditosApolloReais,
+                  deepseekUsdReais: manual.deepseekUsdReais,
+                  acertosHunter: c.acertos_hunter,
+                  conferidoEm: manual.conferidoEm,
+                  cicloApolloNovo: c.ciclo_apollo_novo,
+                })
+              : c.custo_real_apollo_creditos != null && c.custo_real_deepseek_usd != null
                 ? custoDaCampanhaReal({
                     empresasConsultadas: c.empresas_consultadas,
                     creditosApolloReais: c.custo_real_apollo_creditos,
