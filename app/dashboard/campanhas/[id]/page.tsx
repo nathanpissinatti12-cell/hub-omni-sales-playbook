@@ -12,7 +12,6 @@ import {
   getCampaignSummary,
 } from "@/db/queries";
 import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
-import { creditosTelefoneReais } from "@/lib/creditosTelefoneReais";
 import { getCustoReal } from "@/db/custoCampanhaRealQueries";
 import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
 import { RegionChart } from "@/components/charts/RegionChart";
@@ -72,10 +71,9 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
             acertosHunter: perf.acertos_hunter,
             conferidoEm: custoReal.conferido_em ?? "",
             cicloApolloNovo: perf.ciclo_apollo_novo,
-            creditosTelefoneMedidos: creditosTelefoneReais(campaign.nome),
           })
         : perf.custo_conferido
-          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter, perf.ciclo_apollo_novo, creditosTelefoneReais(campaign.nome))
+          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter, perf.ciclo_apollo_novo)
           : null;
   // Custo por lead que efetivamente subiu na Meetime — não por "empresa
   // enriquecida", que inclui quem nunca virou contato de verdade (sem e-mail
