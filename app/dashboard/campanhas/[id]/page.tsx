@@ -13,7 +13,6 @@ import {
 } from "@/db/queries";
 import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
 import { creditosTelefoneReais } from "@/lib/creditosTelefoneReais";
-import { getCustoRealManual } from "@/lib/custoRealManual";
 import { getCustoReal } from "@/db/custoCampanhaRealQueries";
 import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
 import { RegionChart } from "@/components/charts/RegionChart";
@@ -62,20 +61,10 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const originTotal = getCampaignOriginTotal(campaign.nome);
 
   const perf = performance.find((p) => p.id === campaign.id) ?? null;
-  const custoManual = getCustoRealManual(campaign.nome);
   const custo =
     perf == null
       ? null
-      : custoManual
-        ? custoDaCampanhaReal({
-            empresasConsultadas: perf.empresas_consultadas,
-            creditosApolloReais: custoManual.creditosApolloReais,
-            deepseekUsdReais: custoManual.deepseekUsdReais,
-            acertosHunter: perf.acertos_hunter,
-            conferidoEm: custoManual.conferidoEm,
-            cicloApolloNovo: perf.ciclo_apollo_novo,
-          })
-        : custoReal != null
+      : custoReal != null
         ? custoDaCampanhaReal({
             empresasConsultadas: perf.empresas_consultadas,
             creditosApolloReais: Number(custoReal.apollo_creditos_reais),

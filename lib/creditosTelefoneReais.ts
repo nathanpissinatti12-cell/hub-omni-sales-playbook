@@ -11,10 +11,9 @@
 // Só entram aqui campanhas onde alguém já conferiu o valor real no painel do
 // Apollo — as demais continuam usando a estimativa por % (TAXA_REVELACAO_TELEFONE
 // em custoCampanha.ts). Adicionar uma linha nova quando outra campanha for medida.
-// A ICP - VAREJO PME. foi movida pra lib/custoRealManual.ts em 2026-09-16 —
-// o total de crédito real do dia (2.567) já inclui o telefone, então não
-// entra aqui também (evita contar o telefone duas vezes).
-const TELEFONE_CREDITOS_REAIS: Record<string, number> = {};
+const TELEFONE_CREDITOS_REAIS: Record<string, number> = {
+  "ICP - VAREJO PME.": 1992,
+};
 
 export function creditosTelefoneReais(nomeCampanha: string): number | null {
   return TELEFONE_CREDITOS_REAIS[nomeCampanha] ?? null;
