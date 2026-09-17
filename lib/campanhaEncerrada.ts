@@ -8,6 +8,7 @@ const ENCERRADA_EM: Record<string, string> = {
   "ICP - Distribuidores Atacadistas Mercados ETP": "2026-09-09",
   "ICP - Hospitais privados": "2026-09-08",
   "ICP - Imobiliaria Rib": "2026-09-04",
+  "ICP - BLIP ETP": "2026-09-17",
 };
 
 export function encerradaEm(nomeCampanha: string): string | null {
