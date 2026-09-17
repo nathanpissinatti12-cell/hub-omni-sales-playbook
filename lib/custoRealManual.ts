@@ -33,7 +33,12 @@ const CUSTO_REAL_MANUAL: Record<
   // 17/09/2026: mesma checagem (Gabriel Donadeli, sem filtro de recurso) —
   // 296 créditos no total, também 100% telefone. DeepSeek também medido
   // direto no painel de billing (Today, API Key: All): US$0,18 em 45
-  // chamadas — bate com o número de empresas consultadas nesse dia.
+  // chamadas. Os números se cruzam e fecham: 45 chamadas DeepSeek = 45
+  // empresas consultadas (1 chamada cada); 296 créditos Apollo ÷ 8
+  // créditos/revelação = 37 celulares revelados dessas 45 (82% de taxa,
+  // mais alta que a média geral de 59,2%). Gemini não foi medido à parte
+  // aqui — segue a taxa estimada (45 × R$0,007 ≈ R$0,32), calculada
+  // dinamicamente por quem chama isso (empresasConsultadas real do banco).
   "ICP - BLIP ETP": {
     creditosApolloReais: 296,
     conferidoEm: "2026-09-17",
