@@ -3,6 +3,7 @@ import type { CampaignPerformanceRow } from "@/db/queries";
 import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais, DEEPSEEK_CUSTO_USD_POR_CHAMADA } from "@/lib/custoCampanha";
 import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
 import { getCustoRealManual } from "@/lib/custoRealManual";
+import { celularesRevelados } from "@/lib/celularesRevelados";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
@@ -15,6 +16,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-4 py-2 font-medium">Total na fila</th>
             <th className="px-4 py-2 font-medium">Taxa processado</th>
             <th className="px-4 py-2 font-medium">Empresas enriquecidas</th>
+            <th className="px-4 py-2 font-medium">% celular revelado</th>
             <th className="px-4 py-2 font-medium">Criados Meetime</th>
             <th className="px-4 py-2 font-medium">Sem contato</th>
             <th className="px-4 py-2 font-medium">Custo</th>
@@ -48,6 +50,8 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                   : null;
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             const encerrada = encerradaEm(c.nome);
+            const revelados = celularesRevelados(c.nome);
+            const percentRevelado = revelados != null && c.empresas_enriquecidas > 0 ? (revelados / c.empresas_enriquecidas) * 100 : null;
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
@@ -59,6 +63,17 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
               <td className="px-4 py-2">{c.total_fila}</td>
               <td className="px-4 py-2">{c.taxa_processamento}%</td>
               <td className="px-4 py-2">{c.empresas_enriquecidas}</td>
+              <td
+                className="px-4 py-2 whitespace-nowrap"
+                style={{ color: "var(--text-muted)" }}
+                title={
+                  revelados != null
+                    ? `${revelados} celulares revelados (medido) de ${c.empresas_enriquecidas} empresas enriquecidas`
+                    : "Ainda não medido pra essa campanha"
+                }
+              >
+                {percentRevelado == null ? "—" : `${percentRevelado.toFixed(0)}%`}
+              </td>
               <td className="px-4 py-2">{c.criados_meetime}</td>
               <td className="px-4 py-2">{c.leads_sem_contato}</td>
               <td
