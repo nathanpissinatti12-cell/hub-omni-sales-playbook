@@ -42,12 +42,18 @@ function precoCreditoApolloReais(cicloNovo: boolean): number {
     : precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
 }
 // Créditos gastos, em média, por empresa que chegou a ser consultada — recalibrado
-// 2026-09-08 com o consumo real da ICP - Imobiliaria Rib, direto do painel "Uso de
-// créditos" do Apollo (944 créditos em 08/09, filtrado por dia e por usuário) ÷ 234
-// empresas consultadas = 4,03. Substitui a estimativa anterior (6,95, calibrada na
-// ICP - PedBot), que superestimava o custo em quase 2x. Varia com o porte das
-// empresas da lista (busca paginada no Apollo) — remedir quando o perfil mudar muito.
-export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.03);
+// 2026-09-17 combinando as duas medições mais recentes e limpas (créditos
+// isolados por conta — filtrando "Uso de créditos" pela conta do n8n, sem
+// misturar trabalho manual de outros colaboradores, ver lib/custoRealManual.ts):
+// ICP - VAREJO PME. (1.992 créditos / 468 empresas) + ICP - BLIP ETP (296
+// créditos / 44 empresas) = 2.288 ÷ 512 = 4,47. Antes era 4,03 (só a
+// Imobiliaria Rib, 944 créditos ÷ 234 empresas, 08/09). Nas duas medições mais
+// recentes, 100% do crédito Apollo do fluxo n8n foi revelação de celular —
+// nenhum crédito de busca/enriquecimento (ver TAXA_REVELACAO_TELEFONE abaixo,
+// calibrada com o mesmo par de campanhas). Substitui a estimativa anterior de
+// 6,95 (calibrada na ICP - PedBot). Varia com o porte das empresas da lista —
+// remedir quando o perfil mudar muito.
+export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.47);
 
 // ---- DeepSeek (seleciona o decisor — 1 chamada por empresa consultada) ----
 // Custo real por chamada, medido 2026-09-08 direto no painel de billing do
@@ -87,9 +93,12 @@ export const GEMINI_CUSTO_REAIS_POR_EMPRESA = numeroDoAmbiente("GEMINI_CUSTO_REA
 // o usuário confirmar o valor na aba "Sobre créditos" do Apollo.
 export const TELEFONE_CREDITOS_POR_REVELACAO = numeroDoAmbiente("APOLLO_TELEFONE_CREDITOS_POR_REVELACAO", 8);
 // Taxa de empresas consultadas que efetivamente têm celular revelado —
-// calibrada 2026-09-09 na ICP - Distribuidores Atacadistas Mercados ETP:
-// 74 revelações (592 créditos ÷ 8) ÷ 125 empresas consultadas = 59,2%.
-export const TAXA_REVELACAO_TELEFONE = numeroDoAmbiente("APOLLO_TAXA_REVELACAO_TELEFONE", 0.592);
+// recalibrada 2026-09-17 com o mesmo par de campanhas de CREDITOS_POR_EMPRESA
+// acima: (1.992 + 296) créditos ÷ 8 = 286 revelações ÷ (468 + 44) empresas =
+// 55,9%. Antes era 59,2% (só a ICP - Distribuidores Atacadistas Mercados ETP,
+// 74 revelações ÷ 125 empresas, 09/09) — número próximo, confirma que a taxa
+// é relativamente estável entre campanhas.
+export const TAXA_REVELACAO_TELEFONE = numeroDoAmbiente("APOLLO_TAXA_REVELACAO_TELEFONE", 0.559);
 
 function precoUnitarioReais(precoUsd: number, cota: number): number {
   return cota > 0 ? (precoUsd / cota) * USD_BRL : 0;
