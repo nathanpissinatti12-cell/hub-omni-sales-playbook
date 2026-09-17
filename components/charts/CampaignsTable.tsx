@@ -29,7 +29,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
               ? custoDaCampanhaReal({
                   empresasConsultadas: c.empresas_consultadas,
                   creditosApolloReais: manual.creditosApolloReais,
-                  deepseekUsdReais: c.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
+                  deepseekUsdReais: manual.deepseekUsdReais ?? c.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
                   acertosHunter: c.acertos_hunter,
                   conferidoEm: manual.conferidoEm,
                   cicloApolloNovo: c.ciclo_apollo_novo,

@@ -69,7 +69,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         ? custoDaCampanhaReal({
             empresasConsultadas: perf.empresas_consultadas,
             creditosApolloReais: custoManual.creditosApolloReais,
-            deepseekUsdReais: perf.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
+            deepseekUsdReais: custoManual.deepseekUsdReais ?? perf.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
             acertosHunter: perf.acertos_hunter,
             conferidoEm: custoManual.conferidoEm,
             cicloApolloNovo: perf.ciclo_apollo_novo,

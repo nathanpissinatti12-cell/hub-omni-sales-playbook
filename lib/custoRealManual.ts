@@ -17,7 +17,10 @@
 // (Gabriel Donadeli) e confirmar na tabela/feed que a origem de cada linha é
 // "API Test" / usuário "Você" (não "Extensão"). Só esse total é atribuível
 // à campanha.
-const CUSTO_REAL_MANUAL: Record<string, { creditosApolloReais: number; conferidoEm: string }> = {
+const CUSTO_REAL_MANUAL: Record<
+  string,
+  { creditosApolloReais: number; conferidoEm: string; deepseekUsdReais?: number }
+> = {
   // 15/09/2026: filtrado em "Gabriel Donadeli", sem filtro de recurso, deu
   // 1.992 créditos no total — 100% em "Números de telefone" (249 revelações
   // × 8), confirmado linha a linha no feed como origem "API Test"/"Você".
@@ -28,10 +31,13 @@ const CUSTO_REAL_MANUAL: Record<string, { creditosApolloReais: number; conferido
     conferidoEm: "2026-09-15",
   },
   // 17/09/2026: mesma checagem (Gabriel Donadeli, sem filtro de recurso) —
-  // 296 créditos no total, também 100% telefone.
+  // 296 créditos no total, também 100% telefone. DeepSeek também medido
+  // direto no painel de billing (Today, API Key: All): US$0,18 em 45
+  // chamadas — bate com o número de empresas consultadas nesse dia.
   "ICP - BLIP ETP": {
     creditosApolloReais: 296,
     conferidoEm: "2026-09-17",
+    deepseekUsdReais: 0.18,
   },
 };
 
