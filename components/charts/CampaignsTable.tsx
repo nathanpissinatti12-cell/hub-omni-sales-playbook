@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
-import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
+import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais, DEEPSEEK_CUSTO_USD_POR_CHAMADA } from "@/lib/custoCampanha";
 import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
 import { getCustoRealManual } from "@/lib/custoRealManual";
 
@@ -29,7 +29,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
               ? custoDaCampanhaReal({
                   empresasConsultadas: c.empresas_consultadas,
                   creditosApolloReais: manual.creditosApolloReais,
-                  deepseekUsdReais: manual.deepseekUsdReais,
+                  deepseekUsdReais: c.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
                   acertosHunter: c.acertos_hunter,
                   conferidoEm: manual.conferidoEm,
                   cicloApolloNovo: c.ciclo_apollo_novo,

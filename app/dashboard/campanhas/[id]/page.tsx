@@ -14,7 +14,7 @@ import {
 import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
 import { getCustoRealManual } from "@/lib/custoRealManual";
 import { getCustoReal } from "@/db/custoCampanhaRealQueries";
-import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais } from "@/lib/custoCampanha";
+import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais, DEEPSEEK_CUSTO_USD_POR_CHAMADA } from "@/lib/custoCampanha";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
@@ -69,7 +69,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         ? custoDaCampanhaReal({
             empresasConsultadas: perf.empresas_consultadas,
             creditosApolloReais: custoManual.creditosApolloReais,
-            deepseekUsdReais: custoManual.deepseekUsdReais,
+            deepseekUsdReais: perf.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
             acertosHunter: perf.acertos_hunter,
             conferidoEm: custoManual.conferidoEm,
             cicloApolloNovo: perf.ciclo_apollo_novo,

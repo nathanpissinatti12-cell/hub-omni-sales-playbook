@@ -5,31 +5,33 @@
 //
 // `creditosApolloReais` aqui é o total de crédito Apollo REALMENTE gasto pelo
 // fluxo n8n — substitui inteiramente a estimativa por empresa
-// (CREDITOS_POR_EMPRESA), não soma com ela.
+// (CREDITOS_POR_EMPRESA), não soma com ela. DeepSeek continua estimado
+// (empresas consultadas × custo/chamada), calculado dinamicamente por quem
+// chama isso, não fica fixo aqui.
 //
 // IMPORTANTE (aprendido 2026-09-15/16 com a ICP - VAREJO PME.): "Uso de
 // créditos" SEM filtro de membro mistura o trabalho manual de outros
 // colaboradores (ex.: Julia Lopes usando a extensão do Chrome) com o que o
 // fluxo n8n gastou de verdade — dá um total inflado e errado. O jeito certo
 // de isolar é filtrar "Membro da equipe" pela conta que a API do n8n usa
-// (aqui: Gabriel Donadeli) e confirmar na tabela/feed que a origem de cada
-// linha é "API Test" / usuário "Você" (não "Extensão"). Só esse total é
-// atribuível à campanha.
-const CUSTO_REAL_MANUAL: Record<
-  string,
-  { creditosApolloReais: number; deepseekUsdReais: number; conferidoEm: string }
-> = {
-  // 15/09/2026: "Uso de créditos" filtrado em "Gabriel Donadeli" (conta do
-  // n8n), sem filtro de recurso, deu 1.992 créditos no total — 100% em
-  // "Números de telefone" (249 revelações × 8), confirmado linha a linha no
-  // feed de atividades como origem "API Test"/"Você". Nenhum crédito de
-  // busca/enriquecimento nesse dia — a estimativa antiga de 1.882 créditos
-  // pra essa parte nunca aconteceu de fato. DeepSeek segue estimado (nenhum
-  // valor medido informado ainda pra essa campanha).
+// (Gabriel Donadeli) e confirmar na tabela/feed que a origem de cada linha é
+// "API Test" / usuário "Você" (não "Extensão"). Só esse total é atribuível
+// à campanha.
+const CUSTO_REAL_MANUAL: Record<string, { creditosApolloReais: number; conferidoEm: string }> = {
+  // 15/09/2026: filtrado em "Gabriel Donadeli", sem filtro de recurso, deu
+  // 1.992 créditos no total — 100% em "Números de telefone" (249 revelações
+  // × 8), confirmado linha a linha no feed como origem "API Test"/"Você".
+  // Nenhum crédito de busca/enriquecimento nesse dia — a estimativa antiga
+  // de 1.882 créditos pra essa parte nunca aconteceu de fato.
   "ICP - VAREJO PME.": {
     creditosApolloReais: 1992,
-    deepseekUsdReais: 0.000644 * 467, // ainda estimado — sem medição própria
     conferidoEm: "2026-09-15",
+  },
+  // 17/09/2026: mesma checagem (Gabriel Donadeli, sem filtro de recurso) —
+  // 296 créditos no total, também 100% telefone.
+  "ICP - BLIP ETP": {
+    creditosApolloReais: 296,
+    conferidoEm: "2026-09-17",
   },
 };
 
