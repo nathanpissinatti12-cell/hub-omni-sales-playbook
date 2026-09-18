@@ -34,7 +34,7 @@ const CUSTO_REAL_MANUAL: Record<
   // 296 créditos no total, confirmado 100% "Números de telefone" no painel
   // "Detalhes de uso" (0 crédito em "E-mail" nesse dia pro fluxo de
   // produção — revelar e-mail em lote não cobra, só uma chamada MCP isolada
-  // testada depois cobrou 1cr, ver lib/emailsRevelados.ts). DeepSeek também
+  // testada depois cobrou 1cr). DeepSeek também
   // medido direto no painel de billing (Today, API Key: All): US$0,18 em 45
   // chamadas. Os números se cruzam quase perfeitamente: 45 chamadas
   // DeepSeek = 45 empresas consultadas (1 chamada cada); a contagem real de

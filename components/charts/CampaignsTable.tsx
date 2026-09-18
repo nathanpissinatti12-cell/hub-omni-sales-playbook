@@ -4,8 +4,6 @@ import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais, DEEPS
 import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
 import { getCustoRealManual } from "@/lib/custoRealManual";
 import { celularesRevelados } from "@/lib/celularesRevelados";
-import { emailsRevelados } from "@/lib/emailsRevelados";
-
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
   return (
     <div className="overflow-x-auto rounded-lg border" style={{ borderColor: "var(--border)" }}>
@@ -19,7 +17,6 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-4 py-2 font-medium">Taxa processado</th>
             <th className="px-4 py-2 font-medium">Empresas enriquecidas</th>
             <th className="px-4 py-2 font-medium">% celular revelado</th>
-            <th className="px-4 py-2 font-medium">% e-mail revelado</th>
             <th className="px-4 py-2 font-medium">Criados Meetime</th>
             <th className="px-4 py-2 font-medium">Sem contato</th>
             <th className="px-4 py-2 font-medium">Custo</th>
@@ -53,10 +50,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             const encerrada = encerradaEm(c.nome);
             const revelados = celularesRevelados(c.nome);
-            const percentRevelado = revelados != null && c.empresas_enriquecidas > 0 ? (revelados / c.empresas_enriquecidas) * 100 : null;
-            const emailsRev = emailsRevelados(c.nome);
-            const percentEmailRevelado = emailsRev != null && c.empresas_enriquecidas > 0 ? (emailsRev / c.empresas_enriquecidas) * 100 : null;
-            return (
+            const percentRevelado = revelados != null && c.empresas_enriquecidas > 0 ? (revelados / c.empresas_enriquecidas) * 100 : null;            return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
               <td className="px-4 py-2">
                 <Link href={`/dashboard/campanhas/${c.id}`} className="hover:underline" style={{ color: "var(--accent)" }}>
@@ -80,17 +74,6 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                 }
               >
                 {percentRevelado == null ? "—" : `${percentRevelado.toFixed(0)}%`}
-              </td>
-              <td
-                className="px-4 py-2 whitespace-nowrap"
-                style={{ color: "var(--text-muted)" }}
-                title={
-                  emailsRev != null
-                    ? `${emailsRev} e-mails revelados pelo Apollo (medido) de ${c.empresas_enriquecidas} empresas enriquecidas`
-                    : "Ainda não medido pra essa campanha"
-                }
-              >
-                {percentEmailRevelado == null ? "—" : `${percentEmailRevelado.toFixed(0)}%`}
               </td>
               <td className="px-4 py-2">{c.criados_meetime}</td>
               <td className="px-4 py-2">{c.leads_sem_contato}</td>

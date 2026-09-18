@@ -8,7 +8,7 @@
 // estimativa anterior por crédito (296 ÷ 8 = 37) porque essa conta quase fecha
 // mas não exatamente: confirmado no painel "Detalhes de uso" (17/09, filtrado
 // por Gabriel Donadeli) que os 296 créditos são 100% telefone — e-mail não
-// gerou crédito nenhum no fluxo de produção (ver lib/emailsRevelados.ts e
+// gerou crédito nenhum no fluxo de produção (ver
 // reference_apollo_pools_de_credito.md). Então 40 telefones reais × 8 = 320
 // esperado vs 296 medido = 24 créditos (~3 telefones) sem explicação — gap
 // pequeno, provavelmente revelação repetida de contato já revelado antes
