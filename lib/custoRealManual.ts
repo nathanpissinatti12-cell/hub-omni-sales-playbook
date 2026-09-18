@@ -31,18 +31,33 @@ const CUSTO_REAL_MANUAL: Record<
     conferidoEm: "2026-09-15",
   },
   // 17/09/2026: mesma checagem (Gabriel Donadeli, sem filtro de recurso) —
-  // 296 créditos no total, também 100% telefone. DeepSeek também medido
-  // direto no painel de billing (Today, API Key: All): US$0,18 em 45
-  // chamadas. Os números se cruzam e fecham: 45 chamadas DeepSeek = 45
-  // empresas consultadas (1 chamada cada); 296 créditos Apollo ÷ 8
-  // créditos/revelação = 37 celulares revelados dessas 45 (82% de taxa,
-  // mais alta que a média geral de 59,2%). Gemini não foi medido à parte
-  // aqui — segue a taxa estimada (45 × R$0,007 ≈ R$0,32), calculada
+  // 296 créditos no total, confirmado 100% "Números de telefone" no painel
+  // "Detalhes de uso" (0 crédito em "E-mail" nesse dia pro fluxo de
+  // produção — revelar e-mail em lote não cobra, só uma chamada MCP isolada
+  // testada depois cobrou 1cr, ver lib/emailsRevelados.ts). DeepSeek também
+  // medido direto no painel de billing (Today, API Key: All): US$0,18 em 45
+  // chamadas. Os números se cruzam quase perfeitamente: 45 chamadas
+  // DeepSeek = 45 empresas consultadas (1 chamada cada); a contagem real de
+  // telefones revelados no banco é 40 de 45 (88,9%, ver
+  // lib/celularesRevelados.ts) — 296 ÷ 8 = 37 credita menos que os 40 reais,
+  // gap de 24 créditos (~3 telefones) ainda sem explicação, provavelmente
+  // revelação repetida de contato já revelado antes. Gemini não foi medido à
+  // parte aqui — segue a taxa estimada (45 × R$0,007 ≈ R$0,32), calculada
   // dinamicamente por quem chama isso (empresasConsultadas real do banco).
   "ICP - BLIP ETP": {
     creditosApolloReais: 296,
     conferidoEm: "2026-09-17",
     deepseekUsdReais: 0.18,
+  },
+  // 18/09/2026: 729 créditos no total, 129 empresas enriquecidas. Diferente
+  // das duas medições acima, aqui o crédito de match/busca NÃO foi de graça:
+  // 729 = 129×1 (match) + 75×8 (telefone) — bate exato, sem resto. Taxa de
+  // revelação de telefone = 75/129 = 58,1%, próxima dos 55,9% já calibrados.
+  // DeepSeek não medido nesse dia — segue a estimativa padrão
+  // (empresasConsultadas × custo/chamada).
+  "ICP - Distribuidores Atacadistas Mercados ETP": {
+    creditosApolloReais: 729,
+    conferidoEm: "2026-09-18",
   },
 };
 

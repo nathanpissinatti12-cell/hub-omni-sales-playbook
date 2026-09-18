@@ -9,6 +9,12 @@ const ENCERRADA_EM: Record<string, string> = {
   "ICP - Hospitais privados": "2026-09-08",
   "ICP - Imobiliaria Rib": "2026-09-04",
   "ICP - BLIP ETP": "2026-09-17",
+  // Datas abaixo vieram da coluna "Última execução" da lista de Workflows do
+  // n8n (todas com toggle desativado, 0 em andamento) — mesma fonte usada
+  // pras entradas acima, print conferido em 2026-09-18.
+  "ICP - VAREJO PME.": "2026-09-14",
+  "ICP - VAREJO": "2026-09-11",
+  "ICP - Industrias (têxtil, química e alimentícia) PME": "2026-09-11",
 };
 
 export function encerradaEm(nomeCampanha: string): string | null {
