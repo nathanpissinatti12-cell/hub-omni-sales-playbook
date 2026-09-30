@@ -282,9 +282,9 @@ export function PainelIndicadores() {
       <Painel titulo="Período de apuração">
         <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
           A meta comparada é sempre a proporcional aos dias úteis decorridos — nunca a meta cheia.
-          Indicadores mensais usam o recorte selecionado; <b>Resultado do trimestre</b> e <b>ARR</b> são
-          acumulados e ponderados pelas metas de cada mês do cronograma (ago–dez/2026), já que as metas
-          crescem mês a mês. Taxas (%) e valores unitários não são proporcionalizados.
+          Indicadores mensais usam o recorte selecionado; <b>Resultado do trimestre</b> é acumulado e
+          ponderado pelas metas de cada mês do cronograma (ago–dez/2026), já que as metas crescem mês
+          a mês. Taxas (%) e valores unitários não são proporcionalizados.
         </p>
         <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
           A coluna <b>Meta</b> é editável e vale só para o <b>mês de registro</b> selecionado aqui —
