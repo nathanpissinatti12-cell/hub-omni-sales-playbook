@@ -61,7 +61,6 @@ export function rotuloMes(chave: string): string {
 // N3 — Head Comercial
 // ---------------------------------------------------------------------------
 export const N3: LinhaTabela[] = [
-  { grupo: "Com meta" },
   {
     id: "n3_mrr_out",
     nome: "MRR novo — outbound",
@@ -131,43 +130,6 @@ export const N3: LinhaTabela[] = [
     hint: "MRR novo ÷ negócios ganhos",
     meta: 4000,
     fmt: "brl",
-    dir: "up",
-    esc: null,
-  },
-  { grupo: "Sem meta — baseline em construção" },
-  {
-    id: "n3_cac_in",
-    nome: "CAC Inbound",
-    hint: "custo inbound ÷ clientes conquistados",
-    meta: null,
-    fmt: "brl",
-    dir: "down",
-    esc: null,
-  },
-  {
-    id: "n3_roi",
-    nome: "ROI por canal — outbound",
-    hint: "(receita − custo) ÷ custo",
-    meta: null,
-    fmt: "x",
-    dir: "up",
-    esc: null,
-  },
-  {
-    id: "n3_roi_in",
-    nome: "ROI por canal — inbound",
-    hint: "(receita − custo) ÷ custo",
-    meta: null,
-    fmt: "x",
-    dir: "up",
-    esc: null,
-  },
-  {
-    id: "n3_ltv",
-    nome: "LTV / CAC",
-    hint: "referência de mercado ≥ 3:1",
-    meta: null,
-    fmt: "x",
     dir: "up",
     esc: null,
   },

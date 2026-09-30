@@ -312,7 +312,7 @@ export function PainelIndicadores() {
       </Painel>
 
       {/* ---------------- N3 ---------------- */}
-      <Painel titulo="Head Comercial" tag="N3" tagCor="var(--accent)" desc="12 indicadores · 8 com meta · 4 em baseline">
+      <Painel titulo="Head Comercial" tag="N3" tagCor="var(--accent)" desc="8 indicadores, todos com meta">
         <Tabela
           defs={N3}
           prefixo=""
