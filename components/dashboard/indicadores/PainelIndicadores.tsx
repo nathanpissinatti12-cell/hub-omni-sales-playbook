@@ -25,6 +25,7 @@ import {
   fmt,
   iso,
   limitesTrimestre,
+  metaDinamica,
   num,
   resolveMeta,
   status,
@@ -121,12 +122,12 @@ export function PainelIndicadores() {
   );
 
   const reais = mapa[chaveMapa(mesAtivo, "real")] || {};
+  const metasBrutas = useMemo(() => mapa[chaveMapa(mesAtivo, "meta")] || {}, [mapa, mesAtivo]);
   const metasOverride = useMemo(() => {
-    const brutos = mapa[chaveMapa(mesAtivo, "meta")] || {};
     const out: Record<string, number | null> = {};
-    for (const [k, v] of Object.entries(brutos)) out[k] = num(v);
+    for (const [k, v] of Object.entries(metasBrutas)) out[k] = num(v);
     return out;
-  }, [mapa, mesAtivo]);
+  }, [metasBrutas]);
 
   // ---- chips do período ----------------------------------------------------
   const duPeriodo = diasUteis(dtIni, dtFim);
@@ -195,7 +196,10 @@ export function PainelIndicadores() {
       let accMeta = 0;
       let accReal = 0;
       return mesesJanela.map((k) => {
-        accMeta += CRONOGRAMA[k].out + CRONOGRAMA[k].inb;
+        const metasDoMes = mapa[chaveMapa(k, "meta")] || {};
+        accMeta +=
+          (num(metasDoMes["n3_mrr_out"]) ?? CRONOGRAMA[k].out) +
+          (num(metasDoMes["n3_mrr_in"]) ?? CRONOGRAMA[k].inb);
         const doMes = mapa[chaveMapa(k, "real")] || {};
         const out = num(doMes["n3_mrr_out"]);
         const inb = num(doMes["n3_mrr_in"]);
@@ -231,6 +235,8 @@ export function PainelIndicadores() {
       let meta = def.meta;
       if (indEvo === "n3_mrr_out") meta = CRONOGRAMA[k].out;
       if (indEvo === "n3_mrr_in") meta = CRONOGRAMA[k].inb;
+      const override = num((mapa[chaveMapa(k, "meta")] || {})[indEvo]);
+      if (override !== null) meta = override;
       const pct = meta !== null ? status(real, meta, def.dir).pct : null;
       return { rotulo: rotuloMes(k), real, meta, pct };
     });
@@ -277,6 +283,11 @@ export function PainelIndicadores() {
           acumulados e ponderados pelas metas de cada mês do cronograma (ago–dez/2026), já que as metas
           crescem mês a mês. Taxas (%) e valores unitários não são proporcionalizados.
         </p>
+        <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
+          A coluna <b>Meta</b> é editável e vale só para o <b>mês de registro</b> selecionado aqui —
+          os demais meses seguem intactos. Campo em branco usa a meta padrão do indicador (mostrada
+          em cinza dentro do campo); apagar o que você digitou volta pra ela.
+        </p>
         <div className="flex flex-wrap items-end gap-4">
           <Campo label="Mês de registro">
             <Select
@@ -305,6 +316,7 @@ export function PainelIndicadores() {
           defs={N3}
           prefixo=""
           reais={reais}
+          metasBrutas={metasBrutas}
           metasOverride={metasOverride}
           dtIni={dtIni}
           dtFim={dtFim}
@@ -321,6 +333,7 @@ export function PainelIndicadores() {
           defs={N4}
           prefixo=""
           reais={reais}
+          metasBrutas={metasBrutas}
           metasOverride={metasOverride}
           dtIni={dtIni}
           dtFim={dtFim}
@@ -351,6 +364,7 @@ export function PainelIndicadores() {
           defs={[{ grupo: pessoa.nome, cor: "p5" }, ...pessoa.kpis]}
           prefixo={`${pessoa.chave}_`}
           reais={reais}
+          metasBrutas={metasBrutas}
           metasOverride={metasOverride}
           dtIni={dtIni}
           dtFim={dtFim}
@@ -558,6 +572,7 @@ function Tabela({
   defs,
   prefixo,
   reais,
+  metasBrutas,
   metasOverride,
   dtIni,
   dtFim,
@@ -566,6 +581,7 @@ function Tabela({
   defs: LinhaTabela[];
   prefixo: string;
   reais: Record<string, string>;
+  metasBrutas: Record<string, string>;
   metasOverride: Record<string, number | null>;
   dtIni: string;
   dtFim: string;
@@ -610,7 +626,7 @@ function Tabela({
             const ind = linha as Indicador;
             const chave = prefixo + ind.id;
             const semMeta = ind.meta === null;
-            const { base, proporcional } = resolveMeta(ind, chave, metasOverride, dtIni, dtFim);
+            const { proporcional } = resolveMeta(ind, chave, metasOverride, dtIni, dtFim);
             const real = num(reais[chave]);
             const st = status(real, proporcional, ind.dir);
 
@@ -633,7 +649,19 @@ function Tabela({
                       sem meta
                     </span>
                   ) : (
-                    <span className="font-bold">{fmt(base, ind.fmt)}</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={metasBrutas[chave] ?? ""}
+                      placeholder={String(metaDinamica(ind, dtIni, dtFim) ?? ind.meta)}
+                      onChange={(e) => onChange("meta", chave, e.target.value)}
+                      title={`Meta de ${ind.nome} só para o mês selecionado. Em branco usa a meta padrão (${fmt(
+                        metaDinamica(ind, dtIni, dtFim) ?? ind.meta,
+                        ind.fmt
+                      )}).`}
+                      className="w-28 rounded-md border bg-transparent px-2 py-1 text-right text-sm font-bold outline-none"
+                      style={inputStyle}
+                    />
                   )}
                 </td>
                 <td className="px-2 py-2 text-right font-extrabold tabular-nums" style={{ color: "var(--accent)" }}>
