@@ -20,6 +20,46 @@ export function fmt(v: number | null, t: Formato): string {
   return v.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
 }
 
+/**
+ * Só o número formatado em pt-BR, sem o símbolo da unidade — os campos do
+ * painel mostram R$ / % / x ao lado do input, não dentro dele.
+ */
+export function fmtNumero(v: number | null, t: Formato): string {
+  if (v === null || Number.isNaN(v)) return "";
+  if (t === "brl") {
+    return v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  return v.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+}
+
+/**
+ * Lê o que foi digitado num campo do painel e devolve o número canônico (ponto
+ * decimal) pra gravar, ou null quando o texto ainda não é um número válido —
+ * nesse caso quem chama mantém o rascunho na tela sem gravar nada.
+ *
+ * Aceita as duas convenções porque as duas aparecem na prática: o usuário
+ * digita "9.202,05" e o valor que volta do banco é "9202.05". Quando não há
+ * vírgula, o ponto é desempatado pelo tamanho do último grupo: 3 dígitos é
+ * separador de milhar ("9.202"), qualquer outro tamanho é decimal ("9202.05").
+ */
+export function parseNumeroBr(texto: string): string | null {
+  const limpo = texto.trim();
+  if (limpo === "") return "";
+
+  let normalizado: string;
+  if (limpo.includes(",")) {
+    normalizado = limpo.replace(/\./g, "").replace(",", ".");
+  } else {
+    const grupos = limpo.split(".");
+    const ultimo = grupos[grupos.length - 1];
+    normalizado = grupos.length > 1 && ultimo.length === 3 ? limpo.replace(/\./g, "") : limpo;
+  }
+
+  if (!/^-?\d*\.?\d*$/.test(normalizado)) return null;
+  const n = Number(normalizado);
+  return Number.isFinite(n) ? String(n) : null;
+}
+
 // --------------------------------------------------------------------------
 // Datas e dias úteis
 // --------------------------------------------------------------------------
