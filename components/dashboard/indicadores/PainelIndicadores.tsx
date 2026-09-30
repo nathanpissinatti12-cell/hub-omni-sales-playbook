@@ -12,6 +12,7 @@ import {
   isGrupo,
   mesesCiclo,
   rotuloMes,
+  type Formato,
   type Indicador,
   type LinhaTabela,
 } from "@/lib/indicadores";
@@ -311,7 +312,7 @@ export function PainelIndicadores() {
       </Painel>
 
       {/* ---------------- N3 ---------------- */}
-      <Painel titulo="Head Comercial" tag="N3" tagCor="var(--accent)" desc="13 indicadores · 9 com meta · 4 em baseline">
+      <Painel titulo="Head Comercial" tag="N3" tagCor="var(--accent)" desc="12 indicadores · 8 com meta · 4 em baseline">
         <Tabela
           defs={N3}
           prefixo=""
@@ -568,6 +569,36 @@ function Secao({
 // Tabela de indicadores
 // ===========================================================================
 
+/**
+ * Campo numérico com a unidade do indicador ao lado. O símbolo fica fora do
+ * <input type="number"> de propósito: dentro dele o navegador só aceita número
+ * puro, e misturar máscara com digitação quebra o parse do valor.
+ */
+function CampoValor({
+  fmt: formato,
+  children,
+}: {
+  fmt: Formato;
+  children: React.ReactNode;
+}) {
+  const sufixo = formato === "pct" ? "%" : formato === "x" ? "x" : null;
+  return (
+    <div className="flex items-center justify-end gap-1">
+      {formato === "brl" && (
+        <span className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+          R$
+        </span>
+      )}
+      {children}
+      {sufixo && (
+        <span className="w-3 text-xs font-semibold" style={{ color: "var(--text-muted)" }}>
+          {sufixo}
+        </span>
+      )}
+    </div>
+  );
+}
+
 function Tabela({
   defs,
   prefixo,
@@ -649,33 +680,37 @@ function Tabela({
                       sem meta
                     </span>
                   ) : (
-                    <input
-                      type="number"
-                      step="0.01"
-                      value={metasBrutas[chave] ?? ""}
-                      placeholder={String(metaDinamica(ind, dtIni, dtFim) ?? ind.meta)}
-                      onChange={(e) => onChange("meta", chave, e.target.value)}
-                      title={`Meta de ${ind.nome} só para o mês selecionado. Em branco usa a meta padrão (${fmt(
-                        metaDinamica(ind, dtIni, dtFim) ?? ind.meta,
-                        ind.fmt
-                      )}).`}
-                      className="w-28 rounded-md border bg-transparent px-2 py-1 text-right text-sm font-bold outline-none"
-                      style={inputStyle}
-                    />
+                    <CampoValor fmt={ind.fmt}>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={metasBrutas[chave] ?? ""}
+                        placeholder={String(metaDinamica(ind, dtIni, dtFim) ?? ind.meta)}
+                        onChange={(e) => onChange("meta", chave, e.target.value)}
+                        title={`Meta de ${ind.nome} só para o mês selecionado. Em branco usa a meta padrão (${fmt(
+                          metaDinamica(ind, dtIni, dtFim) ?? ind.meta,
+                          ind.fmt
+                        )}).`}
+                        className="w-24 rounded-md border bg-transparent px-2 py-1 text-right text-sm font-bold outline-none"
+                        style={inputStyle}
+                      />
+                    </CampoValor>
                   )}
                 </td>
                 <td className="px-2 py-2 text-right font-extrabold tabular-nums" style={{ color: "var(--accent)" }}>
                   {proporcional === null ? "—" : fmt(proporcional, ind.fmt)}
                 </td>
                 <td className="px-2 py-2 text-right">
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={reais[chave] ?? ""}
-                    onChange={(e) => onChange("real", chave, e.target.value)}
-                    className="w-28 rounded-md border bg-transparent px-2 py-1 text-right text-sm outline-none"
-                    style={inputStyle}
-                  />
+                  <CampoValor fmt={ind.fmt}>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={reais[chave] ?? ""}
+                      onChange={(e) => onChange("real", chave, e.target.value)}
+                      className="w-24 rounded-md border bg-transparent px-2 py-1 text-right text-sm outline-none"
+                      style={inputStyle}
+                    />
+                  </CampoValor>
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-right font-extrabold tabular-nums">
                   <span

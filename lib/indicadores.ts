@@ -126,15 +126,6 @@ export const N3: LinhaTabela[] = [
     esc: null,
   },
   {
-    id: "n3_arr",
-    nome: "ARR",
-    hint: "ciclo ago–dez/2026 · ponderado pelas metas mensais decorridas",
-    meta: 58182,
-    fmt: "brl",
-    dir: "up",
-    esc: "ano",
-  },
-  {
     id: "n3_tkt",
     nome: "Ticket médio",
     hint: "MRR novo ÷ negócios ganhos",

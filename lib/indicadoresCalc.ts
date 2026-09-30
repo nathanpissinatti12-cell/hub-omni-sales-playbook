@@ -162,9 +162,6 @@ export function metaDinamica(ind: Indicador, ini: string, fim: string): number |
     const L = limitesTrimestre(fim);
     return somaCronograma(L.ini, L.fim, fim).total;
   }
-  if (ind.id === "n3_arr") {
-    return somaCronograma(CICLO_ANUAL.ini, CICLO_ANUAL.fim, fim).total;
-  }
   return null;
 }
 
