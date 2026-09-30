@@ -141,11 +141,14 @@ export const N3: LinhaTabela[] = [
 export const N4: LinhaTabela[] = [
   { grupo: "BDR", cor: "p4" },
   { id: "n4_reun", nome: "Reuniões agendadas", meta: 165, fmt: "num", dir: "up", esc: "mes" },
-  { id: "n4_sql", nome: "SQL", meta: 80, fmt: "num", dir: "up", esc: "mes" },
+  // O id segue "n4_sql" mesmo com o nome trocado pra SAL: ele é a chave dos
+  // lançamentos já gravados em indicadores_valores, e renomear perderia o
+  // histórico.
+  { id: "n4_sql", nome: "SAL", meta: 80, fmt: "num", dir: "up", esc: "mes" },
   {
     id: "n4_real",
     nome: "Conversão reunião realizada",
-    hint: "SAL → realizada",
+    hint: "realizada → SAL",
     meta: 95,
     fmt: "pct",
     dir: "up",
