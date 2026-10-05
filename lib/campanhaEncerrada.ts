@@ -17,11 +17,21 @@ const ENCERRADA_EM: Record<string, string> = {
   "ICP - Industrias (têxtil, química e alimentícia) PME": "2026-09-11",
   // "Outbound Onvox - Parceiros1" segue em andamento — não entra aqui.
   "Outbound Onvox - Parceiros": "2026-09-30",
-  "ICP - Blip PME": "2026-10-05",
+  "ICP - BLIP PME": "2026-10-05",
 };
 
+// Mesma normalização de lib/custoRealManual.ts: o nome vem digitado à mão nos
+// fluxos do n8n e diverge em maiúsculas/espaçamento.
+function normaliza(nome: string): string {
+  return nome.toLowerCase().replace(/\s+/g, "");
+}
+
+const POR_NOME_NORMALIZADO = new Map(
+  Object.entries(ENCERRADA_EM).map(([nome, data]) => [normaliza(nome), data])
+);
+
 export function encerradaEm(nomeCampanha: string): string | null {
-  return ENCERRADA_EM[nomeCampanha] ?? null;
+  return POR_NOME_NORMALIZADO.get(normaliza(nomeCampanha)) ?? null;
 }
 
 export function formataDataEncerramento(iso: string): string {
