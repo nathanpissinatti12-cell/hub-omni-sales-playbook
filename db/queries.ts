@@ -6,7 +6,16 @@ import { APOLLO_INICIO_PLANO_NOVO } from "@/lib/custoCampanha";
 // fila_processamento.campanha é digitado à mão e diverge de campanhas.nome
 // em maiúsculas/espaçamento (ex.: "ICPs -imobiliaria" vs "ICPS - imobiliaria"),
 // então a comparação usa nome normalizado (minúsculas, sem espaços) nos dois lados.
-const NORMALIZE_NAME = (col: string) => `lower(regexp_replace(${col}, '\\s+', '', 'g'))`;
+//
+// A classe POSIX [[:space:]] é obrigatória aqui: com '\s+' o Postgres deste
+// servidor (14.23) apaga a LETRA "s" e mantém os espaços — "Distribuidores
+// Atacadistas" virava "ditribuidore atacadita". Como os dois lados do JOIN
+// usavam a mesma expressão errada, a lista de campanhas continuava funcionando
+// e o bug passou despercebido; mas o `normalizeName` abaixo (JS, que remove
+// espaço de verdade) nunca batia com o valor vindo do SQL, então toda consulta
+// com `WHERE NORMALIZE_NAME(campanha) = $1` devolvia ZERO linhas — era o caso
+// de todas as páginas de detalhe de campanha.
+const NORMALIZE_NAME = (col: string) => `lower(regexp_replace(${col}, '[[:space:]]+', '', 'g'))`;
 const normalizeName = (s: string) => s.toLowerCase().replace(/\s+/g, "");
 
 export type CampaignPerformanceRow = {

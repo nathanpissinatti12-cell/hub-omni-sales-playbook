@@ -47,24 +47,27 @@ function precoCreditoApolloReais(cicloNovo: boolean): number {
 //
 // Todas vêm de medição limpa (crédito isolado por conta no painel "Uso de
 // créditos", filtrado pelo membro que a API do n8n usa — ver
-// lib/custoRealManual.ts), nunca de estimativa:
+// lib/custoRealManual.ts), nunca de estimativa. O divisor é "empresas
+// consultadas", contado no banco com a MESMA regra da query do painel
+// (processado/erro, tirando as barradas pelo dedup) — não "enriquecidas", que
+// é outro número e daria taxa mais alta:
 //
-//   PME  ICP - VAREJO PME.      1.992cr / 468 empresas
-//        ICP - Blip PME         1.408cr / 260 empresas
-//        → 3.400 ÷ 728 = 4,67
+//   PME  ICP - VAREJO PME.      1.992cr / 467 consultadas = 4,27
+//        ICP - Blip PME         1.408cr / 295 consultadas = 4,77
+//        → 3.400 ÷ 762 = 4,46
 //
-//   ETP  ICP - BLIP ETP           296cr /  45 empresas
-//        ICP - Distrib. Atac. ETP 729cr / 129 empresas (129×1 match + 75×8 tel)
-//        → 1.025 ÷ 174 = 5,89
+//   ETP  ICP - BLIP ETP           296cr /  44 consultadas = 6,73
+//        ICP - Distrib. Atac. ETP 729cr / 125 consultadas = 5,83
+//        → 1.025 ÷ 169 = 6,07
 //
-//   Sem porte no nome → média geral das quatro: 4.425 ÷ 902 = 4,91.
+//   Sem porte no nome → média geral das quatro: 4.425 ÷ 931 = 4,75.
 //
 // Histórico: 6,95 (só ICP - PedBot) → 4,03 (só Imobiliaria Rib) → 4,47 → 4,71
 // (taxa única para tudo). A taxa única subestimava campanha ETP, que é o motivo
 // desta separação. Remedir quando o perfil das listas mudar muito.
-export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.91);
-export const CREDITOS_POR_EMPRESA_PME = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA_PME", 4.67);
-export const CREDITOS_POR_EMPRESA_ETP = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA_ETP", 5.89);
+export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.75);
+export const CREDITOS_POR_EMPRESA_PME = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA_PME", 4.46);
+export const CREDITOS_POR_EMPRESA_ETP = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA_ETP", 6.07);
 
 export type Porte = "pme" | "etp";
 
