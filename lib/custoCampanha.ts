@@ -41,19 +41,54 @@ function precoCreditoApolloReais(cicloNovo: boolean): number {
     ? precoUnitarioReais(APOLLO_PRECO_MENSAL_USD_NOVO, APOLLO_CREDITOS_CICLO_NOVO)
     : precoUnitarioReais(APOLLO_PRECO_MENSAL_USD, APOLLO_CREDITOS_CICLO);
 }
-// Créditos gastos, em média, por empresa que chegou a ser consultada — recalibrado
-// 2026-09-18 combinando as três medições mais recentes e limpas (créditos
-// isolados por conta — filtrando "Uso de créditos" pela conta do n8n, sem
-// misturar trabalho manual de outros colaboradores, ver lib/custoRealManual.ts):
-// ICP - VAREJO PME. (1.992cr / 468 empresas, 100% telefone) + ICP - BLIP ETP
-// (296cr / 44 empresas, 100% telefone) + ICP - Distribuidores Atacadistas
-// Mercados ETP (729cr / 129 empresas, aqui SIM com crédito de match: 129×1 +
-// 75×8 telefone) = 3.017 ÷ 641 = 4,71. Antes era 4,47 (só as duas primeiras,
-// sem nenhum crédito de match). A 3ª medição mostra que buscar/dar match não é
-// sempre de graça — varia por campanha, motivo ainda não identificado.
-// Substitui a estimativa anterior de 6,95 (calibrada na ICP - PedBot). Varia
-// com o porte das empresas da lista — remedir quando o perfil mudar muito.
-export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.71);
+// Créditos gastos, em média, por empresa consultada. São TRÊS taxas porque o
+// consumo depende do porte da lista: empresa grande (ETP) tem mais gente no
+// Apollo, então o fluxo paga mais revelação por empresa que numa lista PME.
+//
+// Todas vêm de medição limpa (crédito isolado por conta no painel "Uso de
+// créditos", filtrado pelo membro que a API do n8n usa — ver
+// lib/custoRealManual.ts), nunca de estimativa. O divisor é "empresas
+// consultadas", contado no banco com a MESMA regra da query do painel
+// (processado/erro, tirando as barradas pelo dedup) — não "enriquecidas", que
+// é outro número e daria taxa mais alta:
+//
+//   PME  ICP - VAREJO PME.      1.992cr / 467 consultadas = 4,27
+//        ICP - Blip PME         1.408cr / 295 consultadas = 4,77
+//        → 3.400 ÷ 762 = 4,46
+//
+//   ETP  ICP - BLIP ETP           296cr /  44 consultadas = 6,73
+//        ICP - Distrib. Atac. ETP 729cr / 125 consultadas = 5,83
+//        → 1.025 ÷ 169 = 6,07
+//
+//   Sem porte no nome → média geral das quatro: 4.425 ÷ 931 = 4,75.
+//
+// Histórico: 6,95 (só ICP - PedBot) → 4,03 (só Imobiliaria Rib) → 4,47 → 4,71
+// (taxa única para tudo). A taxa única subestimava campanha ETP, que é o motivo
+// desta separação. Remedir quando o perfil das listas mudar muito.
+export const CREDITOS_POR_EMPRESA = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA", 4.75);
+export const CREDITOS_POR_EMPRESA_PME = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA_PME", 4.46);
+export const CREDITOS_POR_EMPRESA_ETP = numeroDoAmbiente("APOLLO_CREDITOS_POR_EMPRESA_ETP", 6.07);
+
+export type Porte = "pme" | "etp";
+
+/**
+ * O porte não existe como coluna no banco — é convenção no nome da campanha
+ * ("ICP - Blip PME", "ICP - BLIP ETP"). Nome sem nenhum dos dois devolve null e
+ * cai na taxa geral.
+ */
+export function porteDaCampanha(nomeCampanha: string | undefined): Porte | null {
+  if (!nomeCampanha) return null;
+  if (/\bPME\b/i.test(nomeCampanha)) return "pme";
+  if (/\bETP\b/i.test(nomeCampanha)) return "etp";
+  return null;
+}
+
+export function creditosPorEmpresaDe(nomeCampanha?: string): number {
+  const porte = porteDaCampanha(nomeCampanha);
+  if (porte === "pme") return CREDITOS_POR_EMPRESA_PME;
+  if (porte === "etp") return CREDITOS_POR_EMPRESA_ETP;
+  return CREDITOS_POR_EMPRESA;
+}
 
 // ---- DeepSeek (seleciona o decisor — 1 chamada por empresa consultada) ----
 // Custo real por chamada, medido 2026-09-08 direto no painel de billing do
@@ -145,10 +180,18 @@ export type CustoCampanha = {
    * confirmado. Ver TELEFONE_CREDITOS_POR_REVELACAO acima.
    */
   creditosTelefoneEstimados: number;
+  /** Taxa usada na estimativa (varia por porte da campanha) — ausente no custo medido. */
+  creditosPorEmpresa?: number;
 };
 
-export function custoDaCampanha(empresasConsultadas: number, acertosHunter: number, cicloApolloNovo = false): CustoCampanha {
-  const creditosApollo = empresasConsultadas * CREDITOS_POR_EMPRESA;
+export function custoDaCampanha(
+  empresasConsultadas: number,
+  acertosHunter: number,
+  cicloApolloNovo = false,
+  nomeCampanha?: string
+): CustoCampanha {
+  const creditosPorEmpresa = creditosPorEmpresaDe(nomeCampanha);
+  const creditosApollo = empresasConsultadas * creditosPorEmpresa;
   const apolloReais = creditosApollo * precoCreditoApolloReais(cicloApolloNovo);
   const deepseekReais = empresasConsultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA * USD_BRL;
   const creditosHunter = acertosHunter * HUNTER_CREDITOS_POR_ACERTO;
@@ -166,6 +209,7 @@ export function custoDaCampanha(empresasConsultadas: number, acertosHunter: numb
     creditosApollo,
     creditosHunter,
     creditosTelefoneEstimados,
+    creditosPorEmpresa,
   };
 }
 
@@ -229,7 +273,7 @@ export function explicaCusto(c: CustoCampanha): string {
     ].join(" · ");
   }
   return [
-    `Apollo: ${c.empresasConsultadas} empresas × ${CREDITOS_POR_EMPRESA} créditos = ${Math.round(c.creditosApollo)} créditos ≈ ${formataReais(c.apolloReais)}`,
+    `Apollo: ${c.empresasConsultadas} empresas × ${c.creditosPorEmpresa ?? CREDITOS_POR_EMPRESA} créditos = ${Math.round(c.creditosApollo)} créditos ≈ ${formataReais(c.apolloReais)}`,
     `DeepSeek: ${c.empresasConsultadas} chamadas ≈ ${formataReais(c.deepseekReais)}`,
     `Hunter: ${c.acertosHunter} e-mails achados × ${HUNTER_CREDITOS_POR_ACERTO} créditos = ${c.creditosHunter.toFixed(1)} créditos ≈ ${formataReais(c.hunterReais)}`,
     `Gemini: ${c.empresasConsultadas} empresas × ${formataReais(GEMINI_CUSTO_REAIS_POR_EMPRESA)} ≈ ${formataReais(c.geminiReais)}`,

@@ -59,8 +59,31 @@ const CUSTO_REAL_MANUAL: Record<
     creditosApolloReais: 729,
     conferidoEm: "2026-09-18",
   },
+  // 05/10/2026: 1.408 créditos para 295 na fila / 260 enriquecidas / 225 leads
+  // criados no Ontime — 5,4 créditos por empresa enriquecida e 6,3 por lead.
+  // O painel mostra os 1.408 inteiros em "Números de telefone": 1.408 ÷ 8 = 176
+  // revelações exatas, sem sobra, ou seja nenhum crédito de match/busca — mesmo
+  // padrão da VAREJO PME. e da BLIP ETP. DeepSeek não medido nesse dia; segue a
+  // estimativa padrão.
+  "ICP - BLIP PME": {
+    creditosApolloReais: 1408,
+    conferidoEm: "2026-10-05",
+  },
 };
 
+// O nome da campanha é digitado à mão em cada fluxo do n8n e volta com
+// maiúsculas/espaçamento diferentes do que está escrito aqui ("ICP - Blip PME"
+// vs "ICP - BLIP PME"). Com busca exata, divergir uma letra fazia o custo
+// medido sumir do painel sem erro nenhum. A normalização é a mesma que
+// db/queries.ts já usa pra casar fila_processamento com campanhas.
+function normaliza(nome: string): string {
+  return nome.toLowerCase().replace(/\s+/g, "");
+}
+
+const POR_NOME_NORMALIZADO = new Map(
+  Object.entries(CUSTO_REAL_MANUAL).map(([nome, dados]) => [normaliza(nome), dados])
+);
+
 export function getCustoRealManual(nomeCampanha: string) {
-  return CUSTO_REAL_MANUAL[nomeCampanha] ?? null;
+  return POR_NOME_NORMALIZADO.get(normaliza(nomeCampanha)) ?? null;
 }
