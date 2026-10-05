@@ -46,7 +46,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                     cicloApolloNovo: c.ciclo_apollo_novo,
                   })
                 : c.custo_conferido
-                  ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter, c.ciclo_apollo_novo)
+                  ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter, c.ciclo_apollo_novo, c.nome)
                   : null;
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             const encerrada = encerradaEm(c.nome);

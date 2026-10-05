@@ -15,6 +15,9 @@ const ENCERRADA_EM: Record<string, string> = {
   "ICP - VAREJO PME.": "2026-09-14",
   "ICP - VAREJO": "2026-09-11",
   "ICP - Industrias (têxtil, química e alimentícia) PME": "2026-09-11",
+  // "Outbound Onvox - Parceiros1" segue em andamento — não entra aqui.
+  "Outbound Onvox - Parceiros": "2026-09-30",
+  "ICP - Blip PME": "2026-10-05",
 };
 
 export function encerradaEm(nomeCampanha: string): string | null {

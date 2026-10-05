@@ -84,7 +84,7 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
             cicloApolloNovo: perf.ciclo_apollo_novo,
           })
         : perf.custo_conferido
-          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter, perf.ciclo_apollo_novo)
+          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter, perf.ciclo_apollo_novo, perf.nome)
           : null;
   // Custo por lead que efetivamente subiu na Meetime — não por "empresa
   // enriquecida", que inclui quem nunca virou contato de verdade (sem e-mail

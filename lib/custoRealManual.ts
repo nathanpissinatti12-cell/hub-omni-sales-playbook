@@ -59,6 +59,14 @@ const CUSTO_REAL_MANUAL: Record<
     creditosApolloReais: 729,
     conferidoEm: "2026-09-18",
   },
+  // 05/10/2026: 1.408 créditos para 295 na fila / 260 enriquecidas / 225 leads
+  // criados — 5,4 créditos por empresa enriquecida e 6,3 por lead. Conferido
+  // contra o CRM: os 225 leads estão lá. Medição informada pela sessão de
+  // N8N/Apollo. DeepSeek não medido nesse dia — segue a estimativa padrão.
+  "ICP - Blip PME": {
+    creditosApolloReais: 1408,
+    conferidoEm: "2026-10-05",
+  },
 };
 
 export function getCustoRealManual(nomeCampanha: string) {
