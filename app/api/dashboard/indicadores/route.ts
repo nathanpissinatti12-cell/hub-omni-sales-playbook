@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { limparRealizados, listValores, upsertValor } from "@/db/indicadoresQueries";
-import { mesesCiclo } from "@/lib/indicadores";
+import { mesesCiclo, unidadePorSlug } from "@/lib/indicadores";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +19,24 @@ async function exigeRoot() {
 
 const TIPOS = ["real", "meta"] as const;
 
-export async function GET() {
+// A unidade nunca vem do cliente sem passar por aqui: slug fora de UNIDADES é
+// recusado, então não há como gravar lançamento numa unidade inventada.
+function exigeUnidade(slug: string | null | undefined) {
+  const unidade = unidadePorSlug(slug?.trim());
+  if (!unidade) {
+    return { erro: NextResponse.json({ error: "Unidade desconhecida." }, { status: 400 }) };
+  }
+  return { unidade };
+}
+
+export async function GET(req: Request) {
   const { erro } = await exigeRoot();
   if (erro) return erro;
 
-  const valores = await listValores();
+  const { erro: erroUnidade, unidade } = exigeUnidade(new URL(req.url).searchParams.get("unidade"));
+  if (erroUnidade) return erroUnidade;
+
+  const valores = await listValores(unidade.slug);
   return NextResponse.json(valores);
 }
 
@@ -32,11 +45,15 @@ export async function POST(req: Request) {
   if (erro) return erro;
 
   const body = (await req.json().catch(() => null)) as {
+    unidade?: string;
     mes?: string;
     tipo?: string;
     chave?: string;
     valor?: number | string | null;
   } | null;
+
+  const { erro: erroUnidade, unidade } = exigeUnidade(body?.unidade);
+  if (erroUnidade) return erroUnidade;
 
   const mes = body?.mes?.trim();
   const tipo = body?.tipo?.trim();
@@ -63,6 +80,7 @@ export async function POST(req: Request) {
   }
 
   await upsertValor({
+    unidade: unidade.slug,
     mes,
     tipo: tipo as "real" | "meta",
     chave,
@@ -78,11 +96,14 @@ export async function DELETE(req: Request) {
   if (erro) return erro;
 
   const { searchParams } = new URL(req.url);
+  const { erro: erroUnidade, unidade } = exigeUnidade(searchParams.get("unidade"));
+  if (erroUnidade) return erroUnidade;
+
   const mes = searchParams.get("mes");
   if (!mes || !mesesCiclo().includes(mes)) {
     return NextResponse.json({ error: "Mês fora do ciclo do cronograma." }, { status: 400 });
   }
 
-  await limparRealizados(mes);
+  await limparRealizados(unidade.slug, mes);
   return NextResponse.json({ ok: true });
 }

@@ -3,9 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CRONOGRAMA,
-  N3,
-  N4,
-  PESSOAS,
   BDR_PADRAO,
   closerKpis,
   indicadoresPlanos,
@@ -15,6 +12,7 @@ import {
   type Formato,
   type Indicador,
   type LinhaTabela,
+  type Unidade,
 } from "@/lib/indicadores";
 import {
   corDe,
@@ -53,7 +51,8 @@ function chaveMapa(mes: string, tipo: string) {
   return `${mes}|${tipo}`;
 }
 
-export function PainelIndicadores() {
+export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
+  const { n3: N3, n4: N4, pessoas: PESSOAS } = unidade;
   const meses = useMemo(() => mesesCiclo(), []);
   const [mesAtivo, setMesAtivo] = useState(meses[0]);
   const [dtIni, setDtIni] = useState("");
@@ -67,7 +66,7 @@ export function PainelIndicadores() {
 
   // ---- carga inicial -------------------------------------------------------
   useEffect(() => {
-    fetch("/api/dashboard/indicadores")
+    fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}`)
       .then((r) => (r.ok ? r.json() : []))
       .then((rows: ValorApi[]) => {
         const m: Mapa = {};
@@ -80,7 +79,7 @@ export function PainelIndicadores() {
       })
       .catch(() => setAviso("Não foi possível carregar os lançamentos."))
       .finally(() => setCarregando(false));
-  }, []);
+  }, [unidade.slug]);
 
   // Período default: do primeiro dia do mês ativo até hoje (ou fim do mês).
   useEffect(() => {
@@ -103,7 +102,7 @@ export function PainelIndicadores() {
         fetch("/api/dashboard/indicadores", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ mes: mesAtivo, tipo, chave, valor: valor === "" ? null : valor }),
+          body: JSON.stringify({ unidade: unidade.slug, mes: mesAtivo, tipo, chave, valor: valor === "" ? null : valor }),
         })
           .then((r) => {
             if (!r.ok) throw new Error();
@@ -112,7 +111,7 @@ export function PainelIndicadores() {
           .catch(() => setAviso("Falha ao salvar — verifique a conexão."));
       }, 700);
     },
-    [mesAtivo]
+    [mesAtivo, unidade.slug]
   );
 
   const setValor = useCallback(
@@ -229,8 +228,10 @@ export function PainelIndicadores() {
   }, [mesAtivo, meses]);
 
   // ---- evolução mensal -----------------------------------------------------
+  const planos = useMemo(() => indicadoresPlanos([...N3, ...N4]), [N3, N4]);
+
   const serieEvolucao = useMemo((): PontoEvolucao[] => {
-    const def = indicadoresPlanos().find((r) => r.id === indEvo);
+    const def = planos.find((r) => r.id === indEvo);
     if (!def) return [];
     return meses.map((k) => {
       const doMes = mapa[chaveMapa(k, "real")] || {};
@@ -243,14 +244,14 @@ export function PainelIndicadores() {
       const pct = meta !== null ? status(real, meta, def.dir).pct : null;
       return { rotulo: rotuloMes(k), real, meta, pct };
     });
-  }, [indEvo, mapa, meses]);
+  }, [indEvo, mapa, meses, planos]);
 
   // ---- ações ---------------------------------------------------------------
   async function limparMes() {
     if (!confirm(`Limpar os realizados de ${rotuloMes(mesAtivo)}? As metas e os demais meses são mantidos.`)) {
       return;
     }
-    const r = await fetch(`/api/dashboard/indicadores?mes=${mesAtivo}`, { method: "DELETE" });
+    const r = await fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}&mes=${mesAtivo}`, { method: "DELETE" });
     if (!r.ok) {
       setAviso("Não foi possível limpar.");
       return;
@@ -413,7 +414,7 @@ export function PainelIndicadores() {
             <Select
               value={indEvo}
               onChange={setIndEvo}
-              opcoes={indicadoresPlanos().map((r) => ({ valor: r.id, rotulo: r.nome }))}
+              opcoes={planos.map((r) => ({ valor: r.id, rotulo: r.nome }))}
             />
           }
         >
