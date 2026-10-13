@@ -229,6 +229,45 @@ export const PESSOAS: Pessoa[] = [
 ];
 
 /** Todos os indicadores de N3 e N4 achatados — usado no seletor de evolução. */
-export function indicadoresPlanos(): Indicador[] {
-  return [...N3, ...N4].filter((l): l is Indicador => !isGrupo(l));
+export function indicadoresPlanos(defs: LinhaTabela[] = [...N3, ...N4]): Indicador[] {
+  return defs.filter((l): l is Indicador => !isGrupo(l));
+}
+
+// ---------------------------------------------------------------------------
+// Unidades da Onvox
+//
+// Cerquilho, Tatuí e Ribeirão são unidades comerciais e compartilham a mesma
+// definição (N3/N4/N5 acima) — o que muda entre elas é só o lançamento, que o
+// banco separa pela coluna `unidade`. O Mkt tem indicadores próprios e começa
+// sem definição: a tela mostra um aviso até a lista ser preenchida em
+// INDICADORES_MKT, em vez de exibir metas comerciais que não são dele.
+// ---------------------------------------------------------------------------
+
+/** Indicadores do Mkt. Vazio de propósito — ainda não definidos pelo time. */
+export const MKT_N3: LinhaTabela[] = [];
+export const MKT_N4: LinhaTabela[] = [];
+export const MKT_PESSOAS: Pessoa[] = [];
+
+export type Unidade = {
+  slug: string;
+  nome: string;
+  /** false enquanto a unidade não tem indicador nenhum definido. */
+  temDefinicao: boolean;
+  n3: LinhaTabela[];
+  n4: LinhaTabela[];
+  pessoas: Pessoa[];
+};
+
+export const UNIDADES: Unidade[] = [
+  { slug: "cerquilho", nome: "Cerquilho", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
+  { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
+  { slug: "mkt", nome: "Mkt", temDefinicao: false, n3: MKT_N3, n4: MKT_N4, pessoas: MKT_PESSOAS },
+  { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
+];
+
+/** Unidade do painel que já existia antes da separação — recebe o histórico. */
+export const UNIDADE_PADRAO = "cerquilho";
+
+export function unidadePorSlug(slug: string | undefined): Unidade | null {
+  return UNIDADES.find((u) => u.slug === slug) ?? null;
 }

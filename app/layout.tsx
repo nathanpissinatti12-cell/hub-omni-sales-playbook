@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import "./globals.css";
+import { MenuOnvox } from "@/components/MenuOnvox";
 import { SiteWidgets } from "@/components/SiteWidgets";
 import { SiteLogoutButton } from "@/components/SiteLogoutButton";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
@@ -29,6 +30,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 Dashboard
               </Link>
             )}
+            {/* Os painéis de indicadores são restritos a root, igual ao Dashboard:
+                a rota e a API já recusam quem não é, e o menu acompanha. */}
+            {session?.accessLevel === "root" && <MenuOnvox />}
             <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Admin
             </Link>
