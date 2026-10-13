@@ -44,6 +44,20 @@ const CUSTO_REAL_MANUAL: Record<
   // revelação repetida de contato já revelado antes. Gemini não foi medido à
   // parte aqui — segue a taxa estimada (45 × R$0,007 ≈ R$0,32), calculada
   // dinamicamente por quem chama isso (empresasConsultadas real do banco).
+  //
+  // 05/10/2026: os 296 foram contestados (a sessão de N8N/Apollo falou em ~370)
+  // e reconferidos contra o banco. Os 296 se sustentam:
+  //   - a campanha rodou INTEIRA em 17/09, das 14:25 às 17:33 (processando_em),
+  //     então o filtro "17/09 a 17/09" pegou a janela completa;
+  //   - nenhuma outra campanha rodou nesse dia pela conta do n8n, então não há
+  //     contaminação: os 296 são todos dela;
+  //   - 296 ÷ 8 = 37 revelações exatas, sem resto.
+  // O banco tem 40 linhas com telefone_decisor, mas só 39 números distintos, e
+  // desses apenas 35 têm formato de celular (13+ dígitos). Telefone preenchido
+  // não é telefone pago — fixo e telefone de empresa entram de graça. Por isso
+  // 40 preenchidos convivem com 37 revelações cobradas.
+  // Os ~370 não se reproduzem pelo painel filtrado por membro; batem com o
+  // delta de saldo da equipe inteira, que é teto e inclui uso manual de outros.
   "ICP - BLIP ETP": {
     creditosApolloReais: 296,
     conferidoEm: "2026-09-17",
