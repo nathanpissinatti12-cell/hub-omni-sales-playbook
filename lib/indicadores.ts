@@ -236,11 +236,11 @@ export function indicadoresPlanos(defs: LinhaTabela[] = [...N3, ...N4]): Indicad
 // ---------------------------------------------------------------------------
 // Unidades da Onvox
 //
-// Cerquilho, Tatuí e Ribeirão são unidades comerciais e compartilham a mesma
-// definição (N3/N4/N5 acima) — o que muda entre elas é só o lançamento, que o
-// banco separa pela coluna `unidade`. O Mkt tem indicadores próprios e começa
-// sem definição: a tela mostra um aviso até a lista ser preenchida em
-// INDICADORES_MKT, em vez de exibir metas comerciais que não são dele.
+// Cerquilho, Tatuí, Ribeirão e Partners são operações comerciais e compartilham
+// a mesma definição (N3/N4/N5 acima) — o que muda entre elas é só o lançamento,
+// que o banco separa pela coluna `unidade`. O Mkt tem indicadores próprios e
+// começa sem definição: a tela mostra um aviso até a lista ser preenchida em
+// MKT_N3/MKT_N4/MKT_PESSOAS, em vez de exibir metas comerciais que não são dele.
 // ---------------------------------------------------------------------------
 
 /** Indicadores do Mkt. Vazio de propósito — ainda não definidos pelo time. */
@@ -263,6 +263,7 @@ export const UNIDADES: Unidade[] = [
   { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
   { slug: "mkt", nome: "Mkt", temDefinicao: false, n3: MKT_N3, n4: MKT_N4, pessoas: MKT_PESSOAS },
   { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
+  { slug: "partners", nome: "Partners", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
 ];
 
 /** Unidade do painel que já existia antes da separação — recebe o histórico. */
