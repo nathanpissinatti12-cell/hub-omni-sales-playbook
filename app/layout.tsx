@@ -44,9 +44,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="pt-BR" className={inter.variable}>
       <body>
-        {/* Deep Twilight (#19014b) é a cor de fundo da marca; a logo usada aqui é
-            a versão branca, que é a prevista para fundo escuro. */}
-        <header style={{ background: "#19014b", borderBottom: "1px solid #ffffff26" }}>
+        {/* Cabeçalho branco sobre o fundo Platinum da página, separado só por uma
+            linha: a barra deixa de ser um bloco escuro e a marca aparece na
+            versão roxa, que é a prevista para fundo claro. As cores vêm dos
+            tokens do tema em vez de hex solto, para o cabeçalho acompanhar
+            qualquer ajuste de paleta junto com o resto do site. */}
+        <header style={{ background: "var(--surface)", borderBottom: "1px solid var(--border)" }}>
           <nav className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4">
             {/* Símbolo + palavra como no brandbook. São dois arquivos e não um
                 só porque o símbolo sozinho serve de favicon e de marca em
@@ -54,23 +57,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 e dois textos alternativos seriam lidos em duplicata. */}
             <span className="flex items-center gap-2.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/assets/onvox-simbolo-dark.png" alt="" aria-hidden="true" className="h-7 w-auto" />
+              <img src="/assets/onvox-simbolo-light.png" alt="" aria-hidden="true" className="h-7 w-auto" />
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/assets/onvox-logo-dark.png" alt="Onvox" className="h-7 w-auto" />
+              <img src="/assets/onvox-logo-light.png" alt="Onvox" className="h-7 w-auto" />
             </span>
-            <Link href="/playbook" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
+            <Link href="/playbook" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
               Playbook de Vendas
             </Link>
             {session?.accessLevel === "root" && (
-              <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
+              <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
                 Dashboard
               </Link>
             )}
             {unidadesDoMenu.length > 0 && <MenuOnvox unidades={unidadesDoMenu} />}
-            <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
+            <Link href="/admin" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
               Admin
             </Link>
-            <Link href="/equipamentos" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
+            <Link href="/equipamentos" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
               Equipamentos
             </Link>
             {session && (
