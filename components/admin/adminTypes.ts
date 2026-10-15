@@ -7,6 +7,10 @@ export type AdminUser = {
   email: string;
   access_level: AccessLevel;
   bdr_level: BdrLevel | null;
+  /** Unidade do Painel de Indicadores que o usuário enxerga (só não-root). */
+  unidade: string | null;
+  /** Linha dele no N5 daquela unidade. */
+  pessoa_chave: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;

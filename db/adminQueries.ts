@@ -74,14 +74,31 @@ export async function createUser(input: {
 
 export async function updateUserAccess(
   id: string,
-  input: { accessLevel: AccessLevel; bdrLevel: BdrLevel | null; active: boolean }
+  input: {
+    accessLevel: AccessLevel;
+    bdrLevel: BdrLevel | null;
+    active: boolean;
+    /** Vínculo com o Painel de Indicadores; ignorado quando o nível é root. */
+    unidade: string | null;
+    pessoaChave: string | null;
+  }
 ): Promise<AdminUser | null> {
+  const ehRoot = input.accessLevel === "root";
   const { rows } = await adminPool.query(
     `UPDATE admin_users
-     SET access_level = $2, bdr_level = $3, active = $4, updated_at = now()
+     SET access_level = $2, bdr_level = $3, active = $4, unidade = $5, pessoa_chave = $6, updated_at = now()
      WHERE id = $1
      RETURNING ${USER_COLUMNS}`,
-    [id, input.accessLevel, input.accessLevel === "bdr" ? input.bdrLevel : null, input.active]
+    [
+      id,
+      input.accessLevel,
+      input.accessLevel === "bdr" ? input.bdrLevel : null,
+      input.active,
+      // Root vê todas as unidades e não é uma pessoa do N5 — guardar vínculo
+      // nele deixaria dado morto que confunde na próxima leitura.
+      ehRoot ? null : input.unidade,
+      ehRoot ? null : input.pessoaChave,
+    ]
   );
   return rows[0] ?? null;
 }
