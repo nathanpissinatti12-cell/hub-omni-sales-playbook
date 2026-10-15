@@ -214,9 +214,32 @@ export function closerKpis(mrr: number, forecast: number): Indicador[] {
   ];
 }
 
+/**
+ * `chave` é a identidade da pessoa no banco: todo lançamento do N5 é gravado
+ * como `<chave>_<id do indicador>`, dentro da unidade e do mês.
+ *
+ * Por isso trocar a chave = começar do zero, e isso é intencional: quando sai
+ * alguém e entra outra pessoa na vaga, a nova não deve herdar nota, meta nem
+ * histórico de quem saiu — é só cadastrar com chave nova. O dado antigo
+ * continua no banco, apenas deixa de aparecer. O contrário também vale:
+ * mexer só no `nome` (corrigir grafia, mudar o rótulo da função) preserva
+ * tudo que já foi lançado, porque a chave não mudou.
+ *
+ * Como o lançamento também carrega a unidade, a mesma pessoa em duas unidades
+ * são dois registros independentes.
+ */
 export type Pessoa = { chave: string; nome: string; kpis: Indicador[] };
 
 const MRR_CLOSER = 4853;
+
+/** Closer padrão: meta de MRR do mês e cobertura de forecast de 8x. */
+function closer(chave: string, nome: string): Pessoa {
+  return { chave, nome, kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) };
+}
+
+function bdr(chave: string, nome: string): Pessoa {
+  return { chave, nome, kpis: BDR_PADRAO };
+}
 
 export const PESSOAS: Pessoa[] = [
   { chave: "sara", nome: "Sara Pereira — BDR", kpis: BDR_PADRAO },
@@ -227,6 +250,25 @@ export const PESSOAS: Pessoa[] = [
   { chave: "joao", nome: "João Camilo — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
   { chave: "gabriel", nome: "Gabriel Donadeli — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
 ];
+
+// Times das demais unidades (informados em 15/10/2026). Closers usam a mesma
+// meta de MRR de Cerquilho por enquanto — quando a meta de cada unidade for
+// definida, dá pra ajustar por mês direto na coluna Meta do painel, sem mexer
+// aqui.
+export const PESSOAS_TATUI: Pessoa[] = [
+  closer("eduarda", "Eduarda — Closer"),
+  closer("jose", "Jose — Closer"),
+  bdr("carlos", "Carlos — BDR"),
+  bdr("aline", "Aline — BDR"),
+  bdr("helena", "Helena — BDR"),
+];
+
+export const PESSOAS_RIBEIRAO: Pessoa[] = [
+  bdr("otavio", "Otavio — BDR"),
+  bdr("nathalia", "Nathalia Dadalte — BDR"),
+];
+
+export const PESSOAS_PARTNERS: Pessoa[] = [bdr("alessandra", "Alessandra Thibes — BDR")];
 
 /** Todos os indicadores de N3 e N4 achatados — usado no seletor de evolução. */
 export function indicadoresPlanos(defs: LinhaTabela[] = [...N3, ...N4]): Indicador[] {
@@ -258,16 +300,15 @@ export type Unidade = {
   pessoas: Pessoa[];
 };
 
-// As pessoas do N5 são de CERQUILHO — `PESSOAS` acima é o time de lá. Cada
-// unidade tem o seu, então as demais começam com a lista vazia e o N5 mostra um
-// aviso até alguém preencher. Repetir o time de Cerquilho nas outras faria o
-// painel lançar nota e meta individual em nome de quem não trabalha ali.
+// Cada unidade tem o seu time no N5 — nunca repetir a mesma pessoa em duas,
+// porque o N5 é nominal e isso lançaria meta individual no nome de quem não
+// trabalha ali. Unidade sem time cadastrado mostra aviso no lugar da tabela.
 export const UNIDADES: Unidade[] = [
   { slug: "cerquilho", nome: "Cerquilho", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
-  { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: [] },
+  { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_TATUI },
   { slug: "mkt", nome: "Mkt", temDefinicao: false, n3: MKT_N3, n4: MKT_N4, pessoas: MKT_PESSOAS },
-  { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: [] },
-  { slug: "partners", nome: "Partners", temDefinicao: true, n3: N3, n4: N4, pessoas: [] },
+  { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_RIBEIRAO },
+  { slug: "partners", nome: "Partners", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_PARTNERS },
 ];
 
 /** Unidade do painel que já existia antes da separação — recebe o histórico. */
