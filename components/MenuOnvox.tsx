@@ -39,7 +39,7 @@ export function MenuOnvox({ unidades }: { unidades: { slug: string; nome: string
         aria-expanded={aberto}
         aria-haspopup="menu"
         className="flex items-center gap-1 text-sm hover:underline"
-        style={{ color: "#f4f5f9" }}
+        style={{ color: "var(--text)" }}
       >
         Onvox
         <span className="text-[10px]" aria-hidden="true">
@@ -51,7 +51,7 @@ export function MenuOnvox({ unidades }: { unidades: { slug: string; nome: string
         <div
           role="menu"
           className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-lg border py-1 shadow-lg"
-          style={{ background: "#240a62", borderColor: "#ffffff26" }}
+          style={{ background: "var(--surface)", borderColor: "var(--border)" }}
         >
           {unidades.map((u) => (
             <Link
@@ -59,8 +59,8 @@ export function MenuOnvox({ unidades }: { unidades: { slug: string; nome: string
               role="menuitem"
               href={`/dashboard/indicadores/${u.slug}`}
               onClick={() => setAberto(false)}
-              className="block px-4 py-2 text-sm hover:bg-white/10"
-              style={{ color: "#f4f5f9" }}
+              className="block px-4 py-2 text-sm hover:bg-black/5"
+              style={{ color: "var(--text)" }}
             >
               Painel de indicadores {u.nome}
             </Link>

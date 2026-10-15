@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Tema único "Platinum integral": o site inteiro é claro, independente do tema
+   do sistema operacional. Não há mais variante escura — o roxo #a224db do
+   brandbook só é legível sobre fundo claro (sobre o Deep Twilight dá contraste
+   2,9), então manter os dois temas obrigaria a um segundo roxo que não existe
+   na marca. Platinum de fundo, Deep Twilight no texto, Purple (X11) no
+   destaque: as três cores do brandbook, sem tom inventado. */
 :root {
   /* Faz o navegador desenhar os controles nativos (lista aberta do <select>,
-     seletor de data, barra de rolagem) no mesmo tema do site. Sem isso eles
-     saem sempre no tema claro: no escuro, as <option> ficavam com texto claro
-     sobre fundo branco e só apareciam sob o cursor. */
-  color-scheme: light dark;
+     seletor de data, barra de rolagem) no tema do site. Fixo em claro porque o
+     site é claro: sem isto, quem usa Windows no escuro veria <option> de texto
+     claro sobre fundo branco. */
+  color-scheme: light;
 
   --bg: #f4f5f9;
   --surface: #ffffff;
@@ -16,23 +22,6 @@
   --text-muted: #5f5b7d;
   --accent: #a224db;
   --on-accent: #ffffff;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #19014b;
-    --surface: #240a62;
-    --border: #ffffff26;
-    --text: #f4f5f9;
-    --text-muted: #b9b3d4;
-    /* Mesmo roxo da marca (matiz 281°, saturação 72%), só mais claro: sobre o
-       Deep Twilight, o #a224db original dá contraste 2,9 e texto pequeno em
-       destaque fica ilegível. Este tom dá 5,4 sobre o fundo e 4,8 sobre o
-       cartão. É o mesmo recurso que a identidade antiga usava com os dois
-       amarelos (#d9a900 no claro, #ffd400 no escuro). */
-    --accent: #be66e6;
-    --on-accent: #19014b;
-  }
 }
 
 body {
@@ -52,36 +41,14 @@ h3 {
   line-height: 1.05;
 }
 
-/* Tema claro fixo para uma página específica (hoje só o Painel de Indicadores),
-   independente do tema do sistema operacional. Os valores claros do :root são
-   repetidos aqui porque precisam VENCER o @media prefers-color-scheme: dark
-   acima — herdar não bastaria, já que aquele bloco redefine os mesmos tokens.
-   Os gráficos são SVG que usam fill="var(--text)" etc., então trocar os tokens
-   já reveste tabela, cartões e gráficos de uma vez. */
+/* O Painel de Indicadores marca sua página com esta classe desde quando o resto
+   do site seguia o tema do sistema e ele precisava ser claro à força. Agora o
+   site inteiro é claro, então ela não muda nada — fica como ponto de apoio caso
+   alguma página volte a precisar de tema próprio, e por isso só reafirma os
+   tokens claros em vez de redefinir cores. */
 .tema-claro {
   color-scheme: light;
-
-  --bg: #f4f5f9;
-  --surface: #ffffff;
-  --border: #e2e3ee;
-  --text: #19014b;
-  --text-muted: #5f5b7d;
-  --accent: #a224db;
-  --on-accent: #ffffff;
-
   color: var(--text);
-}
-
-/* O <body> continua escuro (o resto do site segue o tema do SO), então sem isto
-   sobrariam faixas escuras nas margens do <main> e abaixo do conteúdo. Isto
-   pinta a viewport inteira de claro atrás da página. O z-index negativo mantém
-   o cabeçalho preto do site por cima, que é proposital na identidade visual. */
-.tema-claro::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: var(--bg);
-  z-index: -1;
 }
 
 /* Planta baixa isométrica (Controle de Equipamentos): leve "levantada" da
@@ -118,7 +85,7 @@ h3 {
 .playbook-content h2 {
   padding: 0.625rem 0.875rem;
   border-radius: 0.5rem;
-  background: linear-gradient(90deg, rgba(255, 212, 0, 0.1), transparent 75%);
+  background: linear-gradient(90deg, rgba(162, 36, 219, 0.1), transparent 75%);
 }
 
 /* Itens de checklist (☐ + texto, className="flex gap-2") viram cartões em
