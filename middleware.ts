@@ -47,8 +47,15 @@ export async function middleware(req: NextRequest) {
       return NextResponse.redirect(loginUrl);
     }
 
-    // Dashboard: só Root.
-    if (pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard")) {
+    // Painel de Indicadores: colaborador também entra, com visão parcial (N4 +
+    // a própria linha do N5, só na unidade dele). Quem decide o que ele vê é a
+    // página e, principalmente, a rota de API — o middleware roda no Edge e não
+    // consulta banco, então aqui só libera a porta.
+    const ehPainelIndicadores =
+      pathname.startsWith("/dashboard/indicadores") || pathname.startsWith("/api/dashboard/indicadores");
+
+    // Resto do dashboard: só Root.
+    if (!ehPainelIndicadores && (pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard"))) {
       if (session.accessLevel !== "root") {
         if (pathname.startsWith("/api/dashboard")) {
           return NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 });

@@ -2,14 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { UNIDADES } from "@/lib/indicadores";
 
 /**
- * Item "Onvox" do menu de cima: abre a lista de painéis de indicadores, um por
- * unidade. Fica num componente de cliente porque o layout é server component e
- * o menu precisa de estado de aberto/fechado.
+ * Item "Onvox" do menu de cima: abre a lista de painéis de indicadores. As
+ * unidades vêm prontas de quem renderiza, já filtradas pela permissão — o Head
+ * recebe todas, o colaborador só a dele. Fica num componente de cliente porque
+ * o layout é server component e o menu precisa de estado de aberto/fechado.
  */
-export function MenuOnvox() {
+export function MenuOnvox({ unidades }: { unidades: { slug: string; nome: string }[] }) {
   const [aberto, setAberto] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
 
@@ -53,7 +53,7 @@ export function MenuOnvox() {
           className="absolute left-0 top-full z-50 mt-2 w-64 overflow-hidden rounded-lg border py-1 shadow-lg"
           style={{ background: "#141414", borderColor: "#ffffff1f" }}
         >
-          {UNIDADES.map((u) => (
+          {unidades.map((u) => (
             <Link
               key={u.slug}
               role="menuitem"

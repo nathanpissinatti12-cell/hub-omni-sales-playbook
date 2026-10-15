@@ -10,12 +10,37 @@ export type AdminUser = {
   email: string;
   access_level: AccessLevel;
   bdr_level: BdrLevel | null;
+  /** Unidade do Painel de Indicadores que este usuário enxerga (só não-root). */
+  unidade: string | null;
+  /** Linha dele no N5 daquela unidade — a `chave` da pessoa. */
+  pessoa_chave: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;
 };
 
-const USER_COLUMNS = "id, name, email, access_level, bdr_level, active, created_at, updated_at";
+const USER_COLUMNS =
+  "id, name, email, access_level, bdr_level, unidade, pessoa_chave, active, created_at, updated_at";
+
+/**
+ * Dados que o Painel de Indicadores precisa pra decidir o que mostrar. Vem do
+ * banco a cada requisição, e não do cookie de sessão, porque tirar o acesso de
+ * alguém tem que valer na hora — cookie assinado continuaria válido até expirar.
+ */
+export async function getUsuarioPainel(
+  id: string
+): Promise<{ accessLevel: string; unidade: string | null; pessoaChave: string | null } | null> {
+  const { rows } = await adminPool.query(
+    `SELECT access_level, unidade, pessoa_chave FROM admin_users WHERE id = $1 AND active = TRUE`,
+    [id]
+  );
+  if (rows.length === 0) return null;
+  return {
+    accessLevel: rows[0].access_level,
+    unidade: rows[0].unidade,
+    pessoaChave: rows[0].pessoa_chave,
+  };
+}
 
 export async function listUsers(): Promise<AdminUser[]> {
   const { rows } = await adminPool.query(

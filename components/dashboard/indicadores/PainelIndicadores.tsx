@@ -14,6 +14,7 @@ import {
   type LinhaTabela,
   type Unidade,
 } from "@/lib/indicadores";
+import type { Permissao } from "@/lib/permissaoIndicadores";
 import {
   corDe,
   diasUteis,
@@ -51,8 +52,17 @@ function chaveMapa(mes: string, tipo: string) {
   return `${mes}|${tipo}`;
 }
 
-export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
-  const { n3: N3, n4: N4, pessoas: PESSOAS } = unidade;
+export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; permissao: Permissao }) {
+  const { n3: N3, n4: N4 } = unidade;
+  // Colaborador só enxerga a própria linha do N5 — o seletor de pessoa e o
+  // comparativo entre pessoas somem junto, senão mostrariam nome de colega.
+  const PESSOAS = useMemo(
+    () =>
+      permissao.somentePessoa
+        ? unidade.pessoas.filter((p) => p.chave === permissao.somentePessoa)
+        : unidade.pessoas,
+    [unidade.pessoas, permissao.somentePessoa]
+  );
   const meses = useMemo(() => mesesCiclo(), []);
   const [mesAtivo, setMesAtivo] = useState(meses[0]);
   const [dtIni, setDtIni] = useState("");
@@ -317,6 +327,7 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
       </Painel>
 
       {/* ---------------- N3 ---------------- */}
+      {permissao.verN3 && (
       <Painel titulo="Head Comercial" tag="N3" tagCor="var(--accent)" desc="8 indicadores, todos com meta">
         <Tabela
           defs={N3}
@@ -327,11 +338,14 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
           dtIni={dtIni}
           dtFim={dtFim}
           onChange={setValor}
+          podeEditarMeta={permissao.podeEditarMeta}
+          podeEditarReal={permissao.ehHead}
         />
         <Secao titulo="Ranking de atingimento — N3">
           <GraficoRanking dados={ranking(N3, "")} />
         </Secao>
       </Painel>
+      )}
 
       {/* ---------------- N4 ---------------- */}
       <Painel titulo="Supervisão" tag="N4" tagCor="#EC4899" desc="9 indicadores agregados por função">
@@ -344,6 +358,8 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
           dtIni={dtIni}
           dtFim={dtFim}
           onChange={setValor}
+          podeEditarMeta={permissao.podeEditarMeta}
+          podeEditarReal={permissao.ehHead}
         />
         <Secao titulo="Ranking de atingimento — N4">
           <GraficoRanking dados={ranking(N4, "")} />
@@ -372,15 +388,17 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
           </p>
         ) : (
           <>
-            <div className="mb-4 max-w-xs">
-              <Campo label="Pessoa">
-                <Select
-                  value={pessoaSel}
-                  onChange={setPessoaSel}
-                  opcoes={PESSOAS.map((p) => ({ valor: p.chave, rotulo: p.nome }))}
-                />
-              </Campo>
-            </div>
+            {PESSOAS.length > 1 && (
+              <div className="mb-4 max-w-xs">
+                <Campo label="Pessoa">
+                  <Select
+                    value={pessoaSel}
+                    onChange={setPessoaSel}
+                    opcoes={PESSOAS.map((p) => ({ valor: p.chave, rotulo: p.nome }))}
+                  />
+                </Campo>
+              </div>
+            )}
             <Tabela
               defs={[{ grupo: pessoa.nome, cor: "p5" }, ...pessoa.kpis]}
               prefixo={`${pessoa.chave}_`}
@@ -390,22 +408,26 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
               dtIni={dtIni}
               dtFim={dtFim}
               onChange={setValor}
+              podeEditarMeta={permissao.podeEditarMeta}
+              podeEditarReal
             />
             <Secao titulo="Ranking de atingimento — pessoa selecionada">
               <GraficoRanking dados={rankingPessoa} />
             </Secao>
-            <Secao
-              titulo="Comparativo entre pessoas"
-              acao={
-                <Select
-                  value={kpiComp}
-                  onChange={setKpiComp}
-                  opcoes={kpisComparaveis.map((k) => ({ valor: k.id, rotulo: k.nome }))}
-                />
-              }
-            >
-              <GraficoComparativo dados={comparativo} />
-            </Secao>
+            {permissao.somentePessoa == null && (
+              <Secao
+                titulo="Comparativo entre pessoas"
+                acao={
+                  <Select
+                    value={kpiComp}
+                    onChange={setKpiComp}
+                    opcoes={kpisComparaveis.map((k) => ({ valor: k.id, rotulo: k.nome }))}
+                  />
+                }
+              >
+                <GraficoComparativo dados={comparativo} />
+              </Secao>
+            )}
           </>
         )}
       </Painel>
@@ -444,12 +466,16 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
       {/* ---------------- dados ---------------- */}
       <Painel titulo="Dados">
         <div className="flex flex-wrap items-center gap-3">
-          <button onClick={exportar} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
-            Exportar JSON
-          </button>
-          <button onClick={limparMes} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
-            Limpar realizados do mês
-          </button>
+          {permissao.podeExportar && (
+            <button onClick={exportar} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
+              Exportar JSON
+            </button>
+          )}
+          {permissao.podeLimparMes && (
+            <button onClick={limparMes} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
+              Limpar realizados do mês
+            </button>
+          )}
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
             {aviso}
           </span>
@@ -661,6 +687,8 @@ function Tabela({
   dtIni,
   dtFim,
   onChange,
+  podeEditarMeta,
+  podeEditarReal,
 }: {
   defs: LinhaTabela[];
   prefixo: string;
@@ -670,6 +698,8 @@ function Tabela({
   dtIni: string;
   dtFim: string;
   onChange: (tipo: "real" | "meta", chave: string, valor: string) => void;
+  podeEditarMeta: boolean;
+  podeEditarReal: boolean;
 }) {
   return (
     <div className="overflow-x-auto">
@@ -732,7 +762,7 @@ function Tabela({
                     >
                       sem meta
                     </span>
-                  ) : (
+                  ) : podeEditarMeta ? (
                     <CampoValor
                       formato={ind.fmt}
                       valor={metasBrutas[chave] ?? ""}
@@ -744,17 +774,26 @@ function Tabela({
                       forte
                       onChange={(v) => onChange("meta", chave, v)}
                     />
+                  ) : (
+                    // Quem não é Head lê a meta, não digita.
+                    <span className="font-bold">
+                      {fmt(num(metasBrutas[chave] ?? "") ?? metaDinamica(ind, dtIni, dtFim) ?? ind.meta, ind.fmt)}
+                    </span>
                   )}
                 </td>
                 <td className="px-2 py-2 text-right font-extrabold tabular-nums" style={{ color: "var(--accent)" }}>
                   {proporcional === null ? "—" : fmt(proporcional, ind.fmt)}
                 </td>
                 <td className="px-2 py-2 text-right">
-                  <CampoValor
-                    formato={ind.fmt}
-                    valor={reais[chave] ?? ""}
-                    onChange={(v) => onChange("real", chave, v)}
-                  />
+                  {podeEditarReal ? (
+                    <CampoValor
+                      formato={ind.fmt}
+                      valor={reais[chave] ?? ""}
+                      onChange={(v) => onChange("real", chave, v)}
+                    />
+                  ) : (
+                    <span className="tabular-nums">{fmt(num(reais[chave] ?? ""), ind.fmt)}</span>
+                  )}
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-right font-extrabold tabular-nums">
                   <span
