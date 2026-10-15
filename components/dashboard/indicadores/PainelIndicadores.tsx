@@ -58,7 +58,7 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
   const [dtIni, setDtIni] = useState("");
   const [dtFim, setDtFim] = useState("");
   const [mapa, setMapa] = useState<Mapa>({});
-  const [pessoaSel, setPessoaSel] = useState(PESSOAS[0].chave);
+  const [pessoaSel, setPessoaSel] = useState(PESSOAS[0]?.chave ?? "");
   const [kpiComp, setKpiComp] = useState("ini");
   const [indEvo, setIndEvo] = useState("n3_mrr_out");
   const [carregando, setCarregando] = useState(true);
@@ -138,7 +138,8 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
   const pctTri = (fatorTrimestre(dtFim) * 100).toFixed(0);
   const pctAno = (fatorAno(dtFim) * 100).toFixed(0);
 
-  const pessoa = PESSOAS.find((p) => p.chave === pessoaSel) ?? PESSOAS[0];
+  // null quando a unidade ainda não tem time cadastrado — o N5 vira aviso.
+  const pessoa = PESSOAS.find((p) => p.chave === pessoaSel) ?? PESSOAS[0] ?? null;
 
   // ---- rankings ------------------------------------------------------------
   const ranking = useCallback(
@@ -160,6 +161,7 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
   );
 
   const rankingPessoa = useMemo((): ItemRanking[] => {
+    if (!pessoa) return [];
     const out: ItemRanking[] = [];
     for (const ind of pessoa.kpis) {
       const chave = `${pessoa.chave}_${ind.id}`;
@@ -182,7 +184,7 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
       const st = status(real, proporcional, def.dir);
       return { nome: p.nome.split(" — ")[0], real, meta: proporcional, pct: st.pct };
     }).filter((x): x is ItemComparativo => x !== null);
-  }, [kpiComp, reais, metasOverride, dtIni, dtFim]);
+  }, [PESSOAS, kpiComp, reais, metasOverride, dtIni, dtFim]);
 
   const kpisComparaveis = useMemo(() => {
     const lista = BDR_PADRAO.map((k) => ({ id: k.id, nome: k.nome }));
@@ -353,42 +355,59 @@ export function PainelIndicadores({ unidade }: { unidade: Unidade }) {
         titulo="Operação individual"
         tag="N5"
         tagCor="#0EA5E9"
-        desc="Selecione a pessoa para lançar e ler os indicadores individuais."
+        desc={
+          pessoa
+            ? "Selecione a pessoa para lançar e ler os indicadores individuais."
+            : `O time de ${unidade.nome} ainda não foi cadastrado.`
+        }
       >
-        <div className="mb-4 max-w-xs">
-          <Campo label="Pessoa">
-            <Select
-              value={pessoaSel}
-              onChange={setPessoaSel}
-              opcoes={PESSOAS.map((p) => ({ valor: p.chave, rotulo: p.nome }))}
+        {pessoa == null ? (
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+            O N5 é nominal: cada linha é a meta e a nota de uma pessoa específica. Como o time desta
+            unidade ainda não foi cadastrado, não há o que lançar aqui — mostrar o time de outra
+            unidade colocaria meta individual no nome de quem não trabalha nela. Para ligar esta
+            seção, informe as pessoas desta unidade e elas entram em <code>UNIDADES</code>, em
+            <code className="mx-1">lib/indicadores.ts</code>. O N3 e o N4 acima já funcionam
+            normalmente.
+          </p>
+        ) : (
+          <>
+            <div className="mb-4 max-w-xs">
+              <Campo label="Pessoa">
+                <Select
+                  value={pessoaSel}
+                  onChange={setPessoaSel}
+                  opcoes={PESSOAS.map((p) => ({ valor: p.chave, rotulo: p.nome }))}
+                />
+              </Campo>
+            </div>
+            <Tabela
+              defs={[{ grupo: pessoa.nome, cor: "p5" }, ...pessoa.kpis]}
+              prefixo={`${pessoa.chave}_`}
+              reais={reais}
+              metasBrutas={metasBrutas}
+              metasOverride={metasOverride}
+              dtIni={dtIni}
+              dtFim={dtFim}
+              onChange={setValor}
             />
-          </Campo>
-        </div>
-        <Tabela
-          defs={[{ grupo: pessoa.nome, cor: "p5" }, ...pessoa.kpis]}
-          prefixo={`${pessoa.chave}_`}
-          reais={reais}
-          metasBrutas={metasBrutas}
-          metasOverride={metasOverride}
-          dtIni={dtIni}
-          dtFim={dtFim}
-          onChange={setValor}
-        />
-        <Secao titulo="Ranking de atingimento — pessoa selecionada">
-          <GraficoRanking dados={rankingPessoa} />
-        </Secao>
-        <Secao
-          titulo="Comparativo entre pessoas"
-          acao={
-            <Select
-              value={kpiComp}
-              onChange={setKpiComp}
-              opcoes={kpisComparaveis.map((k) => ({ valor: k.id, rotulo: k.nome }))}
-            />
-          }
-        >
-          <GraficoComparativo dados={comparativo} />
-        </Secao>
+            <Secao titulo="Ranking de atingimento — pessoa selecionada">
+              <GraficoRanking dados={rankingPessoa} />
+            </Secao>
+            <Secao
+              titulo="Comparativo entre pessoas"
+              acao={
+                <Select
+                  value={kpiComp}
+                  onChange={setKpiComp}
+                  opcoes={kpisComparaveis.map((k) => ({ valor: k.id, rotulo: k.nome }))}
+                />
+              }
+            >
+              <GraficoComparativo dados={comparativo} />
+            </Secao>
+          </>
+        )}
       </Painel>
 
       {/* ---------------- evolução ---------------- */}

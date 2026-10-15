@@ -258,12 +258,16 @@ export type Unidade = {
   pessoas: Pessoa[];
 };
 
+// As pessoas do N5 são de CERQUILHO — `PESSOAS` acima é o time de lá. Cada
+// unidade tem o seu, então as demais começam com a lista vazia e o N5 mostra um
+// aviso até alguém preencher. Repetir o time de Cerquilho nas outras faria o
+// painel lançar nota e meta individual em nome de quem não trabalha ali.
 export const UNIDADES: Unidade[] = [
   { slug: "cerquilho", nome: "Cerquilho", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
-  { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
+  { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: [] },
   { slug: "mkt", nome: "Mkt", temDefinicao: false, n3: MKT_N3, n4: MKT_N4, pessoas: MKT_PESSOAS },
-  { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
-  { slug: "partners", nome: "Partners", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
+  { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: [] },
+  { slug: "partners", nome: "Partners", temDefinicao: true, n3: N3, n4: N4, pessoas: [] },
 ];
 
 /** Unidade do painel que já existia antes da separação — recebe o histórico. */
