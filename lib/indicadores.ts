@@ -46,8 +46,17 @@ export const CRONOGRAMA: Record<string, { out: number; inb: number }> = {
 
 export const CICLO_ANUAL = { ini: "2026-08-01", fim: "2026-12-31" };
 
+/** Ano que o painel mostra no eixo dos gráficos e no seletor de mês. */
+export const ANO_PAINEL = 2026;
+
+/**
+ * Os 12 meses do ano, e não só os do cronograma de MRR (ago–dez). O painel
+ * precisa deles por dois motivos: o gráfico de evolução mostra o ano inteiro, e
+ * indicadores que não são MRR (CAC, conversão, reunião) existem o ano todo.
+ * Mês fora do cronograma simplesmente não tem meta de MRR — ver CRONOGRAMA.
+ */
 export function mesesCiclo(): string[] {
-  return Object.keys(CRONOGRAMA).sort();
+  return Array.from({ length: 12 }, (_, i) => `${ANO_PAINEL}-${String(i + 1).padStart(2, "0")}`);
 }
 
 const MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];

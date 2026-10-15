@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   CRONOGRAMA,
   BDR_PADRAO,
@@ -36,6 +36,7 @@ import {
   GraficoBurnup,
   GraficoComparativo,
   GraficoEvolucao,
+  GraficoLinhaMensal,
   GraficoRanking,
   type ItemComparativo,
   type ItemRanking,
@@ -64,7 +65,13 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     [unidade.pessoas, permissao.somentePessoa]
   );
   const meses = useMemo(() => mesesCiclo(), []);
-  const [mesAtivo, setMesAtivo] = useState(meses[0]);
+  // Abre no mês corrente, não em janeiro: com os 12 meses na lista, começar pelo
+  // primeiro faria o painel abrir sempre num mês vazio.
+  const [mesAtivo, setMesAtivo] = useState(() => {
+    const hoje = new Date();
+    const atual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+    return meses.includes(atual) ? atual : meses[0];
+  });
   const [dtIni, setDtIni] = useState("");
   const [dtFim, setDtFim] = useState("");
   const [mapa, setMapa] = useState<Mapa>({});
@@ -211,9 +218,11 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       let accReal = 0;
       return mesesJanela.map((k) => {
         const metasDoMes = mapa[chaveMapa(k, "meta")] || {};
+        // Mês fora do cronograma de MRR (jan–jul) entra como zero: não há meta
+        // de MRR definida antes de agosto.
         accMeta +=
-          (num(metasDoMes["n3_mrr_out"]) ?? CRONOGRAMA[k].out) +
-          (num(metasDoMes["n3_mrr_in"]) ?? CRONOGRAMA[k].inb);
+          (num(metasDoMes["n3_mrr_out"]) ?? CRONOGRAMA[k]?.out ?? 0) +
+          (num(metasDoMes["n3_mrr_in"]) ?? CRONOGRAMA[k]?.inb ?? 0);
         const doMes = mapa[chaveMapa(k, "real")] || {};
         const out = num(doMes["n3_mrr_out"]);
         const inb = num(doMes["n3_mrr_in"]);
@@ -242,6 +251,27 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   // ---- evolução mensal -----------------------------------------------------
   const planos = useMemo(() => indicadoresPlanos([...N3, ...N4]), [N3, N4]);
 
+  /**
+   * Série do ano inteiro de UM indicador, para o gráfico que abre ao clicar no
+   * nome dele. A meta de cada mês segue a mesma ordem de precedência do painel:
+   * override lançado > cronograma do mês > meta fixa da definição.
+   */
+  const serieMensal = useCallback(
+    (ind: Indicador, chave: string): PontoEvolucao[] =>
+      meses.map((k) => {
+        const real = num((mapa[chaveMapa(k, "real")] || {})[chave]);
+        const override = num((mapa[chaveMapa(k, "meta")] || {})[chave]);
+        let meta = override;
+        if (meta === null) {
+          if (ind.id === "n3_mrr_out") meta = CRONOGRAMA[k]?.out ?? null;
+          else if (ind.id === "n3_mrr_in") meta = CRONOGRAMA[k]?.inb ?? null;
+          else meta = ind.meta;
+        }
+        return { rotulo: rotuloMes(k), real, meta, pct: status(real, meta, ind.dir).pct };
+      }),
+    [mapa, meses]
+  );
+
   const serieEvolucao = useMemo((): PontoEvolucao[] => {
     const def = planos.find((r) => r.id === indEvo);
     if (!def) return [];
@@ -249,8 +279,8 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       const doMes = mapa[chaveMapa(k, "real")] || {};
       const real = num(doMes[indEvo]);
       let meta = def.meta;
-      if (indEvo === "n3_mrr_out") meta = CRONOGRAMA[k].out;
-      if (indEvo === "n3_mrr_in") meta = CRONOGRAMA[k].inb;
+      if (indEvo === "n3_mrr_out") meta = CRONOGRAMA[k]?.out ?? null;
+      if (indEvo === "n3_mrr_in") meta = CRONOGRAMA[k]?.inb ?? null;
       const override = num((mapa[chaveMapa(k, "meta")] || {})[indEvo]);
       if (override !== null) meta = override;
       const pct = meta !== null ? status(real, meta, def.dir).pct : null;
@@ -340,6 +370,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           onChange={setValor}
           podeEditarMeta={permissao.podeEditarMeta}
           podeEditarReal={permissao.ehHead}
+          serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N3">
           <GraficoRanking dados={ranking(N3, "")} />
@@ -360,6 +391,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           onChange={setValor}
           podeEditarMeta={permissao.podeEditarMeta}
           podeEditarReal={permissao.ehHead}
+          serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N4">
           <GraficoRanking dados={ranking(N4, "")} />
@@ -410,6 +442,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
               onChange={setValor}
               podeEditarMeta={permissao.podeEditarMeta}
               podeEditarReal
+              serieMensal={serieMensal}
             />
             <Secao titulo="Ranking de atingimento — pessoa selecionada">
               <GraficoRanking dados={rankingPessoa} />
@@ -689,6 +722,7 @@ function Tabela({
   onChange,
   podeEditarMeta,
   podeEditarReal,
+  serieMensal,
 }: {
   defs: LinhaTabela[];
   prefixo: string;
@@ -700,7 +734,12 @@ function Tabela({
   onChange: (tipo: "real" | "meta", chave: string, valor: string) => void;
   podeEditarMeta: boolean;
   podeEditarReal: boolean;
+  serieMensal: (ind: Indicador, chave: string) => PontoEvolucao[];
 }) {
+  // Qual indicador está com o gráfico do ano aberto. Um por vez: abrir vários
+  // empurraria a tabela pra longe e o comparativo se perderia.
+  const [aberto, setAberto] = useState<string | null>(null);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-sm">
@@ -744,10 +783,26 @@ function Tabela({
             const real = num(reais[chave]);
             const st = status(real, proporcional, ind.dir);
 
+            const expandido = aberto === chave;
+
             return (
-              <tr key={chave} style={{ borderBottom: "1px solid var(--border)" }}>
+              <Fragment key={chave}>
+              <tr style={{ borderBottom: "1px solid var(--border)" }}>
                 <td className="px-2 py-2">
-                  <span className="font-semibold">{ind.nome}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAberto(expandido ? null : chave)}
+                    aria-expanded={expandido}
+                    className="text-left"
+                    title="Ver a evolução deste indicador no ano"
+                  >
+                    <span className="font-semibold hover:underline">
+                      {ind.nome}
+                      <span className="ml-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        {expandido ? "▲" : "▼"}
+                      </span>
+                    </span>
+                  </button>
                   {ind.hint && (
                     <span className="block text-[11px] leading-snug" style={{ color: "var(--text-muted)" }}>
                       {ind.hint}
@@ -805,6 +860,17 @@ function Tabela({
                   </span>
                 </td>
               </tr>
+              {expandido && (
+                <tr style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td colSpan={5} className="px-2 pb-4 pt-1">
+                    <p className="mb-2 text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+                      {ind.nome} — mês a mês
+                    </p>
+                    <GraficoLinhaMensal serie={serieMensal(ind, chave)} />
+                  </td>
+                </tr>
+              )}
+              </Fragment>
             );
           })}
         </tbody>

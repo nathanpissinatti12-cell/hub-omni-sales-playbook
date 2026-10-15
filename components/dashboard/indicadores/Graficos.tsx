@@ -373,6 +373,103 @@ export function GraficoEvolucao({ serie }: { serie: PontoEvolucao[] }) {
   );
 }
 
+/**
+ * Evolução do ano em LINHA — uma para o realizado, outra para a meta, com os 12
+ * meses no eixo. É o gráfico que abre ao clicar no nome do indicador. O
+ * GraficoEvolucao acima é de barras: com 12 pontos a barra fica estreita demais
+ * e a leitura de tendência se perde.
+ */
+export function GraficoLinhaMensal({ serie }: { serie: PontoEvolucao[] }) {
+  const temAlgo = serie.some((d) => d.real !== null || d.meta !== null);
+  if (!temAlgo) return <Vazio msg="Sem meta nem realizado lançados neste ano para este indicador." />;
+
+  const W = 760;
+  const H = 230;
+  const ml = 62;
+  const mr = 16;
+  const mt = 18;
+  const mb = 40;
+  const valores = [...serie.map((d) => d.real), ...serie.map((d) => d.meta)].filter(
+    (v): v is number => v !== null
+  );
+  const maxV = Math.max(...valores, 0) * 1.18 || 1;
+  const x = (i: number) => ml + ((W - ml - mr) * i) / Math.max(serie.length - 1, 1);
+  const y = (v: number) => mt + (H - mt - mb) * (1 - v / maxV);
+
+  // Mês sem valor interrompe a linha, em vez de ligar por cima do buraco —
+  // ligar sugeriria um valor que nunca foi lançado.
+  const segmentos = (campo: "real" | "meta") => {
+    const partes: string[][] = [];
+    let atual: string[] = [];
+    serie.forEach((d, i) => {
+      const v = d[campo];
+      if (v === null) {
+        if (atual.length) partes.push(atual);
+        atual = [];
+        return;
+      }
+      atual.push(`${x(i)},${y(v)}`);
+    });
+    if (atual.length) partes.push(atual);
+    return partes;
+  };
+
+  return (
+    <>
+      <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" fontFamily="inherit">
+        {[0, 0.25, 0.5, 0.75, 1].map((f) => {
+          const v = maxV * f;
+          return (
+            <g key={f}>
+              <line x1={ml} y1={y(v)} x2={W - mr} y2={y(v)} stroke="var(--border)" />
+              <text x={ml - 7} y={y(v) + 3.5} fontSize="9.5" fill="var(--text-muted)" textAnchor="end">
+                {v >= 1000 ? (v / 1000).toFixed(1) + "k" : v.toFixed(1)}
+              </text>
+            </g>
+          );
+        })}
+
+        {segmentos("meta").map((pontos, i) => (
+          <polyline
+            key={`m${i}`}
+            points={pontos.join(" ")}
+            fill="none"
+            stroke={COR_META}
+            strokeWidth={2}
+            strokeDasharray="5 4"
+            opacity={0.85}
+          />
+        ))}
+        {segmentos("real").map((pontos, i) => (
+          <polyline
+            key={`r${i}`}
+            points={pontos.join(" ")}
+            fill="none"
+            stroke={CORES.ok}
+            strokeWidth={2.5}
+            strokeLinejoin="round"
+          />
+        ))}
+
+        {serie.map((d, i) => (
+          <g key={i}>
+            {d.real !== null && <circle cx={x(i)} cy={y(d.real)} r={3.5} fill={corDe(d.pct)} />}
+            <text x={x(i)} y={H - mb + 18} fontSize="9.5" fill="var(--text-muted)" textAnchor="middle">
+              {d.rotulo}
+            </text>
+          </g>
+        ))}
+      </svg>
+      <Legenda
+        itens={[
+          { cor: CORES.ok, label: "Realizado (ponto colorido pelo atingimento)" },
+          { cor: COR_META, label: "Meta do mês (tracejado)" },
+        ]}
+      />
+    </>
+  );
+}
+
 export function corSituacao(s: Situacao): string {
   return CORES[s];
 }
