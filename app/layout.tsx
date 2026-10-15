@@ -4,6 +4,9 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { MenuOnvox } from "@/components/MenuOnvox";
 import { SiteWidgets } from "@/components/SiteWidgets";
+import { getUsuarioPainel } from "@/db/adminQueries";
+import { UNIDADES } from "@/lib/indicadores";
+import { ehHead } from "@/lib/permissaoIndicadores";
 import { SiteLogoutButton } from "@/components/SiteLogoutButton";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
 
@@ -14,6 +17,18 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await readSiteSession(cookies().get(SITE_SESSION_COOKIE)?.value);
+
+  // Unidades que este usuário pode abrir no Painel de Indicadores: Head vê
+  // todas, colaborador vê só a dele, quem não tem vínculo não vê o menu.
+  const usuarioPainel = session ? await getUsuarioPainel(session.uid) : null;
+  const unidadesDoMenu = !usuarioPainel
+    ? []
+    : ehHead(usuarioPainel)
+      ? UNIDADES.map((u) => ({ slug: u.slug, nome: u.nome }))
+      : UNIDADES.filter((u) => u.slug === usuarioPainel.unidade && usuarioPainel.pessoaChave).map((u) => ({
+          slug: u.slug,
+          nome: u.nome,
+        }));
 
   return (
     <html lang="pt-BR">
@@ -30,9 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 Dashboard
               </Link>
             )}
-            {/* Os painéis de indicadores são restritos a root, igual ao Dashboard:
-                a rota e a API já recusam quem não é, e o menu acompanha. */}
-            {session?.accessLevel === "root" && <MenuOnvox />}
+            {unidadesDoMenu.length > 0 && <MenuOnvox unidades={unidadesDoMenu} />}
             <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
               Admin
             </Link>
