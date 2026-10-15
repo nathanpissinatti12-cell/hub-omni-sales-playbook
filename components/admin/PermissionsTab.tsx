@@ -8,6 +8,7 @@ import {
   type AdminUser,
   type BdrLevel,
 } from "./adminTypes";
+import { UNIDADES, unidadePorSlug } from "@/lib/indicadores";
 
 export function PermissionsTab({
   users,
@@ -43,8 +44,11 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
   const [accessLevel, setAccessLevel] = useState<AccessLevel>(user.access_level);
   const [bdrLevel, setBdrLevel] = useState<BdrLevel>(user.bdr_level ?? "blue");
   const [active, setActive] = useState(user.active);
+  const [unidade, setUnidade] = useState(user.unidade ?? "");
+  const [pessoaChave, setPessoaChave] = useState(user.pessoa_chave ?? "");
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [newPassword, setNewPassword] = useState("");
@@ -82,19 +86,39 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
     setDirty(
       accessLevel !== user.access_level ||
         (accessLevel === "bdr" && bdrLevel !== (user.bdr_level ?? "blue")) ||
-        active !== user.active
+        active !== user.active ||
+        unidade !== (user.unidade ?? "") ||
+        pessoaChave !== (user.pessoa_chave ?? "")
     );
-  }, [accessLevel, bdrLevel, active, user]);
+  }, [accessLevel, bdrLevel, active, unidade, pessoaChave, user]);
+
+  // Trocar de unidade invalida a pessoa escolhida: o time é outro.
+  useEffect(() => {
+    if (unidade !== (user.unidade ?? "")) setPessoaChave("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unidade]);
 
   async function save() {
     setSaving(true);
+    setErro(null);
     try {
       const res = await fetch(`/api/admin/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accessLevel, bdrLevel: accessLevel === "bdr" ? bdrLevel : null, active }),
+        body: JSON.stringify({
+          accessLevel,
+          bdrLevel: accessLevel === "bdr" ? bdrLevel : null,
+          active,
+          unidade: unidade || null,
+          pessoaChave: pessoaChave || null,
+        }),
       });
-      if (res.ok) onChanged();
+      if (res.ok) {
+        onChanged();
+        return;
+      }
+      const corpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      setErro(corpo?.error ?? "Não foi possível salvar.");
     } finally {
       setSaving(false);
     }
@@ -175,7 +199,57 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
         </div>
       )}
 
+      {/* Vínculo com o Painel de Indicadores. Root não precisa: vê todas as
+          unidades e não é uma pessoa do N5. */}
+      {accessLevel !== "root" && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <label className="text-xs">
+            <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+              Painel de Indicadores — unidade
+            </span>
+            <select
+              value={unidade}
+              onChange={(e) => setUnidade(e.target.value)}
+              className="w-full rounded-md border px-2 py-1.5 text-xs"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+            >
+              <option value="">Sem acesso ao painel</option>
+              {UNIDADES.filter((u) => u.pessoas.length > 0).map((u) => (
+                <option key={u.slug} value={u.slug}>
+                  {u.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="text-xs">
+            <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+              Pessoa no N5
+            </span>
+            <select
+              value={pessoaChave}
+              onChange={(e) => setPessoaChave(e.target.value)}
+              disabled={!unidade}
+              className="w-full rounded-md border px-2 py-1.5 text-xs disabled:opacity-50"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+            >
+              <option value="">{unidade ? "Escolha a pessoa" : "Escolha a unidade primeiro"}</option>
+              {(unidadePorSlug(unidade)?.pessoas ?? []).map((p) => (
+                <option key={p.chave} value={p.chave}>
+                  {p.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      )}
+
       <div className="mt-3 flex flex-wrap items-center gap-2">
+        {erro && (
+          <span className="text-xs" style={{ color: "#DC2626" }}>
+            {erro}
+          </span>
+        )}
         {dirty && (
           <button
             type="button"
