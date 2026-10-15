@@ -48,8 +48,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             a versão branca, que é a prevista para fundo escuro. */}
         <header style={{ background: "#19014b", borderBottom: "1px solid #ffffff26" }}>
           <nav className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/onvox-logo-dark.png" alt="Onvox" className="h-7 w-auto" />
+            {/* Símbolo + palavra como no brandbook. São dois arquivos e não um
+                só porque o símbolo sozinho serve de favicon e de marca em
+                espaço curto. O alt fica só na palavra: juntos são uma marca,
+                e dois textos alternativos seriam lidos em duplicata. */}
+            <span className="flex items-center gap-2.5">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/assets/onvox-simbolo-dark.png" alt="" aria-hidden="true" className="h-7 w-auto" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/assets/onvox-logo-dark.png" alt="Onvox" className="h-7 w-auto" />
+            </span>
             <Link href="/playbook" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
               Playbook de Vendas
             </Link>
