@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import "./globals.css";
@@ -9,6 +10,16 @@ import { UNIDADES } from "@/lib/indicadores";
 import { ehHead } from "@/lib/permissaoIndicadores";
 import { SiteLogoutButton } from "@/components/SiteLogoutButton";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
+
+// Inter é a tipografia do brandbook da Onvox. Vem pelo next/font, que baixa no
+// build e serve do próprio domínio — sem requisição ao Google no navegador do
+// usuário e sem o salto de fonte que o @import causaria.
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--fonte-onvox",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Playbook de Vendas",
@@ -31,25 +42,27 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         }));
 
   return (
-    <html lang="pt-BR">
+    <html lang="pt-BR" className={inter.variable}>
       <body>
-        <header style={{ background: "#0a0a0a", borderBottom: "1px solid #ffffff1f" }}>
+        {/* Deep Twilight (#19014b) é a cor de fundo da marca; a logo usada aqui é
+            a versão branca, que é a prevista para fundo escuro. */}
+        <header style={{ background: "#19014b", borderBottom: "1px solid #ffffff26" }}>
           <nav className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/assets/omni-logo-dark.png" alt="Omni Assessoria" className="h-7 w-auto" />
-            <Link href="/playbook" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
+            <img src="/assets/onvox-logo-dark.png" alt="Onvox" className="h-7 w-auto" />
+            <Link href="/playbook" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
               Playbook de Vendas
             </Link>
             {session?.accessLevel === "root" && (
-              <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
+              <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
                 Dashboard
               </Link>
             )}
             {unidadesDoMenu.length > 0 && <MenuOnvox unidades={unidadesDoMenu} />}
-            <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
+            <Link href="/admin" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
               Admin
             </Link>
-            <Link href="/equipamentos" className="text-sm hover:underline" style={{ color: "#f5f5f0" }}>
+            <Link href="/equipamentos" className="text-sm hover:underline" style={{ color: "#f4f5f9" }}>
               Equipamentos
             </Link>
             {session && (

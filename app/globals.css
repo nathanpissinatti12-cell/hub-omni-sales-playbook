@@ -2,30 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: "Omni Atyp";
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url("/fonts/AtypText-Regular.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Omni Atyp";
-  font-style: normal;
-  font-weight: 600;
-  font-display: swap;
-  src: url("/fonts/AtypText-Semibold.ttf") format("truetype");
-}
-
-@font-face {
-  font-family: "Omni Atyp";
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: url("/fonts/AtypText-Bold.ttf") format("truetype");
-}
-
 :root {
   /* Faz o navegador desenhar os controles nativos (lista aberta do <select>,
      seletor de data, barra de rolagem) no mesmo tema do site. Sem isso eles
@@ -33,31 +9,47 @@
      sobre fundo branco e só apareciam sob o cursor. */
   color-scheme: light dark;
 
-  --bg: #f7f7f5;
+  --bg: #f4f5f9;
   --surface: #ffffff;
-  --border: #e5e5e0;
-  --text: #0a0a0a;
-  --text-muted: #6b6b64;
-  --accent: #d9a900;
-  --on-accent: #0a0a0a;
+  --border: #e2e3ee;
+  --text: #19014b;
+  --text-muted: #5f5b7d;
+  --accent: #a224db;
+  --on-accent: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #0a0a0a;
-    --surface: #181818;
-    --border: #ffffff1f;
-    --text: #f5f5f0;
-    --text-muted: #a8a8a0;
-    --accent: #ffd400;
-    --on-accent: #0a0a0a;
+    --bg: #19014b;
+    --surface: #240a62;
+    --border: #ffffff26;
+    --text: #f4f5f9;
+    --text-muted: #b9b3d4;
+    /* Mesmo roxo da marca (matiz 281°, saturação 72%), só mais claro: sobre o
+       Deep Twilight, o #a224db original dá contraste 2,9 e texto pequeno em
+       destaque fica ilegível. Este tom dá 5,4 sobre o fundo e 4,8 sobre o
+       cartão. É o mesmo recurso que a identidade antiga usava com os dois
+       amarelos (#d9a900 no claro, #ffd400 no escuro). */
+    --accent: #be66e6;
+    --on-accent: #19014b;
   }
 }
 
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: "Omni Atyp", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--fonte-onvox), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* O brandbook especifica Inter com tracking -6% e entrelinha 95%. Isso vale pro
+   logotipo e pra título — em texto corrido, entrelinha de 95% faz as linhas se
+   tocarem e os acentos invadirem a linha de cima. Por isso o aperto fica só nos
+   títulos, e o corpo usa Inter com entrelinha normal. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.04em;
+  line-height: 1.05;
 }
 
 /* Tema claro fixo para uma página específica (hoje só o Painel de Indicadores),
@@ -69,13 +61,13 @@ body {
 .tema-claro {
   color-scheme: light;
 
-  --bg: #f7f7f5;
+  --bg: #f4f5f9;
   --surface: #ffffff;
-  --border: #e5e5e0;
-  --text: #0a0a0a;
-  --text-muted: #6b6b64;
-  --accent: #d9a900;
-  --on-accent: #0a0a0a;
+  --border: #e2e3ee;
+  --text: #19014b;
+  --text-muted: #5f5b7d;
+  --accent: #a224db;
+  --on-accent: #ffffff;
 
   color: var(--text);
 }

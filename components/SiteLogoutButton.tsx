@@ -16,7 +16,7 @@ export function SiteLogoutButton() {
       type="button"
       onClick={handleLogout}
       className="text-sm hover:underline"
-      style={{ color: "#f5f5f0" }}
+      style={{ color: "#f4f5f9" }}
     >
       Sair
     </button>
