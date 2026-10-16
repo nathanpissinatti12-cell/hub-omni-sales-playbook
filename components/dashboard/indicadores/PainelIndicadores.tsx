@@ -160,21 +160,26 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   // ---- carga ---------------------------------------------------------------
   // Uma função só, usada na abertura e no botão "Atualizar" do histórico: a
   // mesma chamada traz lançamentos, fechamentos e histórico.
-  const carregar = useCallback(() => {
-    return fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}`)
-      .then((r) => (r.ok ? r.json() : { valores: [], fechamentos: [], historico: [] }))
-      .then((resp: RespostaApi) => {
-        const m: Mapa = {};
-        for (const row of resp.valores ?? []) {
-          const k = chaveMapa(row.mes, row.tipo);
-          m[k] = m[k] || {};
-          m[k][row.chave] = row.valor ?? "";
-        }
-        setMapa(m);
-        setFechados(Object.fromEntries((resp.fechamentos ?? []).map((f) => [f.mes, f])));
-        setHistorico(resp.historico ?? []);
-      })
-      .catch(() => setAviso("Não foi possível carregar os lançamentos."));
+  // Devolve o mapa que acabou de ler, além de jogar no estado: a exportação
+  // precisa do dado na mão, e `setMapa` só reflete no próximo render.
+  const carregar = useCallback(async (): Promise<Mapa | null> => {
+    try {
+      const r = await fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}`);
+      const resp: RespostaApi = r.ok ? await r.json() : { valores: [], fechamentos: [], historico: [] };
+      const m: Mapa = {};
+      for (const row of resp.valores ?? []) {
+        const k = chaveMapa(row.mes, row.tipo);
+        m[k] = m[k] || {};
+        m[k][row.chave] = row.valor ?? "";
+      }
+      setMapa(m);
+      setFechados(Object.fromEntries((resp.fechamentos ?? []).map((f) => [f.mes, f])));
+      setHistorico(resp.historico ?? []);
+      return m;
+    } catch {
+      setAviso("Não foi possível carregar os lançamentos.");
+      return null;
+    }
   }, [unidade.slug]);
 
   useEffect(() => {
@@ -201,14 +206,14 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   const [estados, setEstados] = useState<Record<string, EstadoCampo>>({});
 
   const enviar = useCallback(
-    (id: string) => {
+    (id: string): Promise<void> => {
       const p = pendentes.current[id];
-      if (!p) return;
+      if (!p) return Promise.resolve();
       delete pendentes.current[id];
       clearTimeout(timers.current[id]);
       setEstados((prev) => ({ ...prev, [id]: "salvando" }));
 
-      fetch("/api/dashboard/indicadores", {
+      return fetch("/api/dashboard/indicadores", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -254,6 +259,12 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     [mesAtivo, enviar]
   );
 
+  /** Espera sair tudo que ainda não foi gravado — antes de exportar, por exemplo. */
+  const descarregarPendentes = useCallback(
+    () => Promise.all(Object.keys(pendentes.current).map((id) => enviar(id))).then(() => undefined),
+    [enviar]
+  );
+
   /** Descarrega o que estiver pendente de um campo — usado quando ele perde o foco. */
   const gravarAgora = useCallback(
     (tipo: "real" | "meta", chave: string) => enviar(`${mesAtivo}|${tipo}|${chave}`),
@@ -264,9 +275,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   // trás: a tabela já estaria mostrando outro mês e o valor sumiria sem aviso.
   useEffect(() => {
     return () => {
-      for (const id of Object.keys(pendentes.current)) enviar(id);
+      void descarregarPendentes();
     };
-  }, [mesAtivo, enviar]);
+  }, [mesAtivo, descarregarPendentes]);
 
   const estadoDe = useCallback(
     (tipo: "real" | "meta", chave: string): EstadoCampo | undefined =>
@@ -502,7 +513,19 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
    * A meta exportada é a CHEIA do mês, não a proporcional: numa planilha de 12
    * meses, metas que mudam conforme o dia da consulta não se comparam entre si.
    */
-  function exportar() {
+  async function exportar() {
+    // Duas coisas antes de montar o arquivo: mandar o que ainda está pendente de
+    // gravação (senão a releitura abaixo apagaria da tela o que foi digitado
+    // agora) e reler o banco (senão a planilha sai sem o que outra pessoa
+    // lançou depois que esta página abriu).
+    setAviso("Montando a planilha…");
+    await descarregarPendentes();
+    const relido = await carregar();
+    const fonte = relido ?? mapa;
+    if (!relido) {
+      setAviso("Não consegui atualizar antes de exportar — a planilha saiu com o que estava na tela.");
+    }
+
     const UNIDADE_ROTULO: Record<Formato, string> = { brl: "R$", pct: "%", x: "x", num: "nº" };
     const CABECALHO: Celula[] = [
       "Nível",
@@ -515,8 +538,8 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     ];
 
     const abas: Aba[] = meses.map((mes) => {
-      const reaisDoMes = mapa[chaveMapa(mes, "real")] || {};
-      const metasDoMes = mapa[chaveMapa(mes, "meta")] || {};
+      const reaisDoMes = fonte[chaveMapa(mes, "real")] || {};
+      const metasDoMes = fonte[chaveMapa(mes, "meta")] || {};
       const overridesDoMes: Record<string, number | null> = {};
       for (const [k, v] of Object.entries(metasDoMes)) overridesDoMes[k] = num(v);
 
@@ -561,6 +584,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     a.download = `onvox_indicadores_${unidade.slug}_${ano}.xlsx`;
     a.click();
     URL.revokeObjectURL(a.href);
+    if (relido) setAviso(`Planilha de ${ano} exportada às ${new Date().toLocaleTimeString("pt-BR")}.`);
   }
 
   if (carregando) {
