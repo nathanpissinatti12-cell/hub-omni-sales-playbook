@@ -34,6 +34,7 @@ import {
   metaDinamica,
   num,
   parseNumeroBr,
+  projecaoFechamento,
   resolveMeta,
   ritmoNecessario,
   status,
@@ -336,6 +337,89 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   const fAno = fatorAno(dtFim);
   const pctAno = fAno === null ? null : (fAno * 100).toFixed(0);
 
+  // ---- resumo do topo ------------------------------------------------------
+  /**
+   * Os números que respondem "estamos no caminho?" sem rolar a página. Saem dos
+   * mesmos indicadores da tabela, respeitando a permissão: quem não vê N3 não
+   * recebe o cartão de MRR, e o colaborador só conta as próprias linhas.
+   */
+  const resumo = useMemo(() => {
+    const visiveis: { ind: Indicador; chave: string }[] = [];
+    if (permissao.verN3) {
+      for (const l of N3) if (!isGrupo(l)) visiveis.push({ ind: l, chave: l.id });
+    }
+    for (const l of N4) if (!isGrupo(l)) visiveis.push({ ind: l, chave: l.id });
+    for (const p of PESSOAS) {
+      for (const ind of p.kpis) visiveis.push({ ind, chave: `${p.chave}_${ind.id}` });
+    }
+
+    let foraDaMeta = 0;
+    let comMeta = 0;
+    let semLancamento = 0;
+    for (const { ind, chave } of visiveis) {
+      if (ind.meta === null) continue;
+      const { base, proporcional } = resolveMeta(ind, chave, metasOverride, dtIni, dtFim);
+      if (base === null) continue; // mês sem cronograma: não há o que cobrar
+      comMeta++;
+      const real = num(reais[chave]);
+      if (real === null) {
+        semLancamento++;
+        continue;
+      }
+      const pct = status(real, proporcional, ind.dir).pct;
+      if (pct !== null && pct < 85) foraDaMeta++;
+    }
+
+    /** Cartão de um indicador: realizado, meta proporcional e projeção. */
+    const cartao = (chave: string, rotulo: string) => {
+      const linha = visiveis.find((v) => v.chave === chave);
+      if (!linha) return null;
+      const { base, proporcional } = resolveMeta(linha.ind, chave, metasOverride, dtIni, dtFim);
+      const real = num(reais[chave]);
+      return {
+        rotulo,
+        fmt: linha.ind.fmt,
+        real,
+        proporcional,
+        pct: status(real, proporcional, linha.ind.dir).pct,
+        projecao: projecaoFechamento(linha.ind, real, dtIni, dtFim),
+        base,
+      };
+    };
+
+    // MRR do mês é a soma de outbound e inbound — os dois cartões separados
+    // ocupariam metade da faixa dizendo quase a mesma coisa.
+    let mrr: ReturnType<typeof cartao> = null;
+    if (permissao.verN3) {
+      const out = cartao("n3_mrr_out", "");
+      const inb = cartao("n3_mrr_in", "");
+      const soma = (a: number | null, b: number | null) =>
+        a === null && b === null ? null : (a ?? 0) + (b ?? 0);
+      if (out && inb) {
+        const real = soma(out.real, inb.real);
+        const proporcional = soma(out.proporcional, inb.proporcional);
+        mrr = {
+          rotulo: "MRR novo do mês",
+          fmt: "brl",
+          real,
+          proporcional,
+          pct: status(real, proporcional, "up").pct,
+          projecao: soma(out.projecao, inb.projecao),
+          base: soma(out.base, inb.base),
+        };
+      }
+    }
+
+    return {
+      cartoes: [mrr, cartao("n4_reun", "Reuniões agendadas"), cartao("n4_sql", "SAL")].filter(
+        (c): c is NonNullable<typeof c> => c !== null
+      ),
+      foraDaMeta,
+      comMeta,
+      semLancamento,
+    };
+  }, [N3, N4, PESSOAS, permissao.verN3, reais, metasOverride, dtIni, dtFim]);
+
   // null quando a unidade ainda não tem time cadastrado — o N5 vira aviso.
   const pessoa = PESSOAS.find((p) => p.chave === pessoaSel) ?? PESSOAS[0] ?? null;
 
@@ -597,6 +681,16 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
 
   return (
     <div className="space-y-6">
+      {/* ---------------- resumo ----------------
+          Primeiro bloco da página de propósito: antes disto, quem abria o painel
+          via a configuração do período antes de ver qualquer número. */}
+      <Resumo
+        resumo={resumo}
+        mes={rotuloMes(mesAtivo)}
+        diasRestantes={duRestantes}
+        fechado={mesTravado}
+      />
+
       {/* ---------------- período ---------------- */}
       <Painel titulo="Período de apuração">
         <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
@@ -696,6 +790,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           podeEditarReal={podeEditarRealGeral}
           estadoDe={estadoDe}
           onSairDoCampo={gravarAgora}
+          duPeriodo={duPeriodo}
           serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N3">
@@ -719,6 +814,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           podeEditarReal={podeEditarRealGeral}
           estadoDe={estadoDe}
           onSairDoCampo={gravarAgora}
+          duPeriodo={duPeriodo}
           serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N4">
@@ -770,8 +866,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
               onChange={setValor}
               podeEditarMeta={podeEditarMeta}
               podeEditarReal={!mesTravado}
-                  estadoDe={estadoDe}
+              estadoDe={estadoDe}
               onSairDoCampo={gravarAgora}
+              duPeriodo={duPeriodo}
               serieMensal={serieMensal}
             />
             <Secao titulo="Ranking de atingimento — pessoa selecionada">
@@ -987,6 +1084,112 @@ function Secao({
       </div>
       {children}
     </div>
+  );
+}
+
+// ===========================================================================
+// Resumo do topo
+// ===========================================================================
+
+type CartaoResumo = {
+  rotulo: string;
+  fmt: Formato;
+  real: number | null;
+  proporcional: number | null;
+  pct: number | null;
+  projecao: number | null;
+  base: number | null;
+};
+
+/**
+ * Faixa de abertura do painel: o estado do mês em uma olhada. Mostra o
+ * realizado contra a meta proporcional (que é a régua de hoje) e, ao lado, onde
+ * o mês fecha no ritmo atual — as duas perguntas que a tabela abaixo responde
+ * indicador por indicador.
+ */
+function Resumo({
+  resumo,
+  mes,
+  diasRestantes,
+  fechado,
+}: {
+  resumo: { cartoes: CartaoResumo[]; foraDaMeta: number; comMeta: number; semLancamento: number };
+  mes: string;
+  diasRestantes: number;
+  fechado: boolean;
+}) {
+  if (resumo.cartoes.length === 0 && resumo.comMeta === 0) return null;
+
+  return (
+    <section
+      className="rounded-lg border p-5"
+      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+    >
+      <div className="mb-4 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+        <h2 className="text-lg font-semibold">{mes}</h2>
+        <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+          {fechado
+            ? "mês fechado"
+            : diasRestantes > 0
+              ? `${diasRestantes} dia${diasRestantes > 1 ? "s" : ""} útil${diasRestantes > 1 ? "eis" : ""} restante${diasRestantes > 1 ? "s" : ""}`
+              : "sem dia útil restante"}
+        </span>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {resumo.cartoes.map((c) => (
+          <div key={c.rotulo} className="rounded-lg border p-3" style={{ borderColor: "var(--border)" }}>
+            <span
+              className="block text-[10px] font-bold uppercase tracking-wide"
+              style={{ color: "var(--text-muted)" }}
+            >
+              {c.rotulo}
+            </span>
+            <div className="mt-1 flex items-baseline gap-2">
+              <b className="text-xl tabular-nums">{fmt(c.real, c.fmt)}</b>
+              <span className="text-sm font-bold tabular-nums" style={{ color: corDe(c.pct) }}>
+                {c.pct === null ? "—" : `${c.pct.toFixed(0)}%`}
+              </span>
+            </div>
+            <span className="mt-0.5 block text-[11px] leading-snug" style={{ color: "var(--text-muted)" }}>
+              meta até hoje {fmt(c.proporcional, c.fmt)}
+            </span>
+            {c.projecao !== null && (
+              <span className="mt-1 block text-[11px] leading-snug" style={{ color: "var(--text-muted)" }}>
+                no ritmo, fecha em{" "}
+                <b style={{ color: corDe(status(c.projecao, c.base, "up").pct) }}>
+                  {fmt(c.projecao, c.fmt)}
+                </b>
+              </span>
+            )}
+          </div>
+        ))}
+
+        {/* Os dois contadores não são indicador: são o estado do preenchimento e
+            do atingimento do mês, que é o que diz se vale olhar a tabela. */}
+        <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)" }}>
+          <span
+            className="block text-[10px] font-bold uppercase tracking-wide"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Atenção
+          </span>
+          <div className="mt-1 flex items-baseline gap-2">
+            <b className="text-xl tabular-nums" style={{ color: resumo.foraDaMeta > 0 ? CORES.bad : CORES.ok }}>
+              {resumo.foraDaMeta}
+            </b>
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+              de {resumo.comMeta} abaixo de 85%
+            </span>
+          </div>
+          <span className="mt-0.5 block text-[11px] leading-snug" style={{ color: "var(--text-muted)" }}>
+            {resumo.semLancamento === 0
+              ? "todos os indicadores com meta já têm lançamento"
+              : `${resumo.semLancamento} ainda sem lançamento`}
+          </span>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -1216,6 +1419,7 @@ function Tabela({
   podeEditarReal,
   estadoDe,
   onSairDoCampo,
+  duPeriodo,
   serieMensal,
 }: {
   defs: LinhaTabela[];
@@ -1230,6 +1434,8 @@ function Tabela({
   podeEditarReal: boolean;
   estadoDe: (tipo: "real" | "meta", chave: string) => EstadoCampo | undefined;
   onSairDoCampo: (tipo: "real" | "meta", chave: string) => void;
+  /** Dias úteis já decorridos no recorte — usado na explicação da projeção. */
+  duPeriodo: number;
   serieMensal: (ind: Indicador, chave: string) => PontoEvolucao[];
 }) {
   // Qual indicador está com o gráfico do ano aberto. Um por vez: abrir vários
@@ -1241,7 +1447,7 @@ function Tabela({
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>
-            {["Indicador", "Meta", "Meta proporcional", "Realizado", "Falta por dia útil", "Atingimento"].map((h, i) => (
+            {["Indicador", "Meta", "Meta proporcional", "Realizado", "Falta por dia útil", "Projeção no ritmo", "Atingimento"].map((h, i) => (
               <th
                 key={h}
                 className={`whitespace-nowrap border-b-2 px-2 py-2 text-[10px] font-extrabold uppercase tracking-wide ${
@@ -1262,7 +1468,7 @@ function Tabela({
               return (
                 <tr key={`g${idx}`}>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-2 py-2 text-[10px] font-extrabold uppercase tracking-wide"
                     style={{ color: cor, background: "var(--bg, transparent)" }}
                   >
@@ -1279,6 +1485,7 @@ function Tabela({
             const real = num(reais[chave]);
             const st = status(real, proporcional, ind.dir);
             const ritmo = ritmoNecessario(ind, base, real, dtFim);
+            const projecao = projecaoFechamento(ind, real, dtIni, dtFim);
 
             const expandido = aberto === chave;
 
@@ -1374,6 +1581,25 @@ function Tabela({
                     </span>
                   )}
                 </td>
+                {/* Projeção: onde o mês fecha mantendo o ritmo de até agora. A
+                    cor compara com a meta CHEIA, porque a projeção é do mês
+                    inteiro — compará-la com a proporcional misturaria duas
+                    réguas. */}
+                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">
+                  {projecao === null ? (
+                    <span style={{ color: "var(--text-muted)" }}>—</span>
+                  ) : (
+                    <span
+                      style={{ color: corDe(status(projecao, base, ind.dir).pct) }}
+                      title={`No ritmo de ${fmt(real, ind.fmt)} em ${duPeriodo} dia(s) útil(eis), o mês fecha em ${fmt(
+                        projecao,
+                        ind.fmt
+                      )} — a meta cheia é ${fmt(base, ind.fmt)}`}
+                    >
+                      {fmt(projecao, ind.fmt)}
+                    </span>
+                  )}
+                </td>
                 <td className="whitespace-nowrap px-2 py-2 text-right font-extrabold tabular-nums">
                   <span
                     className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle"
@@ -1386,7 +1612,7 @@ function Tabela({
               </tr>
               {expandido && (
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td colSpan={6} className="px-2 pb-4 pt-1">
+                  <td colSpan={7} className="px-2 pb-4 pt-1">
                     <p className="mb-2 text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
                       {ind.nome} — mês a mês
                     </p>
