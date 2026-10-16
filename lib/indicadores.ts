@@ -44,19 +44,67 @@ export const CRONOGRAMA: Record<string, { out: number; inb: number }> = {
   "2026-12": { out: 10965, inb: 2741 },
 };
 
-export const CICLO_ANUAL = { ini: "2026-08-01", fim: "2026-12-31" };
-
-/** Ano que o painel mostra no eixo dos gráficos e no seletor de mês. */
-export const ANO_PAINEL = 2026;
+/**
+ * Anos que o painel oferece no seletor de ciclo. 2027 está aqui SEM cronograma
+ * de MRR de propósito: em janeiro a operação precisa poder lançar reunião, SAL
+ * e leads mesmo que a meta de MRR do ano novo ainda não tenha sido definida —
+ * esses indicadores não dependem do cronograma. Enquanto não houver cronograma,
+ * os indicadores de MRR aparecem como "sem meta" no mês, em vez de herdar um
+ * número de outro ciclo.
+ *
+ * Para abrir o ciclo seguinte: acrescente as chaves do ano em CRONOGRAMA e o
+ * ano nesta lista. Nada mais precisa mudar.
+ */
+export const ANOS_PAINEL = [2026, 2027];
 
 /**
- * Os 12 meses do ano, e não só os do cronograma de MRR (ago–dez). O painel
- * precisa deles por dois motivos: o gráfico de evolução mostra o ano inteiro, e
+ * Ciclo que o painel abre por padrão: o ano corrente quando ele está na lista,
+ * senão o último cadastrado. Sem isto, virado o ano o painel abriria no
+ * primeiro item da lista — em janeiro de 2027, mostraria jan/2026.
+ */
+export function anoPainelPadrao(hoje = new Date()): number {
+  const ano = hoje.getFullYear();
+  return ANOS_PAINEL.includes(ano) ? ano : ANOS_PAINEL[ANOS_PAINEL.length - 1];
+}
+
+/**
+ * Os 12 meses de um ano, e não só os do cronograma de MRR. O painel precisa
+ * deles por dois motivos: o gráfico de evolução mostra o ano inteiro, e
  * indicadores que não são MRR (CAC, conversão, reunião) existem o ano todo.
  * Mês fora do cronograma simplesmente não tem meta de MRR — ver CRONOGRAMA.
  */
-export function mesesCiclo(): string[] {
-  return Array.from({ length: 12 }, (_, i) => `${ANO_PAINEL}-${String(i + 1).padStart(2, "0")}`);
+export function mesesCiclo(ano: number = anoPainelPadrao()): string[] {
+  return Array.from({ length: 12 }, (_, i) => `${ano}-${String(i + 1).padStart(2, "0")}`);
+}
+
+/** Todos os meses de todos os ciclos — o que a API aceita como competência. */
+export function mesesValidos(): string[] {
+  return ANOS_PAINEL.flatMap((ano) => mesesCiclo(ano));
+}
+
+/**
+ * Janela do ciclo de ARR de um ano: do primeiro ao último mês que têm meta no
+ * cronograma (em 2026, ago–dez). Null quando o ano ainda não tem cronograma —
+ * aí não há ciclo de ARR para medir, e o painel mostra travessão em vez de 0%.
+ */
+export function cicloAnualDe(ano: number): { ini: string; fim: string } | null {
+  const chaves = Object.keys(CRONOGRAMA)
+    .filter((k) => k.startsWith(`${ano}-`))
+    .sort();
+  if (chaves.length === 0) return null;
+  const primeiro = chaves[0];
+  const [a, m] = chaves[chaves.length - 1].split("-").map(Number);
+  const ultimoDia = new Date(a, m, 0).getDate();
+  return { ini: `${primeiro}-01`, fim: `${a}-${String(m).padStart(2, "0")}-${ultimoDia}` };
+}
+
+/**
+ * Indicadores cuja meta vem do cronograma de MRR. Em mês sem cronograma eles
+ * ficam sem meta — nunca caem na meta fixa da definição, que é a de agosto/2026
+ * e não diz nada sobre outro mês.
+ */
+export function dependeDoCronograma(id: string): boolean {
+  return id === "n3_mrr_out" || id === "n3_mrr_in" || id === "n3_tri";
 }
 
 const MESES_ABREV = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
@@ -73,7 +121,7 @@ export const N3: LinhaTabela[] = [
   {
     id: "n3_mrr_out",
     nome: "MRR novo — outbound",
-    hint: "meta do mês selecionado · cronograma ago–dez/2026",
+    hint: "meta do mês selecionado · cronograma do ciclo",
     meta: 7765,
     fmt: "brl",
     dir: "up",
@@ -82,7 +130,7 @@ export const N3: LinhaTabela[] = [
   {
     id: "n3_mrr_in",
     nome: "MRR novo — inbound",
-    hint: "meta do mês selecionado · cronograma ago–dez/2026",
+    hint: "meta do mês selecionado · cronograma do ciclo",
     meta: 1941,
     fmt: "brl",
     dir: "up",
@@ -100,7 +148,7 @@ export const N3: LinhaTabela[] = [
   {
     id: "n3_conc",
     nome: "Concentração de risco",
-    hint: "% do MRR fechado por Gabriel · meta até dez/2026",
+    hint: "% do MRR fechado por Gabriel",
     meta: 50,
     fmt: "pct",
     dir: "down",

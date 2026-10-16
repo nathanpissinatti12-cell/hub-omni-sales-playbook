@@ -2,6 +2,8 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  ANOS_PAINEL,
+  anoPainelPadrao,
   CRONOGRAMA,
   BDR_PADRAO,
   closerKpis,
@@ -85,6 +87,13 @@ function chaveMapa(mes: string, tipo: string) {
   return `${mes}|${tipo}`;
 }
 
+/** Mês que o painel abre dentro de um ciclo: o corrente, se for daquele ciclo. */
+function mesPadraoDoCiclo(meses: string[]): string {
+  const hoje = new Date();
+  const atual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
+  return meses.includes(atual) ? atual : meses[0];
+}
+
 /** "15/10 às 14:32" — data curta, que é o que importa pra saber se é de hoje. */
 function quando(iso: string | null): string {
   if (!iso) return "";
@@ -107,14 +116,20 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         : unidade.pessoas,
     [unidade.pessoas, permissao.somentePessoa]
   );
-  const meses = useMemo(() => mesesCiclo(), []);
+  // Ciclo (ano) e os 12 meses dele. O ano não é fixo no código: virado o ano, o
+  // painel precisa abrir no ciclo novo em vez de voltar pra janeiro do anterior.
+  const [ano, setAno] = useState(() => anoPainelPadrao());
+  const meses = useMemo(() => mesesCiclo(ano), [ano]);
   // Abre no mês corrente, não em janeiro: com os 12 meses na lista, começar pelo
   // primeiro faria o painel abrir sempre num mês vazio.
-  const [mesAtivo, setMesAtivo] = useState(() => {
-    const hoje = new Date();
-    const atual = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, "0")}`;
-    return meses.includes(atual) ? atual : meses[0];
-  });
+  const [mesAtivo, setMesAtivo] = useState(() => mesPadraoDoCiclo(mesesCiclo(anoPainelPadrao())));
+
+  // Trocar de ciclo precisa levar o mês junto: sem isto, mesAtivo continuaria
+  // num mês do ano anterior e a tela mostraria dado de um ciclo com o seletor
+  // apontando para outro.
+  useEffect(() => {
+    if (!meses.includes(mesAtivo)) setMesAtivo(mesPadraoDoCiclo(meses));
+  }, [meses, mesAtivo]);
   const [dtIni, setDtIni] = useState("");
   const [dtFim, setDtFim] = useState("");
   const [mapa, setMapa] = useState<Mapa>({});
@@ -260,7 +275,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   const duRestantes = diasUteisRestantes(dtFim);
   const pctMes = (fatorMes(dtIni, dtFim) * 100).toFixed(0);
   const pctTri = (fatorTrimestre(dtFim) * 100).toFixed(0);
-  const pctAno = (fatorAno(dtFim) * 100).toFixed(0);
+  // Null = o ano ainda não tem cronograma, então não há ciclo de ARR para medir.
+  const fAno = fatorAno(dtFim);
+  const pctAno = fAno === null ? null : (fAno * 100).toFixed(0);
 
   // null quando a unidade ainda não tem time cadastrado — o N5 vira aviso.
   const pessoa = PESSOAS.find((p) => p.chave === pessoaSel) ?? PESSOAS[0] ?? null;
@@ -452,8 +469,14 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
           A meta comparada é sempre a proporcional aos dias úteis decorridos — nunca a meta cheia.
           Indicadores mensais usam o recorte selecionado; <b>Resultado do trimestre</b> é acumulado e
-          ponderado pelas metas de cada mês do cronograma (ago–dez/2026), já que as metas crescem mês
-          a mês. Taxas (%) e valores unitários não são proporcionalizados.
+          ponderado pelas metas de cada mês do cronograma do ciclo, já que as metas crescem mês a
+          mês. Taxas (%) e valores unitários não são proporcionalizados.
+        </p>
+        <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
+          Mês sem cronograma de MRR definido aparece como <b>sem meta</b> nos indicadores de MRR e no
+          resultado do trimestre — os demais funcionam normalmente, porque não dependem do
+          cronograma. É o caso de todo mês anterior a agosto/2026 e de um ciclo novo enquanto as
+          metas não forem definidas.
         </p>
         <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
           A coluna <b>Meta</b> é editável e vale só para o <b>mês de registro</b> selecionado aqui —
@@ -467,6 +490,13 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           média diária não existe.
         </p>
         <div className="flex flex-wrap items-end gap-4">
+          <Campo label="Ciclo">
+            <Select
+              value={String(ano)}
+              onChange={(v) => setAno(Number(v))}
+              opcoes={ANOS_PAINEL.map((a) => ({ valor: String(a), rotulo: String(a) }))}
+            />
+          </Campo>
           <Campo label="Mês de registro">
             <Select
               value={mesAtivo}
@@ -485,7 +515,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           <Chip label="Dias úteis restantes" valor={duRestantes} />
           <Chip label="Proporção do mês" valor={`${pctMes}%`} />
           <Chip label="Trimestre decorrido" valor={`${pctTri}%`} />
-          <Chip label="Ciclo ARR decorrido" valor={`${pctAno}%`} />
+          <Chip label="Ciclo ARR decorrido" valor={pctAno === null ? "—" : `${pctAno}%`} />
         </div>
 
         {/* Estado do fechamento. Fica junto do seletor de mês porque é o estado
@@ -632,7 +662,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       {/* ---------------- evolução ---------------- */}
       <Painel
         titulo="Evolução e ritmo"
-        desc="Curvas acumuladas do cronograma ago–dez/2026, alimentadas pelo histórico de cada mês registrado."
+        desc="Curvas acumuladas do cronograma do ciclo, alimentadas pelo histórico de cada mês registrado."
       >
         <Secao titulo="Burn-up do trimestre" primeira>
           <GraficoBurnup
@@ -640,7 +670,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
             vazioMsg="Lance o MRR novo (outbound e inbound) para desenhar a curva."
           />
         </Secao>
-        <Secao titulo="Burn-up do ARR — ciclo ago–dez/2026">
+        <Secao titulo={`Burn-up do ARR — ciclo ${ano}`}>
           <GraficoBurnup
             serie={serieBurnup(meses)}
             vazioMsg="Lance o MRR novo (outbound e inbound) para desenhar a curva."

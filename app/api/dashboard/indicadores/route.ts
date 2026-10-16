@@ -9,7 +9,7 @@ import {
   mesFechado,
   upsertValor,
 } from "@/db/indicadoresQueries";
-import { mesesCiclo, unidadePorSlug } from "@/lib/indicadores";
+import { mesesValidos, unidadePorSlug } from "@/lib/indicadores";
 import {
   chavesLegiveis,
   ehHead,
@@ -94,8 +94,8 @@ export async function POST(req: Request) {
   const tipo = body?.tipo?.trim();
   const chave = body?.chave?.trim();
 
-  if (!mes || !mesesCiclo().includes(mes)) {
-    return NextResponse.json({ error: "Mês fora do ciclo do cronograma." }, { status: 400 });
+  if (!mes || !mesesValidos().includes(mes)) {
+    return NextResponse.json({ error: "Mês fora dos ciclos do painel." }, { status: 400 });
   }
   if (!tipo || !TIPOS.includes(tipo as (typeof TIPOS)[number])) {
     return NextResponse.json({ error: "Tipo inválido." }, { status: 400 });
@@ -158,8 +158,8 @@ export async function DELETE(req: Request) {
   if (erroUnidade) return erroUnidade;
 
   const mes = searchParams.get("mes");
-  if (!mes || !mesesCiclo().includes(mes)) {
-    return NextResponse.json({ error: "Mês fora do ciclo do cronograma." }, { status: 400 });
+  if (!mes || !mesesValidos().includes(mes)) {
+    return NextResponse.json({ error: "Mês fora dos ciclos do painel." }, { status: 400 });
   }
 
   if (await mesFechado(unidade.slug, mes)) {

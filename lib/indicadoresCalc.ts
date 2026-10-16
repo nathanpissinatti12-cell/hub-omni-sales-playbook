@@ -2,7 +2,15 @@
 // Funções puras — nenhuma delas toca no DOM ou no banco, então dá pra testar
 // isoladamente e reutilizar tanto no servidor quanto no cliente.
 
-import { CICLO_ANUAL, CRONOGRAMA, type Direcao, type Escala, type Formato, type Indicador } from "./indicadores";
+import {
+  CRONOGRAMA,
+  cicloAnualDe,
+  dependeDoCronograma,
+  type Direcao,
+  type Escala,
+  type Formato,
+  type Indicador,
+} from "./indicadores";
 
 export function num(v: unknown): number | null {
   if (v === null || v === undefined || v === "") return null;
@@ -174,16 +182,23 @@ export function fatorTrimestre(fim: string): number {
   return s.total > 0 ? s.proporcional / s.total : 0;
 }
 
-export function fatorAno(fim: string): number {
-  if (!fim) return 0;
-  const s = somaCronograma(CICLO_ANUAL.ini, CICLO_ANUAL.fim, fim);
+/**
+ * Fração do ciclo de ARR decorrida. O ciclo é o do ANO da data informada: em
+ * 2027 ainda não há cronograma, então não há ciclo e o painel mostra travessão
+ * em vez de um 0% que pareceria "nada aconteceu".
+ */
+export function fatorAno(fim: string): number | null {
+  if (!fim) return null;
+  const ciclo = cicloAnualDe(parseData(fim).getFullYear());
+  if (!ciclo) return null;
+  const s = somaCronograma(ciclo.ini, ciclo.fim, fim);
   return s.total > 0 ? s.proporcional / s.total : 0;
 }
 
 export function fatorDe(esc: Escala, ini: string, fim: string): number {
   if (esc === "mes") return fatorMes(ini, fim);
   if (esc === "tri") return fatorTrimestre(fim);
-  if (esc === "ano") return fatorAno(fim);
+  if (esc === "ano") return fatorAno(fim) ?? 0;
   return 1;
 }
 
@@ -200,7 +215,11 @@ export function metaDinamica(ind: Indicador, ini: string, fim: string): number |
   }
   if (ind.id === "n3_tri") {
     const L = limitesTrimestre(fim);
-    return somaCronograma(L.ini, L.fim, fim).total;
+    const { total } = somaCronograma(L.ini, L.fim, fim);
+    // Trimestre sem nenhum mês no cronograma (jan–jul/2026, qualquer mês de
+    // 2027 enquanto o ciclo não for definido): não existe meta, e devolver 0
+    // viria à tela como "meta R$ 0,00".
+    return total > 0 ? total : null;
   }
   return null;
 }
@@ -311,6 +330,16 @@ export function resolveMeta(
   if (ind.meta === null) return { base: null, proporcional: null };
   const override = overrides[chave];
   const dinamica = metaDinamica(ind, ini, fim);
+  // Indicador de cronograma em mês sem cronograma fica SEM meta, a menos que
+  // alguém tenha digitado uma. Cair na meta fixa da definição faria jan/2026 e
+  // todo o 2027 exibirem a meta de agosto/2026 como se fosse deles.
+  if (dinamica === null && dependeDoCronograma(ind.id)) {
+    const manual = override !== undefined && override !== null ? override : null;
+    return {
+      base: manual,
+      proporcional: manual === null ? null : manual * fatorDe(ind.esc, ini, fim),
+    };
+  }
   const base = override !== undefined && override !== null ? override : dinamica !== null ? dinamica : ind.meta;
   return { base, proporcional: base === null ? null : base * fatorDe(ind.esc, ini, fim) };
 }
