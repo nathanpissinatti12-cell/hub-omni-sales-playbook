@@ -284,6 +284,32 @@ export function ritmoNecessario(
   };
 }
 
+/**
+ * Onde o mês fecha se o ritmo de até agora continuar: realizado dividido pelos
+ * dias úteis decorridos, vezes os dias úteis do mês inteiro.
+ *
+ * Vale para o mesmo conjunto de `ritmoNecessario` — indicador que acumula no
+ * mês e em que mais é melhor. As duas contas são complementares e é por isso
+ * que valem juntas na tela: uma diz o que falta por dia, a outra diz onde se
+ * chega sem mudar nada.
+ *
+ * Null quando ainda não há dia útil decorrido (começo do mês) ou nada lançado —
+ * projetar a partir de zero daria sempre zero, que pareceria previsão.
+ */
+export function projecaoFechamento(
+  ind: Indicador,
+  real: number | null,
+  ini: string,
+  ate: string
+): number | null {
+  if (ind.esc !== "mes" || ind.dir !== "up") return null;
+  if (real === null || !ini || !ate) return null;
+  const decorridos = diasUteis(ini, ate);
+  const totais = diasUteisDoMes(ate);
+  if (decorridos <= 0 || totais <= 0) return null;
+  return (real / decorridos) * totais;
+}
+
 // --------------------------------------------------------------------------
 // Semáforo de atingimento
 // --------------------------------------------------------------------------
