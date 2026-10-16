@@ -105,6 +105,17 @@ function chaveMapa(mes: string, tipo: string) {
   return `${mes}|${tipo}`;
 }
 
+/**
+ * Mantém uma data dentro de [ini, fim]. Datas ISO comparam como texto, então
+ * basta o operador — nada de Date aqui, que só traria fuso horário pro meio.
+ */
+function dentroDe(valor: string, ini: string, fim: string): string {
+  if (!valor) return ini;
+  if (valor < ini) return ini;
+  if (valor > fim) return fim;
+  return valor;
+}
+
 /** Mês que o painel abre dentro de um ciclo: o corrente, se for daquele ciclo. */
 function mesPadraoDoCiclo(meses: string[]): string {
   const hoje = new Date();
@@ -188,15 +199,34 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     carregar().finally(() => setCarregando(false));
   }, [carregar]);
 
+  // Primeiro e último dia do mês de registro. O período NUNCA sai daqui: a meta
+  // de MRR é escolhida pelo mês da data de início, então um período apontando
+  // para outro mês faria a tabela mostrar a meta de agosto ao lado do realizado
+  // de outubro — número errado com cara de certo.
+  const limitesDoMes = useMemo(() => {
+    const [ano, mes] = mesAtivo.split("-").map(Number);
+    return { ini: iso(new Date(ano, mes - 1, 1)), fim: iso(new Date(ano, mes, 0)) };
+  }, [mesAtivo]);
+
   // Período default: do primeiro dia do mês ativo até hoje (ou fim do mês).
   useEffect(() => {
-    const [ano, mes] = mesAtivo.split("-").map(Number);
-    const primeiro = new Date(ano, mes - 1, 1);
-    const ultimo = new Date(ano, mes, 0);
-    const hoje = new Date();
-    setDtIni(iso(primeiro));
-    setDtFim(iso(hoje >= primeiro && hoje < ultimo ? hoje : ultimo));
-  }, [mesAtivo]);
+    const hoje = iso(new Date());
+    setDtIni(limitesDoMes.ini);
+    setDtFim(hoje > limitesDoMes.fim ? limitesDoMes.fim : hoje < limitesDoMes.ini ? limitesDoMes.fim : hoje);
+  }, [limitesDoMes]);
+
+  function mudarInicio(valor: string) {
+    const novo = dentroDe(valor, limitesDoMes.ini, limitesDoMes.fim);
+    setDtIni(novo);
+    // Fim antes do início zerava a meta proporcional e apagava o atingimento da
+    // tela inteira, sem dizer por quê.
+    if (dtFim < novo) setDtFim(novo);
+  }
+
+  function mudarFim(valor: string) {
+    const novo = dentroDe(valor, limitesDoMes.ini, limitesDoMes.fim);
+    setDtFim(novo < dtIni ? dtIni : novo);
+  }
 
   // ---- gravação -----------------------------------------------------------
   // Grava depois de uma pausa na digitação, para não mandar uma requisição por
@@ -701,6 +731,10 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           mês. Taxas (%) e valores unitários não são proporcionalizados.
         </p>
         <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
+          O recorte de <b>Início</b> e <b>Fim</b> fica sempre dentro do mês de registro: fora dele, a
+          meta do cronograma seria a de outro mês e a comparação não valeria nada.
+        </p>
+        <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
           Mês sem cronograma de MRR definido aparece como <b>sem meta</b> nos indicadores de MRR e no
           resultado do trimestre — os demais funcionam normalmente, porque não dependem do
           cronograma. É o caso de todo mês anterior a agosto/2026 e de um ciclo novo enquanto as
@@ -733,10 +767,26 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
             />
           </Campo>
           <Campo label="Início">
-            <input type="date" value={dtIni} onChange={(e) => setDtIni(e.target.value)} className={inputCls} style={inputStyle} />
+            <input
+              type="date"
+              value={dtIni}
+              min={limitesDoMes.ini}
+              max={limitesDoMes.fim}
+              onChange={(e) => mudarInicio(e.target.value)}
+              className={inputCls}
+              style={inputStyle}
+            />
           </Campo>
           <Campo label="Fim">
-            <input type="date" value={dtFim} onChange={(e) => setDtFim(e.target.value)} className={inputCls} style={inputStyle} />
+            <input
+              type="date"
+              value={dtFim}
+              min={dtIni || limitesDoMes.ini}
+              max={limitesDoMes.fim}
+              onChange={(e) => mudarFim(e.target.value)}
+              className={inputCls}
+              style={inputStyle}
+            />
           </Campo>
           <Chip label="Dias úteis do período" valor={duPeriodo || "—"} />
           <Chip label="Dias úteis do mês" valor={duMes || "—"} />
