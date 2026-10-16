@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { getUsuarioPainel } from "@/db/adminQueries";
 import { fecharMes, listFechamentos, reabrirMes } from "@/db/indicadoresQueries";
-import { mesesCiclo, unidadePorSlug } from "@/lib/indicadores";
+import { mesesValidos, unidadePorSlug } from "@/lib/indicadores";
 import { ehHead, painelLiberado, type UsuarioPainel } from "@/lib/permissaoIndicadores";
 
 export const dynamic = "force-dynamic";
@@ -39,8 +39,8 @@ export async function POST(req: Request) {
   }
 
   const mes = body?.mes?.trim();
-  if (!mes || !mesesCiclo().includes(mes)) {
-    return NextResponse.json({ error: "Mês fora do ciclo do cronograma." }, { status: 400 });
+  if (!mes || !mesesValidos().includes(mes)) {
+    return NextResponse.json({ error: "Mês fora dos ciclos do painel." }, { status: 400 });
   }
 
   if (body?.fechado) {
