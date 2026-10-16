@@ -4,7 +4,7 @@
 // Adaptados do painel HTML original: mesma leitura visual, mas usando os
 // tokens de cor do playbook em vez da paleta clara fixa do arquivo de origem.
 
-import { CORES, corDe, type Situacao } from "@/lib/indicadoresCalc";
+import { CORES, CORES_AREA, corAreaDe, corDe, type Situacao } from "@/lib/indicadoresCalc";
 
 const COR_META = "var(--accent)";
 // Mesmo rosa escurecido das etiquetas N4 (ver COR_N4 no painel): a barra sozinha
@@ -81,7 +81,9 @@ export function GraficoRanking({ dados }: { dados: ItemRanking[] }) {
       ))}
       {dados.map((d, i) => {
         const y = top + i * (bh + gap);
-        const cor = corDe(d.pct);
+        // Barra e rótulo pedem contrastes diferentes: a área 3:1, o texto 4,5:1.
+        const corBarra = corAreaDe(d.pct);
+        const corTexto = corDe(d.pct);
         const larguraPct = Math.min(d.pct, maxPct);
         return (
           <g key={d.nome + i}>
@@ -94,7 +96,7 @@ export function GraficoRanking({ dados }: { dados: ItemRanking[] }) {
               y={y}
               width={Math.max((larguraPct / maxPct) * bw, 2)}
               height={bh}
-              fill={cor}
+              fill={corBarra}
               rx={3}
             />
             <text
@@ -102,7 +104,7 @@ export function GraficoRanking({ dados }: { dados: ItemRanking[] }) {
               y={y + bh / 2 + 3.5}
               fontSize="10.5"
               fontWeight={800}
-              fill={cor}
+              fill={corTexto}
             >
               {d.pct.toFixed(0)}%
             </text>
@@ -179,7 +181,7 @@ export function GraficoComparativo({ dados }: { dados: ItemComparativo[] }) {
                   y={y(d.real)}
                   width={bwid}
                   height={Math.max(y(0) - y(d.real), 1)}
-                  fill={corDe(d.pct)}
+                  fill={corAreaDe(d.pct)}
                   rx={3}
                 />
                 <text
@@ -355,7 +357,7 @@ export function GraficoEvolucao({ serie }: { serie: PontoEvolucao[] }) {
                 y={y(d.real)}
                 width={bw}
                 height={Math.max(y(0) - y(d.real), 1)}
-                fill={corDe(d.pct)}
+                fill={corAreaDe(d.pct)}
                 rx={2}
               />
             )}
@@ -368,7 +370,9 @@ export function GraficoEvolucao({ serie }: { serie: PontoEvolucao[] }) {
       <Legenda
         itens={[
           { cor: COR_META, label: "Meta do mês", opacidade: 0.35 },
-          { cor: CORES.ok, label: "Realizado (cor pelo atingimento)" },
+          { cor: CORES_AREA.ok, label: "Realizado: na meta (100%+)" },
+          { cor: CORES_AREA.warn, label: "quase (85–99%)" },
+          { cor: CORES_AREA.bad, label: "abaixo (até 84%)" },
         ]}
       />
     </>
@@ -447,7 +451,7 @@ export function GraficoLinhaMensal({ serie }: { serie: PontoEvolucao[] }) {
             key={`r${i}`}
             points={pontos.join(" ")}
             fill="none"
-            stroke={CORES.ok}
+            stroke={CORES_AREA.ok}
             strokeWidth={2.5}
             strokeLinejoin="round"
           />
@@ -455,7 +459,7 @@ export function GraficoLinhaMensal({ serie }: { serie: PontoEvolucao[] }) {
 
         {serie.map((d, i) => (
           <g key={i}>
-            {d.real !== null && <circle cx={x(i)} cy={y(d.real)} r={3.5} fill={corDe(d.pct)} />}
+            {d.real !== null && <circle cx={x(i)} cy={y(d.real)} r={3.5} fill={corAreaDe(d.pct)} />}
             <text x={x(i)} y={H - mb + 18} fontSize="9.5" fill="var(--text-muted)" textAnchor="middle">
               {d.rotulo}
             </text>
@@ -464,8 +468,10 @@ export function GraficoLinhaMensal({ serie }: { serie: PontoEvolucao[] }) {
       </svg>
       <Legenda
         itens={[
-          { cor: CORES.ok, label: "Realizado (ponto colorido pelo atingimento)" },
           { cor: COR_META, label: "Meta do mês (tracejado)" },
+          { cor: CORES_AREA.ok, label: "Realizado: na meta (100%+)" },
+          { cor: CORES_AREA.warn, label: "quase (85–99%)" },
+          { cor: CORES_AREA.bad, label: "abaixo (até 84%)" },
         ]}
       />
     </>

@@ -20,6 +20,7 @@ import type { Permissao } from "@/lib/permissaoIndicadores";
 import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
   CORES,
+  corAreaDe,
   corDe,
   diasUteis,
   diasUteisDoMes,
@@ -1603,7 +1604,7 @@ function Tabela({
                 <td className="whitespace-nowrap px-2 py-2 text-right font-extrabold tabular-nums">
                   <span
                     className="mr-1.5 inline-block h-2 w-2 rounded-full align-middle"
-                    style={{ background: corDe(st.pct) }}
+                    style={{ background: corAreaDe(st.pct) }}
                   />
                   <span style={{ color: corDe(st.pct) }}>
                     {st.pct === null ? "—" : st.pct.toFixed(0) + "%"}
