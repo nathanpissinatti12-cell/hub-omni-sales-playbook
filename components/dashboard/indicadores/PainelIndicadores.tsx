@@ -88,9 +88,6 @@ type Mapa = Record<string, Record<string, string>>;
  */
 type EstadoCampo = "pendente" | "salvando" | "salvo" | "erro";
 
-/** Mesma indexação do Mapa, guardando quem gravou cada campo e quando. */
-type Autoria = Record<string, Record<string, { por: string | null; em: string | null }>>;
-
 /**
  * Cores dos níveis N4 e N5. São tons escurecidos do rosa e do azul que vinham
  * da identidade antiga: no tema Platinum, texto branco sobre #EC4899 dava
@@ -151,7 +148,6 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   const [dtIni, setDtIni] = useState("");
   const [dtFim, setDtFim] = useState("");
   const [mapa, setMapa] = useState<Mapa>({});
-  const [autoria, setAutoria] = useState<Autoria>({});
   const [fechados, setFechados] = useState<Record<string, FechamentoApi>>({});
   const [pessoaSel, setPessoaSel] = useState(PESSOAS[0]?.chave ?? "");
   const [kpiComp, setKpiComp] = useState("ini");
@@ -168,16 +164,12 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       .then((r) => (r.ok ? r.json() : { valores: [], fechamentos: [], historico: [] }))
       .then((resp: RespostaApi) => {
         const m: Mapa = {};
-        const a: Autoria = {};
         for (const row of resp.valores ?? []) {
           const k = chaveMapa(row.mes, row.tipo);
           m[k] = m[k] || {};
           m[k][row.chave] = row.valor ?? "";
-          a[k] = a[k] || {};
-          a[k][row.chave] = { por: row.editadoPor, em: row.editadoEm };
         }
         setMapa(m);
-        setAutoria(a);
         setFechados(Object.fromEntries((resp.fechamentos ?? []).map((f) => [f.mes, f])));
         setHistorico(resp.historico ?? []);
       })
@@ -236,14 +228,6 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
             return;
           }
           if (!r.ok) throw new Error();
-          // A autoria local fica sem nome: quem salvou foi o próprio usuário, e
-          // o painel não conhece o nome dele — o nome real vem no próximo
-          // carregamento. Mostrar o autor anterior aqui seria mentira.
-          const k = chaveMapa(p.mes, p.tipo);
-          setAutoria((prev) => ({
-            ...prev,
-            [k]: { ...(prev[k] || {}), [p.chave]: { por: null, em: new Date().toISOString() } },
-          }));
           setEstados((prev) => ({ ...prev, [id]: "salvo" }));
           setAviso(`Salvo às ${new Date().toLocaleTimeString("pt-BR")}`);
         })
@@ -290,7 +274,6 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   );
 
   const reais = mapa[chaveMapa(mesAtivo, "real")] || {};
-  const autoriaReal = autoria[chaveMapa(mesAtivo, "real")] || {};
   const metasBrutas = useMemo(() => mapa[chaveMapa(mesAtivo, "meta")] || {}, [mapa, mesAtivo]);
   const metasOverride = useMemo(() => {
     const out: Record<string, number | null> = {};
@@ -507,11 +490,72 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     setAviso(`Realizados de ${rotuloMes(mesAtivo)} limpos.`);
   }
 
+  /**
+   * Planilha do ciclo inteiro, uma linha por indicador e mês. Formato CSV com
+   * ponto e vírgula e vírgula decimal, que é o que o Excel em português abre
+   * com duplo clique sem passar pelo assistente de importação; o BOM no começo
+   * é o que faz os acentos chegarem certos.
+   *
+   * A meta exportada é a CHEIA do mês, não a proporcional: numa planilha de 12
+   * meses, metas que mudam conforme o dia da consulta não se comparam entre si.
+   */
   function exportar() {
-    const blob = new Blob([JSON.stringify(mapa, null, 2)], { type: "application/json" });
+    const sep = ";";
+    const texto = (v: string) => (/[;"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+    const numero = (v: number | null) => (v === null ? "" : String(v).replace(".", ","));
+
+    const linhas: string[] = [
+      ["Mês", "Nível", "Pessoa", "Indicador", "Unidade do valor", "Meta cheia do mês", "Realizado", "Atingimento %"]
+        .map(texto)
+        .join(sep),
+    ];
+
+    const UNIDADE_ROTULO: Record<Formato, string> = { brl: "R$", pct: "%", x: "x", num: "nº" };
+
+    for (const mes of meses) {
+      const reaisDoMes = mapa[chaveMapa(mes, "real")] || {};
+      const metasDoMes = mapa[chaveMapa(mes, "meta")] || {};
+      const overridesDoMes: Record<string, number | null> = {};
+      for (const [k, v] of Object.entries(metasDoMes)) overridesDoMes[k] = num(v);
+
+      // Mês inteiro como janela: a exportação não é "até hoje", é o fechamento
+      // de cada mês.
+      const [a, m] = mes.split("-").map(Number);
+      const ini = iso(new Date(a, m - 1, 1));
+      const fim = iso(new Date(a, m, 0));
+
+      const linha = (ind: Indicador, chave: string, nivel: string, pessoa: string) => {
+        const { base } = resolveMeta(ind, chave, overridesDoMes, ini, fim);
+        const real = num(reaisDoMes[chave]);
+        if (base === null && real === null) return; // nada a dizer sobre este mês
+        const pct = status(real, base, ind.dir).pct;
+        linhas.push(
+          [
+            rotuloMes(mes),
+            nivel,
+            pessoa,
+            ind.nome,
+            UNIDADE_ROTULO[ind.fmt],
+            numero(base),
+            numero(real),
+            numero(pct === null ? null : Math.round(pct)),
+          ]
+            .map(texto)
+            .join(sep)
+        );
+      };
+
+      for (const l of N3) if (!isGrupo(l)) linha(l, l.id, "N3", "");
+      for (const l of N4) if (!isGrupo(l)) linha(l, l.id, "N4", "");
+      for (const p of PESSOAS) {
+        for (const ind of p.kpis) linha(ind, `${p.chave}_${ind.id}`, "N5", p.nome.split(" — ")[0]);
+      }
+    }
+
+    const blob = new Blob(["\uFEFF" + linhas.join("\r\n")], { type: "text/csv;charset=utf-8" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `omni_indicadores_${mesAtivo}.json`;
+    a.download = `onvox_indicadores_${unidade.slug}_${ano}.csv`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -623,7 +667,6 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           onChange={setValor}
           podeEditarMeta={podeEditarMeta}
           podeEditarReal={podeEditarRealGeral}
-          autoriaReal={autoriaReal}
           estadoDe={estadoDe}
           onSairDoCampo={gravarAgora}
           serieMensal={serieMensal}
@@ -647,7 +690,6 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           onChange={setValor}
           podeEditarMeta={podeEditarMeta}
           podeEditarReal={podeEditarRealGeral}
-          autoriaReal={autoriaReal}
           estadoDe={estadoDe}
           onSairDoCampo={gravarAgora}
           serieMensal={serieMensal}
@@ -701,8 +743,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
               onChange={setValor}
               podeEditarMeta={podeEditarMeta}
               podeEditarReal={!mesTravado}
-              autoriaReal={autoriaReal}
-              estadoDe={estadoDe}
+                  estadoDe={estadoDe}
               onSairDoCampo={gravarAgora}
               serieMensal={serieMensal}
             />
@@ -777,7 +818,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         <div className="flex flex-wrap items-center gap-3">
           {permissao.podeExportar && (
             <button onClick={exportar} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
-              Exportar JSON
+              Exportar planilha
             </button>
           )}
           {permissao.podeLimparMes && !mesTravado && (
@@ -1146,7 +1187,6 @@ function Tabela({
   onChange,
   podeEditarMeta,
   podeEditarReal,
-  autoriaReal,
   estadoDe,
   onSairDoCampo,
   serieMensal,
@@ -1161,7 +1201,6 @@ function Tabela({
   onChange: (tipo: "real" | "meta", chave: string, valor: string) => void;
   podeEditarMeta: boolean;
   podeEditarReal: boolean;
-  autoriaReal: Record<string, { por: string | null; em: string | null }>;
   estadoDe: (tipo: "real" | "meta", chave: string) => EstadoCampo | undefined;
   onSairDoCampo: (tipo: "real" | "meta", chave: string) => void;
   serieMensal: (ind: Indicador, chave: string) => PontoEvolucao[];
@@ -1213,7 +1252,6 @@ function Tabela({
             const real = num(reais[chave]);
             const st = status(real, proporcional, ind.dir);
             const ritmo = ritmoNecessario(ind, base, real, dtFim);
-            const quem = autoriaReal[chave];
 
             const expandido = aberto === chave;
 
@@ -1284,15 +1322,6 @@ function Tabela({
                     />
                   ) : (
                     <span className="tabular-nums">{fmt(num(reais[chave] ?? ""), ind.fmt)}</span>
-                  )}
-                  {/* Autoria do último lançamento. Sem isto, um número
-                      sobrescrito não deixa pista de quem mexeu — e o histórico
-                      completo fica no banco, não na tela. */}
-                  {quem?.em && (
-                    <span className="mt-0.5 block text-[10px] leading-tight" style={{ color: "var(--text-muted)" }}>
-                      {quem.por ? `${quem.por} · ` : ""}
-                      {quando(quem.em)}
-                    </span>
                   )}
                 </td>
                 {/* Ritmo necessário: só para indicador que acumula no mês e em
