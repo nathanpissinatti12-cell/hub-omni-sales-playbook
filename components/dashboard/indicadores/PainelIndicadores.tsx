@@ -16,9 +16,11 @@ import {
 } from "@/lib/indicadores";
 import type { Permissao } from "@/lib/permissaoIndicadores";
 import {
+  CORES,
   corDe,
   diasUteis,
   diasUteisDoMes,
+  diasUteisRestantes,
   fatorAno,
   fatorMes,
   fatorTrimestre,
@@ -30,6 +32,7 @@ import {
   num,
   parseNumeroBr,
   resolveMeta,
+  ritmoNecessario,
   status,
 } from "@/lib/indicadoresCalc";
 import {
@@ -44,13 +47,38 @@ import {
   type PontoEvolucao,
 } from "./Graficos";
 
-type ValorApi = { mes: string; tipo: "real" | "meta"; chave: string; valor: string | null };
+type ValorApi = {
+  mes: string;
+  tipo: "real" | "meta";
+  chave: string;
+  valor: string | null;
+  editadoPor: string | null;
+  editadoEm: string | null;
+};
+
+type FechamentoApi = { mes: string; fechadoEm: string; fechadoPor: string | null };
+
+type RespostaApi = { valores: ValorApi[]; fechamentos: FechamentoApi[] };
 
 /** Estado local: mapa mes -> tipo -> chave -> valor bruto (string, como digitado). */
 type Mapa = Record<string, Record<string, string>>;
 
+/** Mesma indexação do Mapa, guardando quem gravou cada campo e quando. */
+type Autoria = Record<string, Record<string, { por: string | null; em: string | null }>>;
+
 function chaveMapa(mes: string, tipo: string) {
   return `${mes}|${tipo}`;
+}
+
+/** "15/10 às 14:32" — data curta, que é o que importa pra saber se é de hoje. */
+function quando(iso: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} às ${d.toLocaleTimeString(
+    "pt-BR",
+    { hour: "2-digit", minute: "2-digit" }
+  )}`;
 }
 
 export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; permissao: Permissao }) {
@@ -75,6 +103,8 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   const [dtIni, setDtIni] = useState("");
   const [dtFim, setDtFim] = useState("");
   const [mapa, setMapa] = useState<Mapa>({});
+  const [autoria, setAutoria] = useState<Autoria>({});
+  const [fechados, setFechados] = useState<Record<string, FechamentoApi>>({});
   const [pessoaSel, setPessoaSel] = useState(PESSOAS[0]?.chave ?? "");
   const [kpiComp, setKpiComp] = useState("ini");
   const [indEvo, setIndEvo] = useState("n3_mrr_out");
@@ -84,15 +114,20 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   // ---- carga inicial -------------------------------------------------------
   useEffect(() => {
     fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}`)
-      .then((r) => (r.ok ? r.json() : []))
-      .then((rows: ValorApi[]) => {
+      .then((r) => (r.ok ? r.json() : { valores: [], fechamentos: [] }))
+      .then((resp: RespostaApi) => {
         const m: Mapa = {};
-        for (const row of rows) {
+        const a: Autoria = {};
+        for (const row of resp.valores ?? []) {
           const k = chaveMapa(row.mes, row.tipo);
           m[k] = m[k] || {};
           m[k][row.chave] = row.valor ?? "";
+          a[k] = a[k] || {};
+          a[k][row.chave] = { por: row.editadoPor, em: row.editadoEm };
         }
         setMapa(m);
+        setAutoria(a);
+        setFechados(Object.fromEntries((resp.fechamentos ?? []).map((f) => [f.mes, f])));
       })
       .catch(() => setAviso("Não foi possível carregar os lançamentos."))
       .finally(() => setCarregando(false));
@@ -122,7 +157,22 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           body: JSON.stringify({ unidade: unidade.slug, mes: mesAtivo, tipo, chave, valor: valor === "" ? null : valor }),
         })
           .then((r) => {
+            // 409 = mês fechado. A tela já esconde os campos nesse caso, então
+            // isto só acontece se o mês for fechado em outra aba enquanto esta
+            // está aberta — e aí a mensagem precisa dizer o motivo real.
+            if (r.status === 409) {
+              setAviso("Mês fechado — este lançamento não foi salvo. Recarregue a página.");
+              return;
+            }
             if (!r.ok) throw new Error();
+            // A autoria local fica sem nome: quem salvou foi o próprio usuário, e
+            // o painel não conhece o nome dele — o nome real vem no próximo
+            // carregamento. Mostrar o autor anterior aqui seria mentira.
+            const k = chaveMapa(mesAtivo, tipo);
+            setAutoria((prev) => ({
+              ...prev,
+              [k]: { ...(prev[k] || {}), [chave]: { por: null, em: new Date().toISOString() } },
+            }));
             setAviso(`Salvo às ${new Date().toLocaleTimeString("pt-BR")}`);
           })
           .catch(() => setAviso("Falha ao salvar — verifique a conexão."));
@@ -141,6 +191,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   );
 
   const reais = mapa[chaveMapa(mesAtivo, "real")] || {};
+  const autoriaReal = autoria[chaveMapa(mesAtivo, "real")] || {};
   const metasBrutas = useMemo(() => mapa[chaveMapa(mesAtivo, "meta")] || {}, [mapa, mesAtivo]);
   const metasOverride = useMemo(() => {
     const out: Record<string, number | null> = {};
@@ -148,9 +199,43 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     return out;
   }, [metasBrutas]);
 
+  // ---- fechamento do mês ---------------------------------------------------
+  // Mês fechado trava a edição de todo mundo, Head incluído: se o Head pudesse
+  // editar sem reabrir, o fechamento não garantiria nada. A API recusa de novo
+  // do lado dela — isto aqui é só pra não oferecer um campo que não vai gravar.
+  const fechamento = fechados[mesAtivo] ?? null;
+  const mesTravado = fechamento !== null;
+  const podeEditarMeta = permissao.podeEditarMeta && !mesTravado;
+  const podeEditarRealGeral = permissao.ehHead && !mesTravado;
+
+  async function alternarFechamento() {
+    const fechando = !mesTravado;
+    if (
+      fechando &&
+      !confirm(
+        `Fechar ${rotuloMes(mesAtivo)}? Ninguém mais lança neste mês — nem você — até reabrir.`
+      )
+    ) {
+      return;
+    }
+    const r = await fetch("/api/dashboard/indicadores/fechamento", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ unidade: unidade.slug, mes: mesAtivo, fechado: fechando }),
+    });
+    if (!r.ok) {
+      setAviso("Não foi possível alterar o fechamento.");
+      return;
+    }
+    const { fechamentos } = (await r.json()) as { fechamentos: FechamentoApi[] };
+    setFechados(Object.fromEntries(fechamentos.map((f) => [f.mes, f])));
+    setAviso(`${rotuloMes(mesAtivo)} ${fechando ? "fechado" : "reaberto"}.`);
+  }
+
   // ---- chips do período ----------------------------------------------------
   const duPeriodo = diasUteis(dtIni, dtFim);
   const duMes = diasUteisDoMes(dtIni);
+  const duRestantes = diasUteisRestantes(dtFim);
   const pctMes = (fatorMes(dtIni, dtFim) * 100).toFixed(0);
   const pctTri = (fatorTrimestre(dtFim) * 100).toFixed(0);
   const pctAno = (fatorAno(dtFim) * 100).toFixed(0);
@@ -334,6 +419,12 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           os demais meses seguem intactos. Campo em branco usa a meta padrão do indicador (mostrada
           em cinza dentro do campo); apagar o que você digitou volta pra ela.
         </p>
+        <p className="mb-4 text-sm" style={{ color: "var(--text-muted)" }}>
+          <b>Falta por dia útil</b> é quanto ainda precisa sair por dia para fechar o mês na meta
+          cheia — aparece só nos indicadores que acumulam ao longo do mês e em que mais é melhor.
+          Taxas, valores unitários, trimestre e ciclo anual mostram travessão, porque nesses casos a
+          média diária não existe.
+        </p>
         <div className="flex flex-wrap items-end gap-4">
           <Campo label="Mês de registro">
             <Select
@@ -350,9 +441,38 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           </Campo>
           <Chip label="Dias úteis do período" valor={duPeriodo || "—"} />
           <Chip label="Dias úteis do mês" valor={duMes || "—"} />
+          <Chip label="Dias úteis restantes" valor={duRestantes} />
           <Chip label="Proporção do mês" valor={`${pctMes}%`} />
           <Chip label="Trimestre decorrido" valor={`${pctTri}%`} />
           <Chip label="Ciclo ARR decorrido" valor={`${pctAno}%`} />
+        </div>
+
+        {/* Estado do fechamento. Fica junto do seletor de mês porque é o estado
+            DAQUELE mês, não do painel inteiro. */}
+        <div className="mt-4 flex flex-wrap items-center gap-3 border-t pt-4" style={{ borderColor: "var(--border)" }}>
+          {mesTravado ? (
+            <span className="text-sm">
+              🔒 <b>{rotuloMes(mesAtivo)} fechado</b>
+              <span style={{ color: "var(--text-muted)" }}>
+                {fechamento?.fechadoPor ? ` por ${fechamento.fechadoPor}` : ""}
+                {fechamento?.fechadoEm ? ` em ${quando(fechamento.fechadoEm)}` : ""} — nenhum
+                lançamento é aceito até reabrir.
+              </span>
+            </span>
+          ) : (
+            <span className="text-sm" style={{ color: "var(--text-muted)" }}>
+              {rotuloMes(mesAtivo)} está <b>aberto</b> para lançamento.
+            </span>
+          )}
+          {permissao.ehHead && (
+            <button
+              onClick={alternarFechamento}
+              className="rounded-md px-3 py-1.5 text-sm font-semibold"
+              style={{ border: "1px solid var(--border)", color: "var(--text)" }}
+            >
+              {mesTravado ? `Reabrir ${rotuloMes(mesAtivo)}` : `Fechar ${rotuloMes(mesAtivo)}`}
+            </button>
+          )}
         </div>
       </Painel>
 
@@ -368,8 +488,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           dtIni={dtIni}
           dtFim={dtFim}
           onChange={setValor}
-          podeEditarMeta={permissao.podeEditarMeta}
-          podeEditarReal={permissao.ehHead}
+          podeEditarMeta={podeEditarMeta}
+          podeEditarReal={podeEditarRealGeral}
+          autoriaReal={autoriaReal}
           serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N3">
@@ -389,8 +510,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           dtIni={dtIni}
           dtFim={dtFim}
           onChange={setValor}
-          podeEditarMeta={permissao.podeEditarMeta}
-          podeEditarReal={permissao.ehHead}
+          podeEditarMeta={podeEditarMeta}
+          podeEditarReal={podeEditarRealGeral}
+          autoriaReal={autoriaReal}
           serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N4">
@@ -440,8 +562,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
               dtIni={dtIni}
               dtFim={dtFim}
               onChange={setValor}
-              podeEditarMeta={permissao.podeEditarMeta}
-              podeEditarReal
+              podeEditarMeta={podeEditarMeta}
+              podeEditarReal={!mesTravado}
+              autoriaReal={autoriaReal}
               serieMensal={serieMensal}
             />
             <Secao titulo="Ranking de atingimento — pessoa selecionada">
@@ -504,7 +627,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
               Exportar JSON
             </button>
           )}
-          {permissao.podeLimparMes && (
+          {permissao.podeLimparMes && !mesTravado && (
             <button onClick={limparMes} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
               Limpar realizados do mês
             </button>
@@ -722,6 +845,7 @@ function Tabela({
   onChange,
   podeEditarMeta,
   podeEditarReal,
+  autoriaReal,
   serieMensal,
 }: {
   defs: LinhaTabela[];
@@ -734,6 +858,7 @@ function Tabela({
   onChange: (tipo: "real" | "meta", chave: string, valor: string) => void;
   podeEditarMeta: boolean;
   podeEditarReal: boolean;
+  autoriaReal: Record<string, { por: string | null; em: string | null }>;
   serieMensal: (ind: Indicador, chave: string) => PontoEvolucao[];
 }) {
   // Qual indicador está com o gráfico do ano aberto. Um por vez: abrir vários
@@ -745,7 +870,7 @@ function Tabela({
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr>
-            {["Indicador", "Meta", "Meta proporcional", "Realizado", "Atingimento"].map((h, i) => (
+            {["Indicador", "Meta", "Meta proporcional", "Realizado", "Falta por dia útil", "Atingimento"].map((h, i) => (
               <th
                 key={h}
                 className={`whitespace-nowrap border-b-2 px-2 py-2 text-[10px] font-extrabold uppercase tracking-wide ${
@@ -766,7 +891,7 @@ function Tabela({
               return (
                 <tr key={`g${idx}`}>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-2 py-2 text-[10px] font-extrabold uppercase tracking-wide"
                     style={{ color: cor, background: "var(--bg, transparent)" }}
                   >
@@ -779,9 +904,11 @@ function Tabela({
             const ind = linha as Indicador;
             const chave = prefixo + ind.id;
             const semMeta = ind.meta === null;
-            const { proporcional } = resolveMeta(ind, chave, metasOverride, dtIni, dtFim);
+            const { base, proporcional } = resolveMeta(ind, chave, metasOverride, dtIni, dtFim);
             const real = num(reais[chave]);
             const st = status(real, proporcional, ind.dir);
+            const ritmo = ritmoNecessario(ind, base, real, dtFim);
+            const quem = autoriaReal[chave];
 
             const expandido = aberto === chave;
 
@@ -849,6 +976,38 @@ function Tabela({
                   ) : (
                     <span className="tabular-nums">{fmt(num(reais[chave] ?? ""), ind.fmt)}</span>
                   )}
+                  {/* Autoria do último lançamento. Sem isto, um número
+                      sobrescrito não deixa pista de quem mexeu — e o histórico
+                      completo fica no banco, não na tela. */}
+                  {quem?.em && (
+                    <span className="mt-0.5 block text-[10px] leading-tight" style={{ color: "var(--text-muted)" }}>
+                      {quem.por ? `${quem.por} · ` : ""}
+                      {quando(quem.em)}
+                    </span>
+                  )}
+                </td>
+                {/* Ritmo necessário: só para indicador que acumula no mês e em
+                    que mais é melhor. Nos demais a conta não existe, e inventar
+                    um número aqui seria pior que deixar vazio. */}
+                <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">
+                  {ritmo === null ? (
+                    <span style={{ color: "var(--text-muted)" }}>—</span>
+                  ) : ritmo.falta === 0 ? (
+                    <span style={{ color: CORES.ok }} title="Meta cheia do mês já alcançada">
+                      no alvo
+                    </span>
+                  ) : ritmo.porDia === null ? (
+                    <span style={{ color: CORES.bad }} title="Não há mais dia útil neste mês">
+                      {fmt(ritmo.falta, ind.fmt)} / sem dia
+                    </span>
+                  ) : (
+                    <span title={`Faltam ${fmt(ritmo.falta, ind.fmt)} para a meta cheia, em ${ritmo.diasRestantes} dia(s) útil(eis)`}>
+                      {fmt(ritmo.porDia, ind.fmt)}
+                      <span className="ml-1 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        /dia
+                      </span>
+                    </span>
+                  )}
                 </td>
                 <td className="whitespace-nowrap px-2 py-2 text-right font-extrabold tabular-nums">
                   <span
@@ -862,7 +1021,7 @@ function Tabela({
               </tr>
               {expandido && (
                 <tr style={{ borderBottom: "1px solid var(--border)" }}>
-                  <td colSpan={5} className="px-2 pb-4 pt-1">
+                  <td colSpan={6} className="px-2 pb-4 pt-1">
                     <p className="mb-2 text-[10px] font-extrabold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
                       {ind.nome} — mês a mês
                     </p>

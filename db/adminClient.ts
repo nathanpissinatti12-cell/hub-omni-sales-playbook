@@ -22,5 +22,9 @@ function getPool() {
 
 export const adminPool = {
   query: (text: string, params?: unknown[]) => getPool().query(text, params),
+  // Uma conexão exclusiva do pool, para quem precisa de transação: BEGIN e
+  // COMMIT só valem na mesma conexão, e `query` acima pega qualquer uma livre.
+  // Quem chama é responsável por release() num finally.
+  connect: () => getPool().connect(),
   end: () => getPool().end(),
 };

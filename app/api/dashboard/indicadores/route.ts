@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { getUsuarioPainel } from "@/db/adminQueries";
-import { limparRealizados, listValores, upsertValor } from "@/db/indicadoresQueries";
+import {
+  limparRealizados,
+  listFechamentos,
+  listHistorico,
+  listValores,
+  mesFechado,
+  upsertValor,
+} from "@/db/indicadoresQueries";
 import { mesesCiclo, unidadePorSlug } from "@/lib/indicadores";
 import {
   chavesLegiveis,
@@ -52,11 +59,20 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Sem acesso a esta unidade." }, { status: 403 });
   }
 
-  const valores = await listValores(unidade.slug);
+  const [valores, fechamentos, historico] = await Promise.all([
+    listValores(unidade.slug),
+    listFechamentos(unidade.slug),
+    listHistorico(unidade.slug),
+  ]);
+
   const permitidas = chavesLegiveis(usuario, unidade);
   // Filtrar aqui, e não na tela: o colaborador não pode nem receber o número do
-  // colega ou do N3 na resposta.
-  return NextResponse.json(permitidas ? valores.filter((v) => permitidas.has(v.chave)) : valores);
+  // colega ou do N3 na resposta. Vale também pro histórico, que repete valores.
+  return NextResponse.json({
+    valores: permitidas ? valores.filter((v) => permitidas.has(v.chave)) : valores,
+    fechamentos,
+    historico: permitidas ? historico.filter((h) => permitidas.has(h.chave)) : historico,
+  });
 }
 
 export async function POST(req: Request) {
@@ -95,6 +111,16 @@ export async function POST(req: Request) {
     );
   }
 
+  // Mês fechado trava para todo mundo, Head incluído: o sentido do fechamento é
+  // o número parar de mudar depois de divulgado. Quem quiser corrigir reabre o
+  // mês antes — e esse reabrir fica registrado.
+  if (await mesFechado(unidade.slug, mes)) {
+    return NextResponse.json(
+      { error: "Mês fechado. Reabra o mês antes de lançar.", mesFechado: true },
+      { status: 409 }
+    );
+  }
+
   const bruto = body?.valor;
   let valor: number | null = null;
   if (bruto !== null && bruto !== undefined && bruto !== "") {
@@ -118,7 +144,7 @@ export async function POST(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  const { erro, usuario } = await exigeUsuario();
+  const { erro, session, usuario } = await exigeUsuario();
   if (erro) return erro;
 
   // Apagar os realizados do mês inteiro é ação de Head — um colaborador nunca
@@ -136,6 +162,13 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ error: "Mês fora do ciclo do cronograma." }, { status: 400 });
   }
 
-  await limparRealizados(unidade.slug, mes);
+  if (await mesFechado(unidade.slug, mes)) {
+    return NextResponse.json(
+      { error: "Mês fechado. Reabra o mês antes de limpar.", mesFechado: true },
+      { status: 409 }
+    );
+  }
+
+  await limparRealizados(unidade.slug, mes, session?.uid ?? null);
   return NextResponse.json({ ok: true });
 }

@@ -206,6 +206,66 @@ export function metaDinamica(ind: Indicador, ini: string, fim: string): number |
 }
 
 // --------------------------------------------------------------------------
+// Ritmo necessário — o que falta por dia útil restante
+// --------------------------------------------------------------------------
+
+/** Dia seguinte a uma data ISO, como ISO. */
+export function diaSeguinte(ref: string): string {
+  const d = parseData(ref);
+  d.setDate(d.getDate() + 1);
+  return iso(d);
+}
+
+/**
+ * Dias úteis que ainda restam no mês depois da data de corte. Conta a partir do
+ * dia SEGUINTE porque o dia do corte já entrou como decorrido na meta
+ * proporcional — somar nos dois lados contaria o mesmo dia duas vezes.
+ */
+export function diasUteisRestantes(ate: string): number {
+  if (!ate) return 0;
+  return diasUteis(diaSeguinte(ate), limitesMes(ate).fim);
+}
+
+export type Ritmo = {
+  /** Quanto falta para a meta CHEIA do mês (nunca a proporcional). */
+  falta: number;
+  diasRestantes: number;
+  /** falta ÷ dias restantes; null quando não sobrou dia útil no mês. */
+  porDia: number | null;
+};
+
+/**
+ * Quanto falta por dia útil restante para fechar o mês na meta.
+ *
+ * Só faz sentido para indicador que ACUMULA ao longo do mês e em que mais é
+ * melhor (reuniões, SAL, MRR novo, leads). Devolve null para o resto:
+ *
+ * - taxa e valor unitário (esc null — conversão, ticket, CAC): a média do mês
+ *   não é a soma dos dias, então "falta x por dia" seria número inventado;
+ * - trimestre e ciclo anual (esc 'tri'/'ano'): o que falta ali não se resolve
+ *   nos dias úteis deste mês;
+ * - indicador de "quanto menor melhor" (dir 'down' — no-show, CAC): não há o
+ *   que correr atrás por dia, o alvo é não passar do teto.
+ */
+export function ritmoNecessario(
+  ind: Indicador,
+  base: number | null,
+  real: number | null,
+  ate: string
+): Ritmo | null {
+  if (ind.esc !== "mes" || ind.dir !== "up") return null;
+  if (base === null || !ate) return null;
+
+  const falta = Math.max(0, base - (real ?? 0));
+  const diasRestantes = diasUteisRestantes(ate);
+  return {
+    falta,
+    diasRestantes,
+    porDia: diasRestantes > 0 ? falta / diasRestantes : null,
+  };
+}
+
+// --------------------------------------------------------------------------
 // Semáforo de atingimento
 // --------------------------------------------------------------------------
 
