@@ -58,7 +58,22 @@ type ValorApi = {
 
 type FechamentoApi = { mes: string; fechadoEm: string; fechadoPor: string | null };
 
-type RespostaApi = { valores: ValorApi[]; fechamentos: FechamentoApi[] };
+type HistoricoApi = {
+  mes: string;
+  tipo: "real" | "meta";
+  chave: string;
+  valorAntigo: string | null;
+  valorNovo: string | null;
+  acao: string;
+  alteradoPor: string | null;
+  alteradoEm: string;
+};
+
+type RespostaApi = {
+  valores: ValorApi[];
+  fechamentos: FechamentoApi[];
+  historico: HistoricoApi[];
+};
 
 /** Estado local: mapa mes -> tipo -> chave -> valor bruto (string, como digitado). */
 type Mapa = Record<string, Record<string, string>>;
@@ -108,13 +123,16 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   const [pessoaSel, setPessoaSel] = useState(PESSOAS[0]?.chave ?? "");
   const [kpiComp, setKpiComp] = useState("ini");
   const [indEvo, setIndEvo] = useState("n3_mrr_out");
+  const [historico, setHistorico] = useState<HistoricoApi[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [aviso, setAviso] = useState("");
 
-  // ---- carga inicial -------------------------------------------------------
-  useEffect(() => {
-    fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}`)
-      .then((r) => (r.ok ? r.json() : { valores: [], fechamentos: [] }))
+  // ---- carga ---------------------------------------------------------------
+  // Uma função só, usada na abertura e no botão "Atualizar" do histórico: a
+  // mesma chamada traz lançamentos, fechamentos e histórico.
+  const carregar = useCallback(() => {
+    return fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}`)
+      .then((r) => (r.ok ? r.json() : { valores: [], fechamentos: [], historico: [] }))
       .then((resp: RespostaApi) => {
         const m: Mapa = {};
         const a: Autoria = {};
@@ -128,10 +146,14 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         setMapa(m);
         setAutoria(a);
         setFechados(Object.fromEntries((resp.fechamentos ?? []).map((f) => [f.mes, f])));
+        setHistorico(resp.historico ?? []);
       })
-      .catch(() => setAviso("Não foi possível carregar os lançamentos."))
-      .finally(() => setCarregando(false));
+      .catch(() => setAviso("Não foi possível carregar os lançamentos."));
   }, [unidade.slug]);
+
+  useEffect(() => {
+    carregar().finally(() => setCarregando(false));
+  }, [carregar]);
 
   // Período default: do primeiro dia do mês ativo até hoje (ou fim do mês).
   useEffect(() => {
@@ -335,6 +357,25 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
 
   // ---- evolução mensal -----------------------------------------------------
   const planos = useMemo(() => indicadoresPlanos([...N3, ...N4]), [N3, N4]);
+
+  /**
+   * Chave de lançamento -> nome legível e formato. O histórico guarda a chave
+   * crua ("n4_reun", "sara_ini"), que não diz nada pra quem lê, e sem o formato
+   * não dá pra saber se 3000 é R$ 3.000,00 ou 3.000 reuniões.
+   */
+  const indicePorChave = useMemo(() => {
+    const m = new Map<string, { nome: string; fmt: Formato }>();
+    for (const l of [...N3, ...N4]) {
+      if (!isGrupo(l)) m.set(l.id, { nome: l.nome, fmt: l.fmt });
+    }
+    for (const p of unidade.pessoas) {
+      const quem = p.nome.split(" — ")[0];
+      for (const k of p.kpis) {
+        m.set(`${p.chave}_${k.id}`, { nome: `${quem} · ${k.nome}`, fmt: k.fmt });
+      }
+    }
+    return m;
+  }, [N3, N4, unidade.pessoas]);
 
   /**
    * Série do ano inteiro de UM indicador, para o gráfico que abre ao clicar no
@@ -619,6 +660,20 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         </Secao>
       </Painel>
 
+      {/* ---------------- histórico ---------------- */}
+      <Painel
+        titulo="Últimas alterações"
+        desc="Toda vez que um número muda, fica registrado aqui — inclusive quando é apagado."
+      >
+        <Historico
+          itens={historico}
+          indicePorChave={indicePorChave}
+          onAtualizar={() => {
+            carregar().then(() => setAviso("Histórico atualizado."));
+          }}
+        />
+      </Painel>
+
       {/* ---------------- dados ---------------- */}
       <Painel titulo="Dados">
         <div className="flex flex-wrap items-center gap-3">
@@ -765,6 +820,129 @@ function Secao({
         {acao}
       </div>
       {children}
+    </div>
+  );
+}
+
+// ===========================================================================
+// Histórico de alterações
+// ===========================================================================
+
+const ACAO_ROTULO: Record<string, string> = {
+  gravou: "",
+  apagou: "campo apagado",
+  limpou_mes: "limpeza do mês inteiro",
+};
+
+/**
+ * Lista das últimas alterações da unidade. Vem pronta da API, já filtrada pela
+ * permissão — o colaborador só recebe as próprias linhas, então aqui não há o
+ * que esconder.
+ */
+function Historico({
+  itens,
+  indicePorChave,
+  onAtualizar,
+}: {
+  itens: HistoricoApi[];
+  indicePorChave: Map<string, { nome: string; fmt: Formato }>;
+  onAtualizar: () => void;
+}) {
+  // A lista chega no carregamento da página, então o que você acabou de digitar
+  // só aparece depois de atualizar — daí o botão, em vez de deixar a lista
+  // silenciosamente velha.
+  const [verTudo, setVerTudo] = useState(false);
+  const visiveis = verTudo ? itens : itens.slice(0, 12);
+
+  if (itens.length === 0) {
+    return (
+      <div className="flex flex-wrap items-center gap-3">
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Nenhuma alteração registrada ainda. O histórico começou a ser gravado em 16/10/2026 — os
+          lançamentos anteriores a essa data não têm rastro.
+        </p>
+        <button
+          onClick={onAtualizar}
+          className="rounded-md px-3 py-1.5 text-sm font-semibold"
+          style={{ border: "1px solid var(--border)", color: "var(--text)" }}
+        >
+          Atualizar
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="mb-3 flex flex-wrap items-center justify-end gap-3">
+        <button
+          onClick={onAtualizar}
+          className="rounded-md px-3 py-1.5 text-sm font-semibold"
+          style={{ border: "1px solid var(--border)", color: "var(--text)" }}
+        >
+          Atualizar
+        </button>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              {["Quando", "Quem", "Indicador", "De → para"].map((h, i) => (
+                <th
+                  key={h}
+                  className={`whitespace-nowrap border-b-2 px-2 py-2 text-[10px] font-extrabold uppercase tracking-wide ${
+                    i === 3 ? "text-right" : "text-left"
+                  }`}
+                  style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {visiveis.map((h, i) => {
+              const def = indicePorChave.get(h.chave);
+              const formato = def?.fmt ?? "num";
+              const extra = ACAO_ROTULO[h.acao] ?? h.acao;
+              return (
+                <tr key={`${h.alteradoEm}-${h.chave}-${i}`} style={{ borderBottom: "1px solid var(--border)" }}>
+                  <td className="whitespace-nowrap px-2 py-2 tabular-nums" style={{ color: "var(--text-muted)" }}>
+                    {quando(h.alteradoEm)}
+                  </td>
+                  <td className="px-2 py-2">{h.alteradoPor ?? "—"}</td>
+                  <td className="px-2 py-2">
+                    {/* Chave sem definição acontece quando um indicador sai do
+                        painel: o lançamento antigo continua no histórico, e
+                        mostrar a chave crua é melhor que sumir com a linha. */}
+                    <span className="font-semibold">{def?.nome ?? h.chave}</span>
+                    <span className="block text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      {h.tipo === "real" ? "realizado" : "meta"} · {rotuloMes(h.mes)}
+                      {extra ? ` · ${extra}` : ""}
+                    </span>
+                  </td>
+                  <td className="whitespace-nowrap px-2 py-2 text-right tabular-nums">
+                    <span style={{ color: "var(--text-muted)" }}>{fmt(num(h.valorAntigo), formato)}</span>
+                    <span className="mx-1.5" aria-hidden="true">
+                      →
+                    </span>
+                    <b>{fmt(num(h.valorNovo), formato)}</b>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {itens.length > 12 && (
+        <button
+          onClick={() => setVerTudo((v) => !v)}
+          className="mt-3 text-sm font-semibold hover:underline"
+          style={{ color: "var(--accent)" }}
+        >
+          {verTudo ? "Mostrar menos" : `Ver todas as ${itens.length} alterações`}
+        </button>
+      )}
     </div>
   );
 }
