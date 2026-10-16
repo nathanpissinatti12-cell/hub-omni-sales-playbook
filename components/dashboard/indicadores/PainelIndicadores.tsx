@@ -17,6 +17,7 @@ import {
   type Unidade,
 } from "@/lib/indicadores";
 import type { Permissao } from "@/lib/permissaoIndicadores";
+import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
   CORES,
   corDe,
@@ -491,28 +492,29 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   }
 
   /**
-   * Planilha do ciclo inteiro, uma linha por indicador e mês. Formato CSV com
-   * ponto e vírgula e vírgula decimal, que é o que o Excel em português abre
-   * com duplo clique sem passar pelo assistente de importação; o BOM no começo
-   * é o que faz os acentos chegarem certos.
+   * Planilha do ciclo: um .xlsx com uma aba por mês, jan a dez. O Excel mostra
+   * as abas na barra de baixo, que é como se compara mês com mês sem filtrar
+   * nada — era o que faltava no CSV, que por formato só tem uma folha.
+   *
+   * Os números vão como número, não como texto: quem formata com R$ ou vírgula
+   * é o Excel, conforme o idioma de quem abre.
    *
    * A meta exportada é a CHEIA do mês, não a proporcional: numa planilha de 12
    * meses, metas que mudam conforme o dia da consulta não se comparam entre si.
    */
   function exportar() {
-    const sep = ";";
-    const texto = (v: string) => (/[;"\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
-    const numero = (v: number | null) => (v === null ? "" : String(v).replace(".", ","));
-
-    const linhas: string[] = [
-      ["Mês", "Nível", "Pessoa", "Indicador", "Unidade do valor", "Meta cheia do mês", "Realizado", "Atingimento %"]
-        .map(texto)
-        .join(sep),
+    const UNIDADE_ROTULO: Record<Formato, string> = { brl: "R$", pct: "%", x: "x", num: "nº" };
+    const CABECALHO: Celula[] = [
+      "Nível",
+      "Pessoa",
+      "Indicador",
+      "Unidade do valor",
+      "Meta cheia do mês",
+      "Realizado",
+      "Atingimento %",
     ];
 
-    const UNIDADE_ROTULO: Record<Formato, string> = { brl: "R$", pct: "%", x: "x", num: "nº" };
-
-    for (const mes of meses) {
+    const abas: Aba[] = meses.map((mes) => {
       const reaisDoMes = mapa[chaveMapa(mes, "real")] || {};
       const metasDoMes = mapa[chaveMapa(mes, "meta")] || {};
       const overridesDoMes: Record<string, number | null> = {};
@@ -524,25 +526,22 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       const ini = iso(new Date(a, m - 1, 1));
       const fim = iso(new Date(a, m, 0));
 
+      const linhas: Celula[][] = [CABECALHO];
+
       const linha = (ind: Indicador, chave: string, nivel: string, pessoa: string) => {
         const { base } = resolveMeta(ind, chave, overridesDoMes, ini, fim);
         const real = num(reaisDoMes[chave]);
         if (base === null && real === null) return; // nada a dizer sobre este mês
         const pct = status(real, base, ind.dir).pct;
-        linhas.push(
-          [
-            rotuloMes(mes),
-            nivel,
-            pessoa,
-            ind.nome,
-            UNIDADE_ROTULO[ind.fmt],
-            numero(base),
-            numero(real),
-            numero(pct === null ? null : Math.round(pct)),
-          ]
-            .map(texto)
-            .join(sep)
-        );
+        linhas.push([
+          nivel,
+          pessoa,
+          ind.nome,
+          UNIDADE_ROTULO[ind.fmt],
+          base,
+          real,
+          pct === null ? null : Math.round(pct),
+        ]);
       };
 
       for (const l of N3) if (!isGrupo(l)) linha(l, l.id, "N3", "");
@@ -550,12 +549,16 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       for (const p of PESSOAS) {
         for (const ind of p.kpis) linha(ind, `${p.chave}_${ind.id}`, "N5", p.nome.split(" — ")[0]);
       }
-    }
 
-    const blob = new Blob(["\uFEFF" + linhas.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      return { nome: rotuloMes(mes), linhas };
+    });
+
+    const blob = new Blob([gerarXlsx(abas)], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = `onvox_indicadores_${unidade.slug}_${ano}.csv`;
+    a.download = `onvox_indicadores_${unidade.slug}_${ano}.xlsx`;
     a.click();
     URL.revokeObjectURL(a.href);
   }
@@ -818,7 +821,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         <div className="flex flex-wrap items-center gap-3">
           {permissao.podeExportar && (
             <button onClick={exportar} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
-              Exportar planilha
+              Exportar planilha (Excel)
             </button>
           )}
           {permissao.podeLimparMes && !mesTravado && (
