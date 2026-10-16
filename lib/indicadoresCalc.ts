@@ -328,18 +328,45 @@ export function status(real: number | null, meta: number | null, dir: Direcao): 
   return { situacao: "bad", pct };
 }
 
+/**
+ * Cores do semáforo quando viram TEXTO (o % na tabela, o rótulo no gráfico).
+ * Precisam de 4,5:1 sobre o fundo claro, que é o mínimo da WCAG para texto
+ * pequeno — por isso são tons fechados: 5,4 / 5,0 / 4,8 / 5,3.
+ */
 export const CORES: Record<Situacao, string> = {
-  ok: "#0F9D58",
+  ok: "#0B7A43",
   warn: "#B45309",
   bad: "#DC2626",
-  na: "#8B8399",
+  na: "#6F6881",
 };
 
+/**
+ * As mesmas situações quando viram ÁREA (barra, ponto, linha). Aqui o mínimo é
+ * 3:1, então dá pra usar tons mais vivos — e isso importa: o âmbar escuro do
+ * texto, numa barra grande ao lado de verde e rosa, lê como marrom e ninguém
+ * associa a "quase na meta".
+ */
+export const CORES_AREA: Record<Situacao, string> = {
+  ok: "#0F9D58",
+  warn: "#D97706",
+  bad: "#DC2626",
+  na: "#B9B3D4",
+};
+
+function situacaoDe(pct: number | null): Situacao {
+  if (pct === null) return "na";
+  if (pct >= 100) return "ok";
+  if (pct >= 85) return "warn";
+  return "bad";
+}
+
 export function corDe(pct: number | null): string {
-  if (pct === null) return CORES.na;
-  if (pct >= 100) return CORES.ok;
-  if (pct >= 85) return CORES.warn;
-  return CORES.bad;
+  return CORES[situacaoDe(pct)];
+}
+
+/** Cor de preenchimento para barra, ponto e linha — ver CORES_AREA. */
+export function corAreaDe(pct: number | null): string {
+  return CORES_AREA[situacaoDe(pct)];
 }
 
 /**
