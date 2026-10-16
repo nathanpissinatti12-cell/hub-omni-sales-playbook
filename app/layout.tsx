@@ -70,12 +70,21 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </Link>
             )}
             {unidadesDoMenu.length > 0 && <MenuOnvox unidades={unidadesDoMenu} />}
-            <Link href="/admin" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
-              Admin
-            </Link>
-            <Link href="/equipamentos" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
-              Equipamentos
-            </Link>
+            {/* Admin e Equipamentos ficam atrás da senha única de administrador.
+                Mostrar o link pra todo mundo levava o colaborador a uma tela de
+                senha que ele não tem — o menu passa a listar só o que a pessoa
+                consegue abrir. Quem tem a senha e não é root ainda chega pela
+                URL direta. */}
+            {session?.accessLevel === "root" && (
+              <>
+                <Link href="/admin" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
+                  Admin
+                </Link>
+                <Link href="/equipamentos" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
+                  Equipamentos
+                </Link>
+              </>
+            )}
             {session && (
               <span className="ml-auto">
                 <SiteLogoutButton />

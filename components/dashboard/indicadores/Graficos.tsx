@@ -7,7 +7,9 @@
 import { CORES, corDe, type Situacao } from "@/lib/indicadoresCalc";
 
 const COR_META = "var(--accent)";
-const COR_REAL = "#EC4899";
+// Mesmo rosa escurecido das etiquetas N4 (ver COR_N4 no painel): a barra sozinha
+// passaria com o tom claro, mas usar dois rosas diferentes na mesma tela não.
+const COR_REAL = "#BE185D";
 
 function Vazio({ msg }: { msg: string }) {
   return (

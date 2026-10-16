@@ -80,8 +80,26 @@ type RespostaApi = {
 /** Estado local: mapa mes -> tipo -> chave -> valor bruto (string, como digitado). */
 type Mapa = Record<string, Record<string, string>>;
 
+/**
+ * Estado de gravação de um campo. "pendente" é o intervalo entre a última tecla
+ * e o envio; os outros três são o resultado. Fica por campo, e não só na
+ * mensagem geral no rodapé, porque quem digita no meio da tabela não enxerga o
+ * rodapé.
+ */
+type EstadoCampo = "pendente" | "salvando" | "salvo" | "erro";
+
 /** Mesma indexação do Mapa, guardando quem gravou cada campo e quando. */
 type Autoria = Record<string, Record<string, { por: string | null; em: string | null }>>;
+
+/**
+ * Cores dos níveis N4 e N5. São tons escurecidos do rosa e do azul que vinham
+ * da identidade antiga: no tema Platinum, texto branco sobre #EC4899 dava
+ * contraste 3,5 e sobre #0EA5E9 dava 2,8 — abaixo do mínimo de 4,5 para texto
+ * pequeno, que é o tamanho da etiqueta e do cabeçalho de grupo. Estes dão 6,1 e
+ * 5,9. O N3 continua no roxo da marca, que já estava correto.
+ */
+const COR_N4 = "#BE185D";
+const COR_N5 = "#0369A1";
 
 function chaveMapa(mes: string, tipo: string) {
   return `${mes}|${tipo}`;
@@ -180,51 +198,95 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     setDtFim(iso(hoje >= primeiro && hoje < ultimo ? hoje : ultimo));
   }, [mesAtivo]);
 
-  // ---- gravação com debounce por chave ------------------------------------
+  // ---- gravação -----------------------------------------------------------
+  // Grava depois de uma pausa na digitação, para não mandar uma requisição por
+  // tecla. O que ainda não foi enviado fica em `pendentes`, e é isso que
+  // permite descarregar na hora quando o campo perde o foco ou o mês troca —
+  // sem isso, digitar e sair rápido perdia o último valor em silêncio.
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
+  const pendentes = useRef<Record<string, { mes: string; tipo: "real" | "meta"; chave: string; valor: string }>>({});
+  const [estados, setEstados] = useState<Record<string, EstadoCampo>>({});
 
-  const gravar = useCallback(
-    (tipo: "real" | "meta", chave: string, valor: string) => {
-      const id = `${mesAtivo}|${tipo}|${chave}`;
+  const enviar = useCallback(
+    (id: string) => {
+      const p = pendentes.current[id];
+      if (!p) return;
+      delete pendentes.current[id];
       clearTimeout(timers.current[id]);
-      timers.current[id] = setTimeout(() => {
-        fetch("/api/dashboard/indicadores", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ unidade: unidade.slug, mes: mesAtivo, tipo, chave, valor: valor === "" ? null : valor }),
+      setEstados((prev) => ({ ...prev, [id]: "salvando" }));
+
+      fetch("/api/dashboard/indicadores", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          unidade: unidade.slug,
+          mes: p.mes,
+          tipo: p.tipo,
+          chave: p.chave,
+          valor: p.valor === "" ? null : p.valor,
+        }),
+      })
+        .then((r) => {
+          // 409 = mês fechado. A tela já esconde os campos nesse caso, então
+          // isto só acontece se o mês for fechado em outra aba enquanto esta
+          // está aberta — e aí a mensagem precisa dizer o motivo real.
+          if (r.status === 409) {
+            setEstados((prev) => ({ ...prev, [id]: "erro" }));
+            setAviso("Mês fechado — este lançamento não foi salvo. Recarregue a página.");
+            return;
+          }
+          if (!r.ok) throw new Error();
+          // A autoria local fica sem nome: quem salvou foi o próprio usuário, e
+          // o painel não conhece o nome dele — o nome real vem no próximo
+          // carregamento. Mostrar o autor anterior aqui seria mentira.
+          const k = chaveMapa(p.mes, p.tipo);
+          setAutoria((prev) => ({
+            ...prev,
+            [k]: { ...(prev[k] || {}), [p.chave]: { por: null, em: new Date().toISOString() } },
+          }));
+          setEstados((prev) => ({ ...prev, [id]: "salvo" }));
+          setAviso(`Salvo às ${new Date().toLocaleTimeString("pt-BR")}`);
         })
-          .then((r) => {
-            // 409 = mês fechado. A tela já esconde os campos nesse caso, então
-            // isto só acontece se o mês for fechado em outra aba enquanto esta
-            // está aberta — e aí a mensagem precisa dizer o motivo real.
-            if (r.status === 409) {
-              setAviso("Mês fechado — este lançamento não foi salvo. Recarregue a página.");
-              return;
-            }
-            if (!r.ok) throw new Error();
-            // A autoria local fica sem nome: quem salvou foi o próprio usuário, e
-            // o painel não conhece o nome dele — o nome real vem no próximo
-            // carregamento. Mostrar o autor anterior aqui seria mentira.
-            const k = chaveMapa(mesAtivo, tipo);
-            setAutoria((prev) => ({
-              ...prev,
-              [k]: { ...(prev[k] || {}), [chave]: { por: null, em: new Date().toISOString() } },
-            }));
-            setAviso(`Salvo às ${new Date().toLocaleTimeString("pt-BR")}`);
-          })
-          .catch(() => setAviso("Falha ao salvar — verifique a conexão."));
-      }, 700);
+        .catch(() => {
+          setEstados((prev) => ({ ...prev, [id]: "erro" }));
+          setAviso("Falha ao salvar — verifique a conexão.");
+        });
     },
-    [mesAtivo, unidade.slug]
+    [unidade.slug]
   );
 
   const setValor = useCallback(
     (tipo: "real" | "meta", chave: string, valor: string) => {
       const k = chaveMapa(mesAtivo, tipo);
       setMapa((prev) => ({ ...prev, [k]: { ...(prev[k] || {}), [chave]: valor } }));
-      gravar(tipo, chave, valor);
+
+      const id = `${mesAtivo}|${tipo}|${chave}`;
+      pendentes.current[id] = { mes: mesAtivo, tipo, chave, valor };
+      setEstados((prev) => ({ ...prev, [id]: "pendente" }));
+      clearTimeout(timers.current[id]);
+      timers.current[id] = setTimeout(() => enviar(id), 700);
     },
-    [mesAtivo, gravar]
+    [mesAtivo, enviar]
+  );
+
+  /** Descarrega o que estiver pendente de um campo — usado quando ele perde o foco. */
+  const gravarAgora = useCallback(
+    (tipo: "real" | "meta", chave: string) => enviar(`${mesAtivo}|${tipo}|${chave}`),
+    [mesAtivo, enviar]
+  );
+
+  // Trocar de mês (ou sair da página) não pode deixar lançamento pendente para
+  // trás: a tabela já estaria mostrando outro mês e o valor sumiria sem aviso.
+  useEffect(() => {
+    return () => {
+      for (const id of Object.keys(pendentes.current)) enviar(id);
+    };
+  }, [mesAtivo, enviar]);
+
+  const estadoDe = useCallback(
+    (tipo: "real" | "meta", chave: string): EstadoCampo | undefined =>
+      estados[`${mesAtivo}|${tipo}|${chave}`],
+    [estados, mesAtivo]
   );
 
   const reais = mapa[chaveMapa(mesAtivo, "real")] || {};
@@ -562,6 +624,8 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           podeEditarMeta={podeEditarMeta}
           podeEditarReal={podeEditarRealGeral}
           autoriaReal={autoriaReal}
+          estadoDe={estadoDe}
+          onSairDoCampo={gravarAgora}
           serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N3">
@@ -571,7 +635,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       )}
 
       {/* ---------------- N4 ---------------- */}
-      <Painel titulo="Supervisão" tag="N4" tagCor="#EC4899" desc="9 indicadores agregados por função">
+      <Painel titulo="Supervisão" tag="N4" tagCor={COR_N4} desc="9 indicadores agregados por função">
         <Tabela
           defs={N4}
           prefixo=""
@@ -584,6 +648,8 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           podeEditarMeta={podeEditarMeta}
           podeEditarReal={podeEditarRealGeral}
           autoriaReal={autoriaReal}
+          estadoDe={estadoDe}
+          onSairDoCampo={gravarAgora}
           serieMensal={serieMensal}
         />
         <Secao titulo="Ranking de atingimento — N4">
@@ -595,7 +661,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       <Painel
         titulo="Operação individual"
         tag="N5"
-        tagCor="#0EA5E9"
+        tagCor={COR_N5}
         desc={
           pessoa
             ? "Selecione a pessoa para lançar e ler os indicadores individuais."
@@ -636,6 +702,8 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
               podeEditarMeta={podeEditarMeta}
               podeEditarReal={!mesTravado}
               autoriaReal={autoriaReal}
+              estadoDe={estadoDe}
+              onSairDoCampo={gravarAgora}
               serieMensal={serieMensal}
             />
             <Secao titulo="Ranking de atingimento — pessoa selecionada">
@@ -986,20 +1054,31 @@ function Historico({
  * <input type="number"> de propósito: dentro dele o navegador só aceita número
  * puro, e misturar máscara com digitação quebra o parse do valor.
  */
+const MARCA_ESTADO: Record<EstadoCampo, { simbolo: string; titulo: string; cor: string }> = {
+  pendente: { simbolo: "•", titulo: "Digitando — ainda não salvo", cor: "var(--text-muted)" },
+  salvando: { simbolo: "…", titulo: "Salvando…", cor: "var(--text-muted)" },
+  salvo: { simbolo: "✓", titulo: "Salvo", cor: CORES.ok },
+  erro: { simbolo: "!", titulo: "Não salvou — veja a mensagem no fim da página", cor: CORES.bad },
+};
+
 function CampoValor({
   formato,
   valor,
   placeholder,
   title,
   forte,
+  estado,
   onChange,
+  onSair,
 }: {
   formato: Formato;
   valor: string;
   placeholder?: string;
   title?: string;
   forte?: boolean;
+  estado?: EstadoCampo;
   onChange: (valorCanonico: string) => void;
+  onSair?: () => void;
 }) {
   // Enquanto o campo está sendo digitado ele mostra o rascunho cru; ao sair,
   // volta a exibir o valor gravado já formatado. Sem isso, reformatar a cada
@@ -1027,7 +1106,12 @@ function CampoValor({
           const canonico = parseNumeroBr(e.target.value);
           if (canonico !== null) onChange(canonico);
         }}
-        onBlur={() => setRascunho(null)}
+        onBlur={() => {
+          setRascunho(null);
+          // Sair do campo grava na hora, sem esperar a pausa da digitação:
+          // trocar de mês ou fechar a aba logo depois perderia o valor.
+          onSair?.();
+        }}
         className={`w-24 rounded-md border bg-transparent px-2 py-1 text-right text-sm outline-none${
           forte ? " font-bold" : ""
         }`}
@@ -1038,6 +1122,15 @@ function CampoValor({
           {sufixo}
         </span>
       )}
+      {/* Largura fixa mesmo sem marca, senão a coluna "pula" ao salvar. */}
+      <span
+        className="w-3 text-center text-xs font-bold"
+        aria-live="polite"
+        title={estado ? MARCA_ESTADO[estado].titulo : undefined}
+        style={{ color: estado ? MARCA_ESTADO[estado].cor : "transparent" }}
+      >
+        {estado ? MARCA_ESTADO[estado].simbolo : ""}
+      </span>
     </div>
   );
 }
@@ -1054,6 +1147,8 @@ function Tabela({
   podeEditarMeta,
   podeEditarReal,
   autoriaReal,
+  estadoDe,
+  onSairDoCampo,
   serieMensal,
 }: {
   defs: LinhaTabela[];
@@ -1067,6 +1162,8 @@ function Tabela({
   podeEditarMeta: boolean;
   podeEditarReal: boolean;
   autoriaReal: Record<string, { por: string | null; em: string | null }>;
+  estadoDe: (tipo: "real" | "meta", chave: string) => EstadoCampo | undefined;
+  onSairDoCampo: (tipo: "real" | "meta", chave: string) => void;
   serieMensal: (ind: Indicador, chave: string) => PontoEvolucao[];
 }) {
   // Qual indicador está com o gráfico do ano aberto. Um por vez: abrir vários
@@ -1095,7 +1192,7 @@ function Tabela({
           {defs.map((linha, idx) => {
             if (isGrupo(linha)) {
               const cor =
-                linha.cor === "p4" ? "#EC4899" : linha.cor === "p5" ? "#0EA5E9" : "var(--accent)";
+                linha.cor === "p4" ? COR_N4 : linha.cor === "p5" ? COR_N5 : "var(--accent)";
               return (
                 <tr key={`g${idx}`}>
                   <td
@@ -1162,7 +1259,9 @@ function Tabela({
                         ind.fmt
                       )}).`}
                       forte
+                      estado={estadoDe("meta", chave)}
                       onChange={(v) => onChange("meta", chave, v)}
+                      onSair={() => onSairDoCampo("meta", chave)}
                     />
                   ) : (
                     // Quem não é Head lê a meta, não digita.
@@ -1179,7 +1278,9 @@ function Tabela({
                     <CampoValor
                       formato={ind.fmt}
                       valor={reais[chave] ?? ""}
+                      estado={estadoDe("real", chave)}
                       onChange={(v) => onChange("real", chave, v)}
+                      onSair={() => onSairDoCampo("real", chave)}
                     />
                   ) : (
                     <span className="tabular-nums">{fmt(num(reais[chave] ?? ""), ind.fmt)}</span>
