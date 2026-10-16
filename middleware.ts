@@ -33,6 +33,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  // Resumo do Painel de Indicadores: quem chama é o n8n, que não tem cookie de
+  // login. A rota autentica por token (INDICADORES_RESUMO_TOKEN) e recusa
+  // sozinha quando o token falta ou não confere — por isso o middleware deixa
+  // passar em vez de barrar com 401 de sessão. O middleware roda no Edge e não
+  // deve ler segredo nem banco, então a decisão fica na rota mesmo.
+  if (pathname === "/api/dashboard/indicadores/resumo") {
+    return NextResponse.next();
+  }
+
   // --- /playbook e /dashboard: login individual (admin_users) ---
   if (pathname.startsWith("/playbook") || pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard")) {
     const cookie = req.cookies.get(SITE_SESSION_COOKIE)?.value;
