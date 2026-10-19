@@ -1,7 +1,8 @@
 // Formato do RMR — o diagnóstico mensal por pessoa.
 //
-// A estrutura é a da planilha que o time já usa (RMR Setembro 2026): oito
-// seções encadeadas, em que cada uma se alimenta da anterior. O número do
+// A estrutura segue a planilha que o time usa como referência (RMR Setembro
+// 2026), sem o bloco de 6M, que lá era exemplo: seções encadeadas, em que cada
+// uma se alimenta da anterior. O número do
 // indicador é o que ancora tudo: o desvio apurado na seção 1 reaparece na 2, na
 // 4, na 5 e na 7. Por isso as duas primeiras seções nascem preenchidas pelo
 // painel — na planilha elas eram transcritas à mão, e transcrição à mão é onde
@@ -44,7 +45,6 @@ export type Rmr = {
   narrativa: string;
   resultado: LinhaResultado[];
   priorizacao: LinhaPriorizacao[];
-  seisM: Record<DimensaoSeisM, string>;
   /** "Negociações iniciadas — 13 realizadas vs. 32 de meta." */
   problema: string;
   /** Exatamente cinco, na ordem. Vazio no fim é normal: nem todo caso chega ao 5. */
@@ -56,27 +56,6 @@ export type Rmr = {
   pedido: { desvio: string; causa: string; precisa: string; impacto: string };
   mensagem: string;
 };
-
-export type DimensaoSeisM =
-  | "metodo"
-  | "maoDeObra"
-  | "maquina"
-  | "material"
-  | "medida"
-  | "meioAmbiente";
-
-/**
- * Os 6M com a dica de cada um. As dicas são as da planilha: sem elas, "Máquina"
- * e "Material" ficam ambíguos e a pessoa escreve a mesma coisa nos dois.
- */
-export const SEIS_M: { chave: DimensaoSeisM; rotulo: string; dica: string }[] = [
-  { chave: "metodo", rotulo: "Método", dica: "Processo, rotina, cadência, priorização do tempo" },
-  { chave: "maoDeObra", rotulo: "Mão de obra", dica: "Capacidade, alocação, competência, treinamento" },
-  { chave: "maquina", rotulo: "Máquina", dica: "CRM, automação, integração, sistema, disponibilidade" },
-  { chave: "material", rotulo: "Material", dica: "Qualidade do lead, proposta, material de apoio" },
-  { chave: "medida", rotulo: "Medida", dica: "O que se mede, como se mede, o que o número esconde" },
-  { chave: "meioAmbiente", rotulo: "Meio ambiente", dica: "Mercado, momento do cliente, concorrência, sazonalidade" },
-];
 
 /** Colunas do 5W2H, na ordem da planilha — usada na tela e na exportação. */
 export const COLUNAS_PLANO: { chave: keyof LinhaPlano; rotulo: string; largura: number }[] = [
@@ -118,14 +97,6 @@ export function rmrVazio(): Rmr {
     narrativa: "",
     resultado: [],
     priorizacao: [],
-    seisM: {
-      metodo: "",
-      maoDeObra: "",
-      maquina: "",
-      material: "",
-      medida: "",
-      meioAmbiente: "",
-    },
     problema: "",
     porques: ["", "", "", "", ""],
     causaRaiz: "",
@@ -174,14 +145,6 @@ export function normalizarRmr(bruto: unknown): Rmr {
       gap: texto(i.gap),
       desvio: texto(i.desvio),
     })),
-    seisM: {
-      metodo: texto(d.seisM?.metodo),
-      maoDeObra: texto(d.seisM?.maoDeObra),
-      maquina: texto(d.seisM?.maquina),
-      material: texto(d.seisM?.material),
-      medida: texto(d.seisM?.medida),
-      meioAmbiente: texto(d.seisM?.meioAmbiente),
-    },
     problema: texto(d.problema),
     porques: porques.slice(0, 5),
     causaRaiz: texto(d.causaRaiz),
@@ -206,7 +169,6 @@ export function rmrVazioDeFato(r: Rmr): boolean {
     !r.causaRaiz.trim() &&
     !r.mensagem.trim() &&
     r.porques.every((p) => !p.trim()) &&
-    Object.values(r.seisM).every((v) => !v.trim()) &&
     Object.values(r.pedido).every((v) => !v.trim()) &&
     r.plano.every((l) => !l.oQue.trim() && !l.causa.trim())
   );
