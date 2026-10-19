@@ -73,7 +73,7 @@ export default async function Modulo3Page() {
       <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-            Playbook de Vendas — Omni Assessoria
+            Playbook de Vendas — Onvox
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Módulo 3 — Vendas / Closers</h1>
           <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>Versão 1.0 — Maio 2026</p>
@@ -455,7 +455,7 @@ export default async function Modulo3Page() {
         </HashSection>
 
         <p className="border-t pt-4 text-center text-xs" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
-          Omni Assessoria — Playbook de Vendas — Módulo 3 — Vendas / Closers — Versão 1.0
+          Onvox — Playbook de Vendas — Módulo 3 — Vendas / Closers — Versão 1.0
         </p>
 
         <SectionNav sections={MODULE_3_SECTIONS} />

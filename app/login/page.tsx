@@ -45,7 +45,7 @@ function LoginForm() {
       >
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-            Omni Assessoria
+            Onvox
           </p>
           <h1 className="mt-1 text-xl font-semibold">Entrar</h1>
           <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>

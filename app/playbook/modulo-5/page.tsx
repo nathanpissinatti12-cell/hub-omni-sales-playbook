@@ -78,7 +78,7 @@ export default async function Modulo5Page() {
       <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-            Playbook de Vendas — Omni Assessoria
+            Playbook de Vendas — Onvox
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Módulo 5 — Pós-venda / Customer Success</h1>
           <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>
