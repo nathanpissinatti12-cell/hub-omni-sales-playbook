@@ -68,7 +68,6 @@ export function sugestaoDoMes(
         pct,
         linha: {
           indicador: ind.nome,
-          gap: `${fmt(real, ind.fmt)} vs ${fmt(base, ind.fmt)} (${diferenca(real, base, ind.fmt)})`,
           desvio: `${(100 - pct).toFixed(1).replace(".", ",")}%`,
         },
       });
