@@ -140,8 +140,8 @@ export function FormularioRmr({
       ]),
       [],
       ["2. PRIORIZAÇÃO — DESVIO DO CICLO"],
-      ["Indicador com desvio", "GAP vs meta", "Desvio %"],
-      ...doc.priorizacao.map((l): Celula[] => [l.indicador, l.gap, l.desvio]),
+      ["Prioridade", "Indicador com desvio", "Desvio %"],
+      ...doc.priorizacao.map((l, i): Celula[] => [i + 1, l.indicador, l.desvio]),
       [],
       ["3. 5 PORQUÊS — CAMINHO ATÉ A CAUSA RAIZ"],
       ["PROBLEMA:", doc.problema],
@@ -353,16 +353,15 @@ export function FormularioRmr({
             Nenhum indicador abaixo da meta neste mês.
           </p>
         ) : (
-          <ol className="space-y-2">
+          <ol className="max-w-xl space-y-2.5">
             {doc.priorizacao.map((l, i) => (
-              <li key={`${l.indicador}-${i}`} className="flex flex-wrap items-baseline gap-x-3 text-sm">
-                <b>{i + 1}.</b>
+              <li key={`${l.indicador}-${i}`} className="flex items-baseline gap-x-3 text-sm">
+                <b style={{ color: "var(--text-muted)" }}>{i + 1}.</b>
                 <span className="font-semibold">{l.indicador}</span>
-                <span className="tabular-nums" style={{ color: "var(--text-muted)" }}>
-                  {l.gap}
-                </span>
-                <span className="font-bold tabular-nums" style={{ color: "#B45309" }}>
-                  desvio de {l.desvio}
+                {/* Sem repetir realizado e meta: estão na seção 1, logo acima.
+                    A seção 2 responde outra pergunta — qual foi o pior. */}
+                <span className="ml-auto font-bold tabular-nums" style={{ color: CORES.bad }}>
+                  {l.desvio} abaixo da meta
                 </span>
               </li>
             ))}

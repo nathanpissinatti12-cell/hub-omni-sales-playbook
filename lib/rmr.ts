@@ -26,9 +26,7 @@ export type LinhaResultado = {
 
 export type LinhaPriorizacao = {
   indicador: string;
-  /** "13 vs 32 (-19)" */
-  gap: string;
-  /** "59,4%" */
+  /** "59,4%" — o tamanho do buraco. Os números que o geraram estão na seção 1. */
   desvio: string;
 };
 
@@ -152,7 +150,6 @@ export function normalizarRmr(bruto: unknown): Rmr {
     })),
     priorizacao: lista<LinhaPriorizacao>(d.priorizacao, (i) => ({
       indicador: texto(i.indicador),
-      gap: texto(i.gap),
       desvio: texto(i.desvio),
     })),
     problema: texto(d.problema),
