@@ -167,6 +167,11 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   const [kpiComp, setKpiComp] = useState("ini");
   const [indEvo, setIndEvo] = useState("n3_mrr_out");
   const [historico, setHistorico] = useState<HistoricoApi[]>([]);
+  // Só a DATA de cada lançamento, sem o autor: a linha com autoria embaixo do
+  // realizado saiu a pedido (5d294b2) por poluir a célula mais lida. Aqui o uso
+  // é outro — dizer se o painel está servindo número de hoje ou da semana
+  // passada — e aparece agregado no resumo, não na célula.
+  const [edicoes, setEdicoes] = useState<Record<string, Record<string, string>>>({});
   const [carregando, setCarregando] = useState(true);
   const [aviso, setAviso] = useState("");
 
@@ -180,12 +185,18 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       const r = await fetch(`/api/dashboard/indicadores?unidade=${unidade.slug}`);
       const resp: RespostaApi = r.ok ? await r.json() : { valores: [], fechamentos: [], historico: [] };
       const m: Mapa = {};
+      const ed: Record<string, Record<string, string>> = {};
       for (const row of resp.valores ?? []) {
         const k = chaveMapa(row.mes, row.tipo);
         m[k] = m[k] || {};
         m[k][row.chave] = row.valor ?? "";
+        if (row.editadoEm) {
+          ed[k] = ed[k] || {};
+          ed[k][row.chave] = row.editadoEm;
+        }
       }
       setMapa(m);
+      setEdicoes(ed);
       setFechados(Object.fromEntries((resp.fechamentos ?? []).map((f) => [f.mes, f])));
       setHistorico(resp.historico ?? []);
       return m;
@@ -267,6 +278,13 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           }
           if (!r.ok) throw new Error();
           setEstados((prev) => ({ ...prev, [id]: "salvo" }));
+          // Sem isto o resumo continuaria dizendo "dado de 3 dias atrás" logo
+          // depois de alguém lançar, até a próxima carga.
+          const k = chaveMapa(p.mes, p.tipo);
+          setEdicoes((prev) => ({
+            ...prev,
+            [k]: { ...(prev[k] || {}), [p.chave]: new Date().toISOString() },
+          }));
           setAviso(`Salvo às ${new Date().toLocaleTimeString("pt-BR")}`);
         })
         .catch(() => {
@@ -367,6 +385,24 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   // Null = o ano ainda não tem cronograma, então não há ciclo de ARR para medir.
   const fAno = fatorAno(dtFim);
   const pctAno = fAno === null ? null : (fAno * 100).toFixed(0);
+
+  /**
+   * Há quantos dias úteis entrou o lançamento mais recente do mês. É a medida de
+   * frescor que importa: o painel pode parecer saudável servindo número parado,
+   * e as colunas de ritmo e projeção assumem que o realizado é de hoje.
+   *
+   * Null em mês que não é o corrente — ali a pergunta não faz sentido.
+   */
+  const frescor = useMemo(() => {
+    if (mesAtivo !== iso(new Date()).slice(0, 7)) return null;
+    const datas = Object.values(edicoes[chaveMapa(mesAtivo, "real")] || {});
+    if (datas.length === 0) return null;
+    const maisRecente = datas.reduce((x, y) => (x > y ? x : y));
+    const dia = maisRecente.slice(0, 10);
+    // diasUteis conta as duas pontas; aqui o que vale é o intervalo.
+    const atraso = Math.max(diasUteis(dia, iso(new Date())) - 1, 0);
+    return { dia, atraso };
+  }, [mesAtivo, edicoes]);
 
   // ---- resumo do topo ------------------------------------------------------
   /**
@@ -720,6 +756,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         mes={rotuloMes(mesAtivo)}
         diasRestantes={duRestantes}
         fechado={mesTravado}
+        frescor={frescor}
       />
 
       {/* ---------------- período ---------------- */}
@@ -1163,11 +1200,14 @@ function Resumo({
   mes,
   diasRestantes,
   fechado,
+  frescor,
 }: {
   resumo: { cartoes: CartaoResumo[]; foraDaMeta: number; comMeta: number; semLancamento: number };
   mes: string;
   diasRestantes: number;
   fechado: boolean;
+  /** Último lançamento do mês corrente e há quantos dias úteis entrou. */
+  frescor: { dia: string; atraso: number } | null;
 }) {
   if (resumo.cartoes.length === 0 && resumo.comMeta === 0) return null;
 
@@ -1185,6 +1225,24 @@ function Resumo({
               ? `${diasRestantes} dia${diasRestantes > 1 ? "s" : ""} útil${diasRestantes > 1 ? "eis" : ""} restante${diasRestantes > 1 ? "s" : ""}`
               : "sem dia útil restante"}
         </span>
+        {/* Frescor: a partir de 5 dias úteis sem lançamento, o aviso deixa de
+            ser informação de rodapé e vira o dado mais importante da faixa —
+            porque "falta por dia" e "projeção no ritmo" passam a estar
+            calculando em cima de número velho. */}
+        {frescor !== null && !fechado && (
+          <span
+            className={`text-sm${frescor.atraso >= 5 ? " font-bold" : ""}`}
+            style={{ color: frescor.atraso >= 5 ? CORES.warn : "var(--text-muted)" }}
+            title={`Lançamento mais recente deste mês: ${frescor.dia.split("-").reverse().join("/")}`}
+          >
+            ·{" "}
+            {frescor.atraso === 0
+              ? "lançado hoje"
+              : frescor.atraso === 1
+                ? "sem lançar desde ontem"
+                : `sem lançar há ${frescor.atraso} dias úteis`}
+          </span>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
