@@ -78,7 +78,7 @@ export default async function RmrPage({ params }: { params: { unidade: string } 
         <Voltar unidade={unidade.slug} />
         <h1 className="mt-2 text-2xl font-semibold">RMR — {unidade.nome}</h1>
         <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-          Diagnóstico e plano de ação do mês · resultado → 6M → 5 porquês → causa raiz → 5W2H
+          Diagnóstico e plano de ação do mês · resultado → 5 porquês → causa raiz → 5W2H
         </p>
       </div>
 

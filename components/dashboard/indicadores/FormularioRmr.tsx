@@ -6,7 +6,6 @@ import { rotuloMes } from "@/lib/indicadores";
 import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
   COLUNAS_PLANO,
-  SEIS_M,
   STATUS_PLANO,
   linhaPlanoVazia,
   rmrVazio,
@@ -136,16 +135,12 @@ export function FormularioRmr({
       ["Indicador com desvio", "GAP vs meta", "Desvio %"],
       ...doc.priorizacao.map((l): Celula[] => [l.indicador, l.gap, l.desvio]),
       [],
-      ["3. DIAGNÓSTICO — CAUSAS POSSÍVEIS (6M)"],
-      ["Dimensão", "Análise registrada"],
-      ...SEIS_M.map((m): Celula[] => [m.rotulo, doc.seisM[m.chave]]),
-      [],
-      ["4. 5 PORQUÊS — CAMINHO ATÉ A CAUSA RAIZ"],
+      ["3. 5 PORQUÊS — CAMINHO ATÉ A CAUSA RAIZ"],
       ["PROBLEMA:", doc.problema],
       ["Etapa", "Análise"],
       ...doc.porques.map((p, i): Celula[] => [`Por quê? ${i + 1}`, p]),
       [],
-      ["5. CAUSA RAIZ E GOVERNABILIDADE"],
+      ["4. CAUSA RAIZ E GOVERNABILIDADE"],
       ["CAUSA RAIZ:", doc.causaRaiz],
       [
         "É acionável no meu nível?",
@@ -153,15 +148,15 @@ export function FormularioRmr({
         doc.precisaSuporte ? "PRECISO DE SUPORTE ( X )" : "PRECISO DE SUPORTE (   )",
       ],
       [],
-      ["6. PLANO DE AÇÃO — 5W2H"],
+      ["5. PLANO DE AÇÃO — 5W2H"],
       COLUNAS_PLANO.map((c) => c.rotulo),
       ...doc.plano.map((l): Celula[] => COLUNAS_PLANO.map((c) => l[c.chave])),
       [],
-      ["7. PEDIDO DE SUPORTE — DECISÃO NECESSÁRIA"],
+      ["6. PEDIDO DE SUPORTE — DECISÃO NECESSÁRIA"],
       ["O desvio, com número", "A causa raiz", "O que eu preciso", "O impacto de não resolver"],
       [doc.pedido.desvio, doc.pedido.causa, doc.pedido.precisa, doc.pedido.impacto],
       [],
-      ["8. FECHAMENTO — MENSAGEM PARA A COORDENAÇÃO"],
+      ["7. FECHAMENTO — MENSAGEM PARA A COORDENAÇÃO"],
       [doc.mensagem],
     ];
 
@@ -350,30 +345,8 @@ export function FormularioRmr({
         )}
       </Secao>
 
-      {/* ---------------- 3. 6M ---------------- */}
-      <Secao titulo="Diagnóstico — causas possíveis (6M)" numero="3">
-        <div className="grid gap-3 md:grid-cols-2">
-          {SEIS_M.map((m) => (
-            <div key={m.chave}>
-              <label className="block text-xs font-bold" htmlFor={`m-${m.chave}`}>
-                {m.rotulo}
-              </label>
-              <span className="mb-1 block text-[11px]" style={{ color: "var(--text-muted)" }}>
-                {m.dica}
-              </span>
-              <AreaTexto
-                id={`m-${m.chave}`}
-                valor={doc.seisM[m.chave]}
-                onChange={(v) => alterar("seisM", { ...doc.seisM, [m.chave]: v })}
-                linhas={3}
-              />
-            </div>
-          ))}
-        </div>
-      </Secao>
-
-      {/* ---------------- 4. 5 porquês ---------------- */}
-      <Secao titulo="5 Porquês — caminho até a causa raiz" numero="4">
+      {/* ---------------- 3. 5 porquês ---------------- */}
+      <Secao titulo="5 Porquês — caminho até a causa raiz" numero="3">
         <label className="block text-xs font-bold" htmlFor="problema">
           Problema (indicador + realizado + meta)
         </label>
@@ -404,8 +377,8 @@ export function FormularioRmr({
         </div>
       </Secao>
 
-      {/* ---------------- 5. causa raiz ---------------- */}
-      <Secao titulo="Causa raiz e governabilidade" numero="5">
+      {/* ---------------- 4. causa raiz ---------------- */}
+      <Secao titulo="Causa raiz e governabilidade" numero="4">
         <AreaTexto
           valor={doc.causaRaiz}
           onChange={(v) => alterar("causaRaiz", v)}
@@ -432,10 +405,10 @@ export function FormularioRmr({
         </div>
       </Secao>
 
-      {/* ---------------- 6. plano 5W2H ---------------- */}
+      {/* ---------------- 5. plano 5W2H ---------------- */}
       <Secao
         titulo="Plano de ação — 5W2H"
-        numero="6"
+        numero="5"
         acao={
           <button
             type="button"
@@ -502,8 +475,8 @@ export function FormularioRmr({
         </div>
       </Secao>
 
-      {/* ---------------- 7. pedido de suporte ---------------- */}
-      <Secao titulo="Pedido de suporte — decisão necessária" numero="7">
+      {/* ---------------- 6. pedido de suporte ---------------- */}
+      <Secao titulo="Pedido de suporte — decisão necessária" numero="6">
         <div className="grid gap-3 md:grid-cols-2">
           {(
             [
@@ -528,8 +501,8 @@ export function FormularioRmr({
         </div>
       </Secao>
 
-      {/* ---------------- 8. fechamento ---------------- */}
-      <Secao titulo="Fechamento — mensagem para a coordenação" numero="8">
+      {/* ---------------- 7. fechamento ---------------- */}
+      <Secao titulo="Fechamento — mensagem para a coordenação" numero="7">
         <AreaTexto
           valor={doc.mensagem}
           onChange={(v) => alterar("mensagem", v)}
