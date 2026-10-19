@@ -27,7 +27,7 @@ export default async function Modulo1Page() {
       <div className="playbook-content min-w-0 flex-1 space-y-14">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-            Playbook de Vendas — Omni Assessoria
+            Playbook de Vendas — Onvox
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Módulo 1 — Fundação Estratégica</h1>
           <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
@@ -275,7 +275,7 @@ Quando o prospect citar um concorrente, pergunte: "O que você não gostou nele?
         <SectionNav sections={MODULE_1_SECTIONS} />
 
         <p className="pt-1 text-center text-xs" style={{ color: "var(--text-muted)" }}>
-          Omni Assessoria — Playbook de Vendas — Módulo 1 — Versão 1.0
+          Onvox — Playbook de Vendas — Módulo 1 — Versão 1.0
         </p>
       </div>
       </PlaybookModuleProvider>
