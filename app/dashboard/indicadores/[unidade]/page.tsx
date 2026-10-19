@@ -42,18 +42,35 @@ export default async function PainelIndicadoresUnidadePage({ params }: { params:
 
   return (
     <div className="tema-claro space-y-6">
-      <div>
-        {permissao.ehHead && (
-          <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
-            ← Voltar ao dashboard
+      {/* O RMR fica no cabeçalho, não entre as seções do painel: é outra tarefa,
+          feita uma vez por mês, e não um bloco que se consulta junto da tabela.
+          Nome "RMR", não "fechamento" — o painel já tem um botão "Fechar <mês>"
+          que trava os lançamentos, e dois "fechamentos" lado a lado seriam a
+          mesma palavra para coisas opostas. */}
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          {permissao.ehHead && (
+            <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text-muted)" }}>
+              ← Voltar ao dashboard
+            </Link>
+          )}
+          <h1 className="mt-2 text-2xl font-semibold">Painel de Indicadores — {unidade.nome}</h1>
+          <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
+            {permissao.ehHead
+              ? "N3 Head · N4 Supervisão · N5 Operação · Meta proporcional por dia útil"
+              : `N4 Supervisão · N5 de ${pessoa?.nome ?? "você"} · Meta proporcional por dia útil`}
+          </p>
+        </div>
+
+        {unidade.temDefinicao && unidade.pessoas.length > 0 && (
+          <Link
+            href={`/dashboard/indicadores/${unidade.slug}/rmr`}
+            className="rounded-lg px-4 py-2 text-sm font-semibold text-white"
+            style={{ background: "var(--accent)" }}
+          >
+            RMR do mês
           </Link>
         )}
-        <h1 className="mt-2 text-2xl font-semibold">Painel de Indicadores — {unidade.nome}</h1>
-        <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
-          {permissao.ehHead
-            ? "N3 Head · N4 Supervisão · N5 Operação · Meta proporcional por dia útil"
-            : `N4 Supervisão · N5 de ${pessoa?.nome ?? "você"} · Meta proporcional por dia útil`}
-        </p>
       </div>
 
       {!unidade.temDefinicao ? (
