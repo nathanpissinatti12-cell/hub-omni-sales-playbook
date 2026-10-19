@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Pessoa } from "@/lib/indicadores";
+import { CORES } from "@/lib/indicadoresCalc";
 import { rotuloMes } from "@/lib/indicadores";
 import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
@@ -128,8 +129,15 @@ export function FormularioRmr({
       ["A narrativa do ciclo:", doc.narrativa],
       [],
       ["1. RESULTADO — O QUE OS INDICADORES MOSTRAM"],
-      ["Indicador", "Realizado", "Meta / referência", "Desvio / leitura"],
-      ...doc.resultado.map((l): Celula[] => [l.indicador, l.realizado, l.meta, l.leitura]),
+      ["Indicador", "Realizado", "Meta / referência", "Diferença", "Atingimento", "Situação"],
+      ...doc.resultado.map((l): Celula[] => [
+        l.indicador,
+        l.realizado,
+        l.meta,
+        l.diferenca,
+        l.pct,
+        l.atingida === null ? (l.realizado ? "sem meta" : "sem lançamento") : l.atingida ? "realizada" : "não realizada",
+      ]),
       [],
       ["2. PRIORIZAÇÃO — DESVIO DO CICLO"],
       ["Indicador com desvio", "GAP vs meta", "Desvio %"],
@@ -271,44 +279,61 @@ export function FormularioRmr({
       >
         <p className="mb-3 text-xs" style={{ color: "var(--text-muted)" }}>
           Vem do painel, comparando com a meta <b>cheia</b> do mês — no fechamento a pergunta não é
-          se está no ritmo, é se entregou o combinado. Dá para editar o texto da leitura.
+          se está no ritmo, é se entregou o combinado. 
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="text-left text-[10px] font-bold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
                 <th className="pb-2 pr-3">Indicador</th>
-                <th className="pb-2 pr-3">Realizado</th>
-                <th className="pb-2 pr-3">Meta</th>
-                <th className="pb-2">Desvio / leitura</th>
+                <th className="pb-2 pr-3 text-right">Realizado</th>
+                <th className="pb-2 pr-3 text-right">Meta</th>
+                <th className="pb-2 pr-3 text-right">Diferença</th>
+                <th className="pb-2 text-right">Atingimento</th>
               </tr>
             </thead>
             <tbody>
               {doc.resultado.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="py-3 text-xs" style={{ color: "var(--text-muted)" }}>
+                  <td colSpan={5} className="py-3 text-xs" style={{ color: "var(--text-muted)" }}>
                     Nenhum indicador lançado neste mês para esta pessoa.
                   </td>
                 </tr>
               )}
               {doc.resultado.map((l, i) => (
                 <tr key={`${l.indicador}-${i}`} style={{ borderTop: "1px solid var(--border)" }}>
-                  <td className="py-2 pr-3">{l.indicador}</td>
-                  <td className="py-2 pr-3 tabular-nums">{l.realizado || "—"}</td>
-                  <td className="py-2 pr-3 tabular-nums" style={{ color: "var(--text-muted)" }}>
+                  <td className="py-2.5 pr-3">{l.indicador}</td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums">{l.realizado || "—"}</td>
+                  <td className="py-2.5 pr-3 text-right tabular-nums" style={{ color: "var(--text-muted)" }}>
                     {l.meta}
                   </td>
-                  <td className="py-2">
-                    <input
-                      value={l.leitura}
-                      onChange={(e) => {
-                        const nova = [...doc.resultado];
-                        nova[i] = { ...nova[i], leitura: e.target.value };
-                        alterar("resultado", nova);
-                      }}
-                      className={inputCls}
-                      style={inputStyle}
-                    />
+                  <td className="py-2.5 pr-3 text-right tabular-nums" style={{ color: "var(--text-muted)" }}>
+                    {l.diferenca || "—"}
+                  </td>
+                  {/* Número e veredito juntos na mesma célula, mas em duas
+                      linhas: a cor sozinha não serve a quem imprime em preto e
+                      branco nem a quem não distingue vermelho de verde. */}
+                  <td className="py-2.5 text-right">
+                    {l.atingida === null ? (
+                      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                        {l.realizado ? "sem meta" : "sem lançamento"}
+                      </span>
+                    ) : (
+                      <>
+                        <b
+                          className="block tabular-nums"
+                          style={{ color: l.atingida ? CORES.ok : CORES.bad }}
+                        >
+                          {l.pct}
+                        </b>
+                        <span
+                          className="block text-[11px]"
+                          style={{ color: l.atingida ? CORES.ok : CORES.bad }}
+                        >
+                          {l.atingida ? "realizada" : "não realizada"}
+                        </span>
+                      </>
+                    )}
                   </td>
                 </tr>
               ))}
