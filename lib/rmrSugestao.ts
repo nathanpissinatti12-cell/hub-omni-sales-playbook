@@ -51,16 +51,16 @@ export function sugestaoDoMes(
     // pessoa completar ou apagar.
     const pct = status(real, base, ind.dir).pct;
 
+    const comparavel = pct !== null && real !== null && base !== null;
     resultado.push({
       indicador: ind.nome,
       realizado: real === null ? "" : fmt(real, ind.fmt),
       meta: base === null ? "sem meta" : fmt(base, ind.fmt),
-      leitura:
-        pct === null || real === null || base === null
-          ? real === null
-            ? "sem lançamento no mês"
-            : "sem meta definida para comparar"
-          : `${pct.toFixed(1).replace(".", ",")}% da meta; ${diferenca(real, base, ind.fmt)}`,
+      diferenca: comparavel ? diferenca(real, base, ind.fmt) : "",
+      pct: comparavel ? `${pct.toFixed(1).replace(".", ",")}%` : "",
+      // 100% exato conta como realizada. Abaixo disso, não — inclusive 99,9%:
+      // "quase" é conversa da reunião, não veredito da tabela.
+      atingida: comparavel ? (pct as number) >= 100 : null,
     });
 
     if (pct !== null && real !== null && base !== null && pct < 100) {

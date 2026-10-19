@@ -12,8 +12,16 @@ export type LinhaResultado = {
   indicador: string;
   realizado: string;
   meta: string;
-  /** "100,9% da meta; +R$ 14.325" — leitura, não só o número. */
-  leitura: string;
+  /** Quanto faltou ou sobrou, na unidade do indicador: "−22", "+R$ 14.325". */
+  diferenca: string;
+  /** Atingimento já formatado: "87,4%". Vazio quando não há o que comparar. */
+  pct: string;
+  /**
+   * O veredito, separado do número de propósito: a cor sozinha não diz nada a
+   * quem imprime em preto e branco ou não distingue vermelho de verde. null
+   * quando falta lançamento ou meta — aí não é "não realizada", é sem resposta.
+   */
+  atingida: boolean | null;
 };
 
 export type LinhaPriorizacao = {
@@ -138,7 +146,9 @@ export function normalizarRmr(bruto: unknown): Rmr {
       indicador: texto(i.indicador),
       realizado: texto(i.realizado),
       meta: texto(i.meta),
-      leitura: texto(i.leitura),
+      diferenca: texto(i.diferenca),
+      pct: texto(i.pct),
+      atingida: i.atingida === true ? true : i.atingida === false ? false : null,
     })),
     priorizacao: lista<LinhaPriorizacao>(d.priorizacao, (i) => ({
       indicador: texto(i.indicador),
