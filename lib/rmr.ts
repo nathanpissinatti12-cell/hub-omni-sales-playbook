@@ -24,10 +24,12 @@ export type LinhaResultado = {
   atingida: boolean | null;
 };
 
+/**
+ * Só o nome. O tamanho do desvio está na seção 1, na coluna de atingimento — a
+ * seção 2 responde apenas QUAIS foram os três piores, e em que ordem.
+ */
 export type LinhaPriorizacao = {
   indicador: string;
-  /** "59,4%" — o tamanho do buraco. Os números que o geraram estão na seção 1. */
-  desvio: string;
 };
 
 /** Uma frente do plano de ação. São os 5W2H mais o que a planilha acrescenta. */
@@ -150,7 +152,6 @@ export function normalizarRmr(bruto: unknown): Rmr {
     })),
     priorizacao: lista<LinhaPriorizacao>(d.priorizacao, (i) => ({
       indicador: texto(i.indicador),
-      desvio: texto(i.desvio),
     })),
     problema: texto(d.problema),
     porques: porques.slice(0, 5),

@@ -140,8 +140,8 @@ export function FormularioRmr({
       ]),
       [],
       ["2. PRIORIZAÇÃO — DESVIO DO CICLO"],
-      ["Prioridade", "Indicador com desvio", "Desvio %"],
-      ...doc.priorizacao.map((l, i): Celula[] => [i + 1, l.indicador, l.desvio]),
+      ["Prioridade", "Indicador com desvio"],
+      ...doc.priorizacao.map((l, i): Celula[] => [i + 1, l.indicador]),
       [],
       ["3. 5 PORQUÊS — CAMINHO ATÉ A CAUSA RAIZ"],
       ["PROBLEMA:", doc.problema],
@@ -353,16 +353,13 @@ export function FormularioRmr({
             Nenhum indicador abaixo da meta neste mês.
           </p>
         ) : (
+          // Só o nome: o tamanho do desvio está na seção 1, logo acima. Aqui a
+          // pergunta é outra — quais foram os três piores, e em que ordem.
           <ol className="max-w-xl space-y-2.5">
             {doc.priorizacao.map((l, i) => (
               <li key={`${l.indicador}-${i}`} className="flex items-baseline gap-x-3 text-sm">
                 <b style={{ color: "var(--text-muted)" }}>{i + 1}.</b>
                 <span className="font-semibold">{l.indicador}</span>
-                {/* Sem repetir realizado e meta: estão na seção 1, logo acima.
-                    A seção 2 responde outra pergunta — qual foi o pior. */}
-                <span className="ml-auto font-bold tabular-nums" style={{ color: CORES.bad }}>
-                  {l.desvio} abaixo da meta
-                </span>
               </li>
             ))}
           </ol>

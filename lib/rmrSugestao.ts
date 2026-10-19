@@ -66,10 +66,7 @@ export function sugestaoDoMes(
     if (pct !== null && real !== null && base !== null && pct < 100) {
       candidatos.push({
         pct,
-        linha: {
-          indicador: ind.nome,
-          desvio: `${(100 - pct).toFixed(1).replace(".", ",")}%`,
-        },
+        linha: { indicador: ind.nome },
       });
     }
   }
