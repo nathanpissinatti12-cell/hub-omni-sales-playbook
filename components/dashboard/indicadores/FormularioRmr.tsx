@@ -19,7 +19,7 @@ import {
   type Rmr,
 } from "@/lib/rmr";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
-import { GraficoLinhaMensal, RankingMensal, type MesLancado, type PontoEvolucao } from "./Graficos";
+import { GraficoColunasMensal, RankingMensal, type MesLancado } from "./Graficos";
 
 /** pendente = há texto não gravado; salvo = o servidor confirmou. */
 type EstadoSalvamento = "limpo" | "pendente" | "salvando" | "salvo" | "erro";
@@ -94,22 +94,20 @@ export function FormularioRmr({
   const [aberto, setAberto] = useState<string | null>(null);
 
   /**
-   * A série do ano para o gráfico de linha, no mesmo formato do painel: linha do
-   * realizado, tracejado da meta, ponto colorido pelo atingimento.
-   *
-   * Só o ciclo do relatório: `meses` traz os dois anos, e 24 pontos espremeriam
-   * dois ciclos no mesmo eixo.
+   * Um ponto por mês do ciclo do relatório: o realizado e o atingimento que dá a
+   * cor da coluna. A meta não vem por mês porque na tela ela é uma régua só — a
+   * do mês do relatório, congelada.
    */
-  const serieDoAno = useCallback(
-    (ind: Indicador): PontoEvolucao[] =>
+  const colunasDoAno = useCallback(
+    (ind: Indicador) =>
       meses
         .filter((m) => m.slice(0, 4) === mes.slice(0, 4))
         .map((m) => {
           const chave = `${pessoaChave}_${ind.id}`;
           const real = num((reaisPorMes[m] ?? {})[chave]);
           const override = (metasPorMes[m] ?? {})[chave];
-          const meta = override === undefined || override === null ? ind.meta : override;
-          return { rotulo: rotuloMes(m), real, meta, pct: status(real, meta, ind.dir).pct };
+          const metaDoMesCorrente = override === undefined || override === null ? ind.meta : override;
+          return { rotulo: rotuloMes(m), real, pct: status(real, metaDoMesCorrente, ind.dir).pct };
         }),
     [meses, mes, pessoaChave, reaisPorMes, metasPorMes]
   );
@@ -586,7 +584,11 @@ export function FormularioRmr({
                         const ind = pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0];
                         return (
                           <>
-                            <GraficoLinhaMensal serie={serieDoAno(ind)} />
+                            <GraficoColunasMensal
+                              serie={colunasDoAno(ind)}
+                              meta={metaDoMes(ind)}
+                              formato={ind.fmt}
+                            />
                             <span
                               className="mb-1 mt-4 block text-[10px] font-bold uppercase tracking-wide"
                               style={{ color: "var(--text-muted)" }}
