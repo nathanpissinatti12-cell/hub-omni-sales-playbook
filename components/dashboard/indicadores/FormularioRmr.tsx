@@ -2,8 +2,8 @@
 
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { Pessoa } from "@/lib/indicadores";
-import { CORES } from "@/lib/indicadoresCalc";
+import type { Indicador, Pessoa } from "@/lib/indicadores";
+import { CORES, num, status } from "@/lib/indicadoresCalc";
 import { rotuloMes } from "@/lib/indicadores";
 import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
@@ -18,8 +18,8 @@ import {
   type LinhaPlano,
   type Rmr,
 } from "@/lib/rmr";
-import { serieDoIndicador, type PontoSerie } from "@/lib/rmrSerie";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
+import { GraficoLinhaMensal, type PontoEvolucao } from "./Graficos";
 
 /** pendente = há texto não gravado; salvo = o servidor confirmou. */
 type EstadoSalvamento = "limpo" | "pendente" | "salvando" | "salvo" | "erro";
@@ -92,6 +92,33 @@ export function FormularioRmr({
   /** Indicador com a série aberta. Um de cada vez: abrir todos devolveria o
       problema que a tabela resolve, que é caber na tela. */
   const [aberto, setAberto] = useState<string | null>(null);
+
+  /**
+   * A série do ano para o gráfico, no mesmo formato que o painel usa: linha do
+   * realizado, tracejado da meta, ponto colorido pelo atingimento.
+   *
+   * O ano inteiro, não só até o mês do relatório — é assim no painel, e ver o
+   * tracejado da meta subindo nos meses que ainda vêm é parte da leitura.
+   *
+   * Meta: o que foi digitado naquele mês, senão a meta padrão do indicador. O
+   * cronograma de MRR não entra aqui porque é do N3, e o RMR é sempre de pessoa.
+   */
+  const serieDoAno = useCallback(
+    (ind: Indicador): PontoEvolucao[] =>
+      // Só os meses do ciclo do relatório. `meses` traz os dois ciclos, porque o
+      // seletor lista todos — num gráfico só, 24 pontos espremeriam dois anos
+      // no mesmo eixo e a comparação com a meta do ano perderia o sentido.
+      meses
+        .filter((m) => m.slice(0, 4) === mes.slice(0, 4))
+        .map((m) => {
+          const chave = `${pessoaChave}_${ind.id}`;
+          const real = num((reaisPorMes[m] ?? {})[chave]);
+          const override = (metasPorMes[m] ?? {})[chave];
+          const meta = override === undefined || override === null ? ind.meta : override;
+          return { rotulo: rotuloMes(m), real, meta, pct: status(real, meta, ind.dir).pct };
+        }),
+    [meses, mes, pessoaChave, reaisPorMes, metasPorMes]
+  );
   // O documento de impressão é levado para fora desta árvore, direto no <body>:
   // é o que permite esconder todos os irmãos dele na impressão sem que o
   // formulário continue ocupando páginas. Só depois do primeiro render, porque
@@ -518,13 +545,15 @@ export function FormularioRmr({
                 {aberto === l.indicador && (
                   <tr>
                     <td colSpan={5} className="px-2 pb-4 pt-1">
-                      <SerieDoIndicador
-                        pontos={serieDoIndicador(
-                          pessoa,
-                          pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0],
-                          meses,
-                          mes,
-                          reaisPorMes
+                      <span
+                        className="mb-1 block text-[10px] font-bold uppercase tracking-wide"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        {l.indicador} — mês a mês
+                      </span>
+                      <GraficoLinhaMensal
+                        serie={serieDoAno(
+                          pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0]
                         )}
                       />
                     </td>
@@ -965,66 +994,6 @@ function Paragrafo({ rotulo, texto }: { rotulo?: string; texto: string }) {
       {rotulo && <b>{rotulo}: </b>}
       {texto}
     </p>
-  );
-}
-
-/**
- * A série do realizado, mês a mês. Abre dentro da própria linha, para o número
- * do mês fechado ficar à vista enquanto se lê a tendência.
- */
-function SerieDoIndicador({ pontos }: { pontos: PontoSerie[] }) {
-  const comDado = pontos.filter((p) => p.realizado !== "");
-  if (comDado.length === 0) {
-    return (
-      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-        Sem lançamento deste indicador em nenhum mês do ciclo.
-      </p>
-    );
-  }
-
-  return (
-    <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)" }}>
-      <table className="w-full max-w-md text-xs">
-        <thead>
-          <tr className="text-left font-bold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-            <th className="pb-1.5 pr-3">Mês</th>
-            <th className="pb-1.5 pr-3 text-right">Realizado</th>
-            <th className="pb-1.5 text-right">Contra o mês anterior</th>
-          </tr>
-        </thead>
-        <tbody className="tabular-nums">
-          {pontos.map((p) => (
-            <tr key={p.mes} style={{ borderTop: "1px solid var(--border)" }}>
-              <td className="py-1.5 pr-3">{rotuloMes(p.mes)}</td>
-              <td className="py-1.5 pr-3 text-right font-semibold">{p.realizado || "—"}</td>
-              {/* A seta segue o NÚMERO e a palavra dá o veredito. Juntar os
-                  dois numa seta só produzia "↓ +8 p.p." no No-show: exato e
-                  ilegível. A palavra também faz a leitura sobreviver ao preto e
-                  branco e a quem não distingue verde de vermelho. */}
-              <td
-                className="py-1.5 text-right"
-                style={{ color: p.melhorou === null ? "var(--text-muted)" : p.melhorou ? CORES.ok : CORES.bad }}
-              >
-                {p.variacao ? (
-                  <>
-                    {p.subiu === null ? "=" : p.subiu ? "↑" : "↓"} {p.variacao}
-                    {p.melhorou !== null && (
-                      <span className="ml-1.5">{p.melhorou ? "melhor" : "pior"}</span>
-                    )}
-                  </>
-                ) : (
-                  "—"
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      <p className="mt-2 text-[11px]" style={{ color: "var(--text-muted)" }}>
-        Compara realizado com realizado, sem a meta no meio — a meta muda mês a mês no cronograma, e
-        entraria na conta como se fosse desempenho.
-      </p>
-    </div>
   );
 }
 
