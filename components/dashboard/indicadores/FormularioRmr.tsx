@@ -3,7 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Indicador, Pessoa } from "@/lib/indicadores";
-import { CORES, num } from "@/lib/indicadoresCalc";
+import { CORES, num, status } from "@/lib/indicadoresCalc";
 import { rotuloMes } from "@/lib/indicadores";
 import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
@@ -19,7 +19,7 @@ import {
   type Rmr,
 } from "@/lib/rmr";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
-import { RankingMensal, type MesLancado } from "./Graficos";
+import { GraficoLinhaMensal, RankingMensal, type MesLancado, type PontoEvolucao } from "./Graficos";
 
 /** pendente = há texto não gravado; salvo = o servidor confirmou. */
 type EstadoSalvamento = "limpo" | "pendente" | "salvando" | "salvo" | "erro";
@@ -92,6 +92,27 @@ export function FormularioRmr({
   /** Indicador com a série aberta. Um de cada vez: abrir todos devolveria o
       problema que a tabela resolve, que é caber na tela. */
   const [aberto, setAberto] = useState<string | null>(null);
+
+  /**
+   * A série do ano para o gráfico de linha, no mesmo formato do painel: linha do
+   * realizado, tracejado da meta, ponto colorido pelo atingimento.
+   *
+   * Só o ciclo do relatório: `meses` traz os dois anos, e 24 pontos espremeriam
+   * dois ciclos no mesmo eixo.
+   */
+  const serieDoAno = useCallback(
+    (ind: Indicador): PontoEvolucao[] =>
+      meses
+        .filter((m) => m.slice(0, 4) === mes.slice(0, 4))
+        .map((m) => {
+          const chave = `${pessoaChave}_${ind.id}`;
+          const real = num((reaisPorMes[m] ?? {})[chave]);
+          const override = (metasPorMes[m] ?? {})[chave];
+          const meta = override === undefined || override === null ? ind.meta : override;
+          return { rotulo: rotuloMes(m), real, meta, pct: status(real, meta, ind.dir).pct };
+        }),
+    [meses, mes, pessoaChave, reaisPorMes, metasPorMes]
+  );
 
   /**
    * Todos os meses COM lançamento, de todos os ciclos. "Últimos anos" é o
@@ -556,19 +577,31 @@ export function FormularioRmr({
                         className="mb-1 block text-[10px] font-bold uppercase tracking-wide"
                         style={{ color: "var(--text-muted)" }}
                       >
-                        {l.indicador} — todos os meses, do maior para o menor
+                        {l.indicador} — mês a mês
                       </span>
+                      {/* Os dois juntos porque respondem perguntas diferentes: a
+                          linha mostra o caminho no tempo, o ranking mostra onde
+                          cada mês ficou em relação à meta da época. */}
                       {(() => {
                         const ind = pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0];
                         return (
-                          <RankingMensal
-                            pontos={mesesLancados(ind)}
-                            meta={metaDoMes(ind)}
-                            formato={ind.fmt}
-                            dir={ind.dir}
-                            rotuloMeta={`meta de ${rotuloMes(mes)}`}
-                            destaque={rotuloMes(mes)}
-                          />
+                          <>
+                            <GraficoLinhaMensal serie={serieDoAno(ind)} />
+                            <span
+                              className="mb-1 mt-4 block text-[10px] font-bold uppercase tracking-wide"
+                              style={{ color: "var(--text-muted)" }}
+                            >
+                              Todos os meses, do maior para o menor
+                            </span>
+                            <RankingMensal
+                              pontos={mesesLancados(ind)}
+                              meta={metaDoMes(ind)}
+                              formato={ind.fmt}
+                              dir={ind.dir}
+                              rotuloMeta={`meta de ${rotuloMes(mes)}`}
+                              destaque={rotuloMes(mes)}
+                            />
+                          </>
                         );
                       })()}
                     </td>
