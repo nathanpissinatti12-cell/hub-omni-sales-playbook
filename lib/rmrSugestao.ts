@@ -29,6 +29,14 @@ function diferenca(real: number, meta: number, formato: Indicador["fmt"]): strin
 export type SugestaoRmr = {
   resultado: LinhaResultado[];
   priorizacao: LinhaPriorizacao[];
+  /**
+   * O problema já enunciado a partir do desvio nº 1: "Lead SQL — 9 realizado
+   * vs. 20 de meta". Existe para amarrar a corrente do método — sem isto, nada
+   * impede escrever os cinco porquês sobre um problema diferente do que foi
+   * priorizado, e aí o diagnóstico discute uma coisa enquanto a tabela aponta
+   * outra. Vazio quando nenhum indicador ficou abaixo da meta.
+   */
+  problema: string;
 };
 
 export function sugestaoDoMes(
@@ -39,7 +47,7 @@ export function sugestaoDoMes(
 ): SugestaoRmr {
   const { ini, fim } = limitesDoMes(mes);
   const resultado: LinhaResultado[] = [];
-  const candidatos: { linha: LinhaPriorizacao; pct: number }[] = [];
+  const candidatos: { linha: LinhaPriorizacao; pct: number; enunciado: string }[] = [];
 
   for (const ind of pessoa.kpis) {
     const chave = `${pessoa.chave}_${ind.id}`;
@@ -67,16 +75,15 @@ export function sugestaoDoMes(
       candidatos.push({
         pct,
         linha: { indicador: ind.nome },
+        enunciado: `${ind.nome} — ${fmt(real, ind.fmt)} realizado vs. ${fmt(base, ind.fmt)} de meta.`,
       });
     }
   }
 
   // Top 3 pelo maior desvio. É a seção 2 da planilha: o ciclo discute três
   // frentes, não doze — e a ordem define por onde a reunião começa.
-  const priorizacao = candidatos
-    .sort((a, b) => a.pct - b.pct)
-    .slice(0, 3)
-    .map((c) => c.linha);
+  const ordenados = candidatos.sort((a, b) => a.pct - b.pct);
+  const priorizacao = ordenados.slice(0, 3).map((c) => c.linha);
 
-  return { resultado, priorizacao };
+  return { resultado, priorizacao, problema: ordenados[0]?.enunciado ?? "" };
 }

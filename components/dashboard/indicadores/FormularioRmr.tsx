@@ -9,6 +9,7 @@ import {
   COLUNAS_PLANO,
   EXEMPLOS_PORQUES,
   STATUS_PLANO,
+  dataBr,
   linhaPlanoVazia,
   rmrVazio,
   rmrVazioDeFato,
@@ -75,7 +76,7 @@ export function FormularioRmr({
     () =>
       pessoa
         ? sugestaoDoMes(pessoa, mes, reaisPorMes[mes] ?? {}, metasPorMes[mes] ?? {})
-        : { resultado: [], priorizacao: [] },
+        : { resultado: [], priorizacao: [], problema: "" },
     [pessoa, mes, reaisPorMes, metasPorMes]
   );
 
@@ -154,7 +155,15 @@ export function FormularioRmr({
     if (registro) {
       setDoc(registro.conteudo);
     } else {
-      setDoc({ ...rmrVazio(), resultado: sugestao.resultado, priorizacao: sugestao.priorizacao });
+      setDoc({
+        ...rmrVazio(),
+        resultado: sugestao.resultado,
+        priorizacao: sugestao.priorizacao,
+        // O enunciado do pior desvio entra nos dois lugares onde ele é cobrado:
+        // o problema dos 5 porquês e o desvio do pedido de suporte.
+        problema: sugestao.problema,
+        pedido: { ...rmrVazio().pedido, desvio: sugestao.problema },
+      });
     }
     setEstado("limpo");
     setAviso("");
@@ -199,7 +208,18 @@ export function FormularioRmr({
 
   /** Repõe as seções 1 e 2 com os números de agora, sem tocar no texto escrito. */
   function recarregarNumeros() {
-    registrarMudanca({ ...doc, resultado: sugestao.resultado, priorizacao: sugestao.priorizacao });
+    // Não sobrescreve texto escrito: o enunciado só entra onde o campo está
+    // vazio. Quem reescreveu o problema de propósito não perde a redação.
+    registrarMudanca({
+      ...doc,
+      resultado: sugestao.resultado,
+      priorizacao: sugestao.priorizacao,
+      problema: doc.problema.trim() ? doc.problema : sugestao.problema,
+      pedido: {
+        ...doc.pedido,
+        desvio: doc.pedido.desvio.trim() ? doc.pedido.desvio : sugestao.problema,
+      },
+    });
     setAviso("Seções 1 e 2 atualizadas com os lançamentos do painel.");
   }
 
@@ -240,7 +260,9 @@ export function FormularioRmr({
       [],
       ["5. PLANO DE AÇÃO — 5W2H"],
       COLUNAS_PLANO.map((c) => c.rotulo),
-      ...doc.plano.map((l): Celula[] => COLUNAS_PLANO.map((c) => l[c.chave])),
+      ...doc.plano.map((l): Celula[] =>
+        COLUNAS_PLANO.map((c) => (c.tipo === "data" ? dataBr(l[c.chave]) : l[c.chave]))
+      ),
       [],
       ["6. PEDIDO DE SUPORTE — DECISÃO NECESSÁRIA"],
       ["O desvio, com número", "A causa raiz", "O que eu preciso", "O impacto de não resolver"],
@@ -573,6 +595,18 @@ export function FormularioRmr({
                           </option>
                         ))}
                       </select>
+                    ) : col.tipo === "data" ? (
+                      <input
+                        id={`p${i}-${col.chave}`}
+                        type="date"
+                        value={linha[col.chave]}
+                        /* O prazo não pode ser anterior ao começo: o seletor já
+                           impede, em vez de aceitar e virar relatório estranho. */
+                        min={col.chave === "prazo" ? linha.quando || undefined : undefined}
+                        onChange={(e) => trocarPlano(doc, alterar, i, col.chave, e.target.value)}
+                        className={inputCls}
+                        style={inputStyle}
+                      />
                     ) : (
                       <input
                         id={`p${i}-${col.chave}`}
