@@ -108,28 +108,21 @@ h3 {
    dado, não de leitura. Aqui a própria tela vira documento: Imprimir → Salvar
    como PDF.
 
-   A regra esconde tudo e revela só o bloco do relatório, em vez de listar o que
-   ocultar — menu, botões, seletores. Assim nada novo na página precisa lembrar
-   de se esconder depois.
+   O documento é levado para fora da árvore da página (portal para o <body>), e
+   na impressão todo irmão dele some. Precisa ser `display: none`, não
+   `visibility: hidden`: conteúdo invisível CONTINUA ocupando espaço, e o
+   formulário inteiro gerava quatro páginas em branco atrás do relatório.
 
-   `visibility` em vez de `display: none` de propósito: `display` quebraria o
-   layout dos ancestrais e o bloco perderia a largura da página. */
+   Esconder os irmãos diretos do <body> — em vez de listar menu, botões e
+   seletores — faz com que nada acrescentado à página depois precise lembrar de
+   se esconder. */
 @media print {
-  body * {
-    visibility: hidden;
-  }
-
-  #rmr-impressao,
-  #rmr-impressao * {
-    visibility: visible;
+  body > *:not(#rmr-impressao) {
+    display: none !important;
   }
 
   #rmr-impressao {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    padding: 0;
+    display: block !important;
   }
 
   /* Seção inteira não deve partir no meio quando cabe na página seguinte. */
@@ -143,15 +136,7 @@ h3 {
   }
 }
 
-/* O documento de impressão fica sempre no DOM e invisível na tela: assim ele
-   reflete o que está no formulário agora, sem estado nem espera entre clicar e
-   abrir o diálogo de impressão. */
-.rmr-so-impressao {
+/* Na tela o documento não existe; ele só aparece na impressão. */
+#rmr-impressao {
   display: none;
-}
-
-@media print {
-  .rmr-so-impressao {
-    display: block;
-  }
 }
