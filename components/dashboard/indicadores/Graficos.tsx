@@ -94,32 +94,50 @@ export function GraficoColunasMensal({
   const y = (v: number) => mt + (1 - v / escala) * (H - mt - mb);
   const pw = (W - ml - mr) / serie.length;
 
-  // Zero, menor, meta e maior — sem repetir valor que caia no mesmo lugar.
-  const marcas: { v: number; destaque: boolean }[] = [{ v: 0, destaque: false }, { v: menor, destaque: false }];
-  if (meta !== null) marcas.push({ v: meta, destaque: true });
-  marcas.push({ v: maior, destaque: false });
-  const vistos = new Set<number>();
-  const eixo = marcas.filter((m) => {
-    const k = Math.round(y(m.v));
-    if (vistos.has(k)) return false;
-    vistos.add(k);
+  // Zero, menor, meta e maior — mas rótulo colado em rótulo fica ilegível, e
+  // "mesmo pixel" não bastava como critério: o melhor mês da Sara é 179 e a meta
+  // é 175, quatro pixels de distância, e os dois textos saíram sobrepostos.
+  // Agora exige 13px de folga, que é a altura da fonte do eixo.
+  //
+  // A ordem decide quem sobrevive à colisão, e a meta vai por último de
+  // propósito: a régua já é visível pela linha tracejada e pela legenda, que diz
+  // o valor dela. O maior e o menor mês só existem como rótulo — se eles caírem,
+  // a informação some.
+  const candidatas: { v: number; destaque: boolean }[] = [
+    { v: 0, destaque: false },
+    { v: menor, destaque: false },
+    { v: maior, destaque: false },
+    ...(meta !== null ? [{ v: meta, destaque: true }] : []),
+  ];
+  const postas: number[] = [];
+  const eixo = candidatas.filter((m) => {
+    const pos = y(m.v);
+    if (postas.some((p) => Math.abs(p - pos) < 13)) return false;
+    postas.push(pos);
     return true;
   });
 
   return (
     <>
       <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" fontFamily="inherit">
+        {/* A régua é desenhada sempre, mesmo quando o rótulo dela perdeu a
+            disputa por espaço: sem a linha, o gráfico deixaria de ter referência. */}
+        {meta !== null && (
+          <line
+            x1={ml}
+            x2={W - mr}
+            y1={y(meta)}
+            y2={y(meta)}
+            stroke={COR_META}
+            strokeWidth={2}
+            strokeDasharray="6 5"
+          />
+        )}
         {eixo.map((m) => (
           <g key={m.v}>
-            <line
-              x1={ml}
-              x2={W - mr}
-              y1={y(m.v)}
-              y2={y(m.v)}
-              stroke={m.destaque ? COR_META : "var(--border)"}
-              strokeWidth={m.destaque ? 2 : 1}
-              strokeDasharray={m.destaque ? "6 5" : undefined}
-            />
+            {!m.destaque && (
+              <line x1={ml} x2={W - mr} y1={y(m.v)} y2={y(m.v)} stroke="var(--border)" strokeWidth={1} />
+            )}
             <text
               x={ml - 8}
               y={y(m.v) + 3.5}
