@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Pessoa } from "@/lib/indicadores";
 import { CORES } from "@/lib/indicadoresCalc";
@@ -18,6 +18,7 @@ import {
   type LinhaPlano,
   type Rmr,
 } from "@/lib/rmr";
+import { serieDoIndicador, type PontoSerie } from "@/lib/rmrSerie";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
 
 /** pendente = há texto não gravado; salvo = o servidor confirmou. */
@@ -88,6 +89,9 @@ export function FormularioRmr({
   // nove linhas de "sem lançamento" e quem olha conclui que o dado sumiu — o
   // formulário abre no mês anterior ao corrente, que pode estar vazio.
   const semLancamento = doc.resultado.length > 0 && doc.resultado.every((l) => !l.realizado.trim());
+  /** Indicador com a série aberta. Um de cada vez: abrir todos devolve o
+      problema que a tabela resolve, que é caber na tela. */
+  const [aberto, setAberto] = useState<string | null>(null);
   // O documento de impressão é levado para fora desta árvore, direto no <body>:
   // é o que permite esconder todos os irmãos dele na impressão sem que o
   // formulário continue ocupando páginas. Só depois do primeiro render, porque
@@ -460,8 +464,24 @@ export function FormularioRmr({
                 </tr>
               )}
               {doc.resultado.map((l, i) => (
-                <tr key={`${l.indicador}-${i}`} style={{ borderTop: "1px solid var(--border)" }}>
-                  <td className="py-2.5 pr-3">{l.indicador}</td>
+                <Fragment key={`${l.indicador}-${i}`}>
+                <tr style={{ borderTop: "1px solid var(--border)" }}>
+                  <td className="py-2.5 pr-3">
+                    {/* Botão de verdade, não div com onClick: a linha é
+                        navegável por teclado como qualquer outro controle. */}
+                    <button
+                      type="button"
+                      onClick={() => setAberto((x) => (x === l.indicador ? null : l.indicador))}
+                      className="text-left hover:underline"
+                      style={{ color: "var(--text)" }}
+                      aria-expanded={aberto === l.indicador}
+                    >
+                      {l.indicador}
+                      <span className="ml-1.5 text-[10px]" style={{ color: "var(--text-muted)" }}>
+                        {aberto === l.indicador ? "▲" : "▼"}
+                      </span>
+                    </button>
+                  </td>
                   <td className="py-2.5 pr-3 text-right tabular-nums">{l.realizado || "—"}</td>
                   <td className="py-2.5 pr-3 text-right tabular-nums" style={{ color: "var(--text-muted)" }}>
                     {l.meta}
@@ -495,6 +515,23 @@ export function FormularioRmr({
                     )}
                   </td>
                 </tr>
+                {aberto === l.indicador && (
+                  <tr>
+                    <td colSpan={5} className="px-2 pb-4 pt-1">
+                      <SerieDoIndicador
+                        pontos={serieDoIndicador(
+                          pessoa,
+                          pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0],
+                          meses,
+                          mes,
+                          reaisPorMes,
+                          metasPorMes
+                        )}
+                      />
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -929,6 +966,68 @@ function Paragrafo({ rotulo, texto }: { rotulo?: string; texto: string }) {
       {rotulo && <b>{rotulo}: </b>}
       {texto}
     </p>
+  );
+}
+
+/**
+ * A série do indicador mês a mês. Abre dentro da própria linha, para o número do
+ * mês fechado ficar à vista enquanto se lê a tendência — abrir noutro lugar
+ * obrigaria a guardar o valor de cabeça.
+ */
+function SerieDoIndicador({ pontos }: { pontos: PontoSerie[] }) {
+  const comDado = pontos.filter((p) => p.pct !== "");
+  if (comDado.length === 0) {
+    return (
+      <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+        Sem lançamento deste indicador em nenhum mês do ciclo.
+      </p>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border p-3" style={{ borderColor: "var(--border)" }}>
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="text-left font-bold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+            <th className="pb-1.5 pr-3">Mês</th>
+            <th className="pb-1.5 pr-3 text-right">Realizado</th>
+            <th className="pb-1.5 pr-3 text-right">Meta</th>
+            <th className="pb-1.5 pr-3 text-right">Atingimento</th>
+            <th className="pb-1.5 text-right">Contra o mês anterior</th>
+          </tr>
+        </thead>
+        <tbody className="tabular-nums">
+          {pontos.map((p) => (
+            <tr key={p.mes} style={{ borderTop: "1px solid var(--border)" }}>
+              <td className="py-1.5 pr-3">{rotuloMes(p.mes)}</td>
+              <td className="py-1.5 pr-3 text-right">{p.realizado || "—"}</td>
+              <td className="py-1.5 pr-3 text-right" style={{ color: "var(--text-muted)" }}>
+                {p.meta || "—"}
+              </td>
+              <td
+                className="py-1.5 pr-3 text-right font-bold"
+                style={{ color: p.atingida === null ? "var(--text-muted)" : p.atingida ? CORES.ok : CORES.bad }}
+              >
+                {p.pct || "—"}
+              </td>
+              {/* Seta + sinal, não só cor: em preto e branco a variação
+                  continua legível, e quem não distingue verde de vermelho
+                  também lê. */}
+              <td
+                className="py-1.5 text-right"
+                style={{ color: p.melhorou === null ? "var(--text-muted)" : p.melhorou ? CORES.ok : CORES.bad }}
+              >
+                {p.variacao ? `${p.melhorou ? "↑" : "↓"} ${p.variacao}` : "—"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="mt-2 text-[11px]" style={{ color: "var(--text-muted)" }}>
+        A variação compara o <b>atingimento</b>, não o valor bruto: a meta muda de mês para mês no
+        cronograma, então o mesmo número pode ser avanço ou recuo.
+      </p>
+    </div>
   );
 }
 
