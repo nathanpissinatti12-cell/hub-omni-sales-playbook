@@ -753,11 +753,38 @@ function DocumentoImpressao({
   return (
     <div id="rmr-impressao" aria-hidden="true">
       <div style={{ color: "#000", fontSize: "11pt", lineHeight: 1.45 }}>
-        <h1 style={{ margin: "0 0 2mm", fontSize: "16pt" }}>
-          RMR — {mes} — {pessoa}
-        </h1>
-        <p style={{ margin: "0 0 6mm", fontSize: "10pt" }}>
-          {unidade} · Diagnóstico e plano de ação
+        {/* Faixa da marca. Sangra para as margens da página com margem negativa:
+            `@page` reserva 16mm e sem isso a tarja ficaria flutuando com borda
+            branca em volta, parecendo um retângulo solto. */}
+        <div
+          style={{
+            background: "#a224db",
+            color: "#fff",
+            margin: "-16mm -16mm 6mm",
+            padding: "7mm 16mm",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: "8mm",
+          }}
+        >
+          <div>
+            <h1 style={{ margin: 0, fontSize: "16pt", lineHeight: 1.2 }}>RMR — {mes}</h1>
+            <p style={{ margin: "1mm 0 0", fontSize: "10.5pt" }}>
+              {pessoa} · {unidade}
+            </p>
+          </div>
+          {/* A versão clara da logo, que é a branca — a mesma do cabeçalho do
+              site não apareceria sobre o roxo. */}
+          <img
+            src="/assets/onvox-logo-dark.png"
+            alt="Onvox"
+            style={{ height: "9mm", width: "auto", flexShrink: 0 }}
+          />
+        </div>
+
+        <p style={{ margin: "0 0 6mm", fontSize: "10pt", color: "#444" }}>
+          Diagnóstico e plano de ação · gerado em {new Date().toLocaleDateString("pt-BR")}
         </p>
 
         {doc.narrativa.trim() && (
@@ -877,7 +904,15 @@ function DocumentoImpressao({
 function Bloco({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <section className="rmr-bloco" style={{ marginBottom: "5mm" }}>
-      <h2 style={{ margin: "0 0 1.5mm", fontSize: "11.5pt", borderBottom: "1px solid #000", paddingBottom: "1mm" }}>
+      <h2
+        style={{
+          margin: "0 0 1.5mm",
+          fontSize: "11.5pt",
+          color: "#19014b",
+          borderBottom: "1.5px solid #a224db",
+          paddingBottom: "1mm",
+        }}
+      >
         {titulo}
       </h2>
       {children}

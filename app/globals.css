@@ -123,6 +123,11 @@ h3 {
 
   #rmr-impressao {
     display: block !important;
+    /* Sem isto a faixa roxa sai BRANCA: o navegador não imprime cor de fundo
+       por padrão, é a opção "gráficos de segundo plano" do diálogo, que vem
+       desmarcada. Esta regra força, e vale para a logo também. */
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   /* Seção inteira não deve partir no meio quando cabe na página seguinte. */
