@@ -493,10 +493,6 @@ export function FormularioRmr({
 
       {/* ---------------- 2. priorização ---------------- */}
       <Secao titulo="Priorização — o Top 3 desvios do ciclo" numero="2">
-        <p className="mb-3 text-xs" style={{ color: "var(--text-muted)" }}>
-          Os três maiores desvios, do pior para o menos pior. A ordem define por onde a reunião
-          começa.
-        </p>
         {doc.priorizacao.length === 0 ? (
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
             Nenhum indicador abaixo da meta neste mês.
