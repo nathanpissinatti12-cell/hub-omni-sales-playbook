@@ -640,6 +640,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   }, [indEvo, mapa, meses, planos]);
 
   // ---- ações ---------------------------------------------------------------
+  // Guardada de propósito: o botão saiu da tela a pedido, a função não. Religar
+  // é um botão chamando ela, com as guardas `podeLimparMes` e mês não travado.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function limparMes() {
     if (!confirm(`Limpar os realizados de ${rotuloMes(mesAtivo)}? As metas e os demais meses são mantidos.`)) {
       return;
@@ -664,6 +667,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
    * A meta exportada é a CHEIA do mês, não a proporcional: numa planilha de 12
    * meses, metas que mudam conforme o dia da consulta não se comparam entre si.
    */
+  // Guardada de propósito, como `limparMes`: religar é um botão chamando ela,
+  // atrás de `permissao.podeExportar`.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function exportar() {
     // Duas coisas antes de montar o arquivo: mandar o que ainda está pendente de
     // gravação (senão a releitura abaixo apagaria da tela o que foi digitado
@@ -1023,18 +1029,18 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       </Painel>
 
       {/* ---------------- dados ---------------- */}
+      {/* Os dois botões saíram a pedido: "Exportar planilha (Excel)" e "Limpar
+          realizados do mês". As funções `exportar` e `limparMes` continuam
+          inteiras logo acima — religar é um botão chamando cada uma, com as
+          guardas de permissão que estavam aqui (`podeExportar`, `podeLimparMes`
+          e mês não travado).
+
+          Vale dizer o que a remoção de "Limpar realizados" evita: era a única
+          ação da tela que apaga lançamento em lote. Sem botão, não há como
+          disparar por engano — e o histórico de alterações, que registra
+          inclusive a limpeza, continua intacto. */}
       <Painel titulo="Dados">
         <div className="flex flex-wrap items-center gap-3">
-          {permissao.podeExportar && (
-            <button onClick={exportar} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
-              Exportar planilha (Excel)
-            </button>
-          )}
-          {permissao.podeLimparMes && !mesTravado && (
-            <button onClick={limparMes} className="rounded-md px-4 py-2 text-sm font-semibold" style={{ border: "1px solid var(--border)", color: "var(--text)" }}>
-              Limpar realizados do mês
-            </button>
-          )}
           <span className="text-xs" style={{ color: "var(--text-muted)" }}>
             {aviso}
           </span>
