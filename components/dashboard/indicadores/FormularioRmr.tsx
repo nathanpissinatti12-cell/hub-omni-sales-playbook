@@ -236,12 +236,24 @@ export function FormularioRmr({
     setAviso("Seções 1 e 2 atualizadas com os lançamentos do painel.");
   }
 
+  /*
+   * SAÍDAS DESLIGADAS NA TELA, CÓDIGO INTEIRO
+   *
+   * Nem o PDF nem a planilha têm botão agora, a pedido. Nada foi removido:
+   *
+   * - PDF: `DocumentoImpressao` continua montado por portal no <body>, com a
+   *   faixa da marca e as regras de @media print em globals.css. Religar é um
+   *   botão chamando `window.print()`. Enquanto isso, Ctrl+P na página ainda
+   *   imprime o relatório formatado — o documento está lá, só não há botão.
+   *
+   * - Planilha: `exportar` abaixo, com o layout em linhas e as datas em
+   *   dd/mm/aaaa. Religar é um botão chamando ela.
+   */
+
   /**
-   * Exportação em planilha. O BOTÃO saiu da tela a pedido — por enquanto a saída
-   * é só o PDF —, mas a função fica pronta: para religar, basta um botão
-   * chamando `exportar`, ao lado do "Gerar PDF". Mantida também porque ela é o
-   * único lugar que conhece o layout do relatório em linhas, caso um dia a
-   * saída precise virar CSV, e-mail ou anexo de automação.
+   * Exportação em planilha. Único lugar que conhece o layout do relatório em
+   * linhas — útil se um dia a saída precisar virar CSV, e-mail ou anexo de
+   * automação.
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function exportar() {
@@ -357,17 +369,6 @@ export function FormularioRmr({
                       ? `salvo em ${new Date(registro.atualizadoEm).toLocaleDateString("pt-BR")}${registro.atualizadoPor ? ` por ${registro.atualizadoPor}` : ""}`
                       : "não preenchido"}
           </span>
-          <button
-            type="button"
-            onClick={() => {
-              void descarregar();
-              window.print();
-            }}
-            className="rounded border px-3 py-1.5 text-sm font-semibold"
-            style={{ borderColor: "var(--border)", color: "var(--text)" }}
-          >
-            Gerar PDF
-          </button>
           <button
             type="button"
             onClick={() => void descarregar(true)}
