@@ -236,6 +236,14 @@ export function FormularioRmr({
     setAviso("Seções 1 e 2 atualizadas com os lançamentos do painel.");
   }
 
+  /**
+   * Exportação em planilha. O BOTÃO saiu da tela a pedido — por enquanto a saída
+   * é só o PDF —, mas a função fica pronta: para religar, basta um botão
+   * chamando `exportar`, ao lado do "Gerar PDF". Mantida também porque ela é o
+   * único lugar que conhece o layout do relatório em linhas, caso um dia a
+   * saída precise virar CSV, e-mail ou anexo de automação.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   function exportar() {
     if (!pessoa) return;
     const linhas: Celula[][] = [
@@ -359,14 +367,6 @@ export function FormularioRmr({
             style={{ borderColor: "var(--border)", color: "var(--text)" }}
           >
             Gerar PDF
-          </button>
-          <button
-            type="button"
-            onClick={exportar}
-            className="rounded border px-3 py-1.5 text-sm font-semibold"
-            style={{ borderColor: "var(--border)", color: "var(--text)" }}
-          >
-            Exportar planilha
           </button>
           <button
             type="button"
