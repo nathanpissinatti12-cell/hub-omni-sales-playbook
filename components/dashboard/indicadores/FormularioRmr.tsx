@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Pessoa } from "@/lib/indicadores";
 import { CORES } from "@/lib/indicadoresCalc";
 import { rotuloMes } from "@/lib/indicadores";
@@ -16,6 +16,9 @@ import {
   type Rmr,
 } from "@/lib/rmr";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
+
+/** pendente = há texto não gravado; salvo = o servidor confirmou. */
+type EstadoSalvamento = "limpo" | "pendente" | "salvando" | "salvo" | "erro";
 
 type Salvo = {
   mes: string;
@@ -61,8 +64,10 @@ export function FormularioRmr({
   const [mes, setMes] = useState(mesInicial);
   const [pessoaChave, setPessoaChave] = useState(pessoas[0]?.chave ?? "");
   const [doc, setDoc] = useState<Rmr>(rmrVazio());
-  const [salvando, setSalvando] = useState(false);
+  const [estado, setEstado] = useState<EstadoSalvamento>("limpo");
   const [aviso, setAviso] = useState("");
+  /** Relatórios gravados nesta sessão — `salvos` é a foto da abertura da página. */
+  const [gravados, setGravados] = useState<Set<string>>(new Set());
 
   const pessoa = pessoas.find((p) => p.chave === pessoaChave) ?? pessoas[0];
 
@@ -76,6 +81,73 @@ export function FormularioRmr({
 
   const registro = salvos.find((s) => s.mes === mes && s.pessoa === pessoaChave) ?? null;
 
+  // O que ainda não foi gravado. Guarda mês e pessoa junto do documento porque a
+  // gravação pode acontecer DEPOIS de trocar de pessoa na tela — e aí gravar no
+  // par errado escreveria o diagnóstico de um no relatório do outro.
+  const pendente = useRef<{ mes: string; pessoa: string; doc: Rmr } | null>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const jaExiste = useCallback(
+    (m: string, p: string) =>
+      salvos.some((s) => s.mes === m && s.pessoa === p) || gravados.has(`${m}|${p}`),
+    [salvos, gravados]
+  );
+
+  const gravar = useCallback(
+    async (alvo: { mes: string; pessoa: string; doc: Rmr }) => {
+      setEstado("salvando");
+      try {
+        const r = await fetch("/api/dashboard/indicadores/rmr", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            unidade: unidadeSlug,
+            mes: alvo.mes,
+            pessoa: alvo.pessoa,
+            conteudo: alvo.doc,
+          }),
+        });
+        if (!r.ok) {
+          const corpo = (await r.json().catch(() => null)) as { error?: string } | null;
+          setEstado("erro");
+          setAviso(corpo?.error ?? "Não foi possível salvar.");
+          return;
+        }
+        setGravados((g) => new Set(g).add(`${alvo.mes}|${alvo.pessoa}`));
+        setEstado("salvo");
+        setAviso("");
+      } catch {
+        setEstado("erro");
+        setAviso("Falha ao salvar — o texto continua na tela, tente de novo.");
+      }
+    },
+    [unidadeSlug]
+  );
+
+  /**
+   * Grava o que estiver pendente. `forcar` ignora a guarda de documento em
+   * branco: é o clique no botão, que é intenção explícita.
+   */
+  const descarregar = useCallback(
+    async (forcar = false) => {
+      const alvo = pendente.current;
+      pendente.current = null;
+      if (timer.current) {
+        clearTimeout(timer.current);
+        timer.current = null;
+      }
+      if (!alvo) return;
+      // Sem isto, passear pelo seletor criaria uma linha em branco para cada
+      // pessoa e mês visitados — e o seletor passaria a marcar todos com ✓.
+      if (!forcar && rmrVazioDeFato(alvo.doc) && !jaExiste(alvo.mes, alvo.pessoa)) {
+        setEstado("limpo");
+        return;
+      }
+      await gravar(alvo);
+    },
+    [gravar, jaExiste]
+  );
+
   // Trocar de mês ou de pessoa troca o documento inteiro. Relatório que ainda
   // não existe nasce com as seções 1 e 2 já preenchidas pelo painel.
   useEffect(() => {
@@ -84,41 +156,50 @@ export function FormularioRmr({
     } else {
       setDoc({ ...rmrVazio(), resultado: sugestao.resultado, priorizacao: sugestao.priorizacao });
     }
+    setEstado("limpo");
     setAviso("");
     // `sugestao` só muda junto com mes/pessoa, que são as dependências reais.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mes, pessoaChave]);
 
-  const alterar = useCallback(<K extends keyof Rmr>(campo: K, valor: Rmr[K]) => {
-    setDoc((d) => ({ ...d, [campo]: valor }));
-  }, []);
+  // Sair da página não pode levar junto meia hora de diagnóstico.
+  useEffect(() => {
+    return () => {
+      void descarregar();
+    };
+  }, [descarregar]);
 
-  async function salvar() {
-    if (!pessoa) return;
-    setSalvando(true);
-    setAviso("");
-    try {
-      const r = await fetch("/api/dashboard/indicadores/rmr", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ unidade: unidadeSlug, mes, pessoa: pessoa.chave, conteudo: doc }),
-      });
-      if (!r.ok) {
-        const corpo = (await r.json().catch(() => null)) as { error?: string } | null;
-        setAviso(corpo?.error ?? "Não foi possível salvar.");
-        return;
-      }
-      setAviso(`Salvo às ${new Date().toLocaleTimeString("pt-BR")}.`);
-    } catch {
-      setAviso("Falha ao salvar — verifique a conexão.");
-    } finally {
-      setSalvando(false);
-    }
+  /**
+   * Toda alteração passa por aqui: guarda o pendente e arma o relógio. Salvar só
+   * ao sair do campo não bastaria — nesta tela a pessoa escreve minutos seguidos
+   * dentro de UMA área de texto, sem nunca tirar o foco dela.
+   */
+  function registrarMudanca(novo: Rmr) {
+    setDoc(novo);
+    pendente.current = { mes, pessoa: pessoaChave, doc: novo };
+    setEstado("pendente");
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => void descarregar(), 4000);
+  }
+
+  function alterar<K extends keyof Rmr>(campo: K, valor: Rmr[K]) {
+    registrarMudanca({ ...doc, [campo]: valor });
+  }
+
+  /** Troca de mês ou de pessoa grava o anterior antes de abrir o próximo. */
+  function trocarMes(novo: string) {
+    void descarregar();
+    setMes(novo);
+  }
+
+  function trocarPessoa(nova: string) {
+    void descarregar();
+    setPessoaChave(nova);
   }
 
   /** Repõe as seções 1 e 2 com os números de agora, sem tocar no texto escrito. */
   function recarregarNumeros() {
-    setDoc((d) => ({ ...d, resultado: sugestao.resultado, priorizacao: sugestao.priorizacao }));
+    registrarMudanca({ ...doc, resultado: sugestao.resultado, priorizacao: sugestao.priorizacao });
     setAviso("Seções 1 e 2 atualizadas com os lançamentos do painel.");
   }
 
@@ -185,14 +266,16 @@ export function FormularioRmr({
   if (!pessoa) return null;
 
   return (
-    <div className="space-y-5">
+    // Um onBlur no contêiner cobre todos os campos: em React o blur borbulha.
+    // Sair de um campo grava na hora, sem esperar os 4 segundos do relógio.
+    <div className="space-y-5" onBlur={() => void descarregar()}>
       {/* ---------------- seleção ---------------- */}
       <section
         className="flex flex-wrap items-end gap-3 rounded-lg border p-4"
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
         <Campo label="Mês do relatório">
-          <select value={mes} onChange={(e) => setMes(e.target.value)} className={inputCls} style={inputStyle}>
+          <select value={mes} onChange={(e) => trocarMes(e.target.value)} className={inputCls} style={inputStyle}>
             {meses.map((m) => (
               <option key={m} value={m}>
                 {rotuloMes(m)}
@@ -204,7 +287,7 @@ export function FormularioRmr({
         <Campo label="Pessoa">
           <select
             value={pessoaChave}
-            onChange={(e) => setPessoaChave(e.target.value)}
+            onChange={(e) => trocarPessoa(e.target.value)}
             className={inputCls}
             style={inputStyle}
             disabled={pessoas.length === 1}
@@ -218,12 +301,19 @@ export function FormularioRmr({
         </Campo>
 
         <div className="ml-auto flex flex-wrap items-center gap-2">
-          {registro && (
-            <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-              salvo em {new Date(registro.atualizadoEm).toLocaleDateString("pt-BR")}
-              {registro.atualizadoPor ? ` por ${registro.atualizadoPor}` : ""}
-            </span>
-          )}
+          <span className="text-xs" style={{ color: estado === "erro" ? CORES.bad : "var(--text-muted)" }}>
+            {estado === "salvando"
+              ? "salvando…"
+              : estado === "pendente"
+                ? "alterações não salvas"
+                : estado === "salvo"
+                  ? "salvo"
+                  : estado === "erro"
+                    ? "não salvo"
+                    : registro
+                      ? `salvo em ${new Date(registro.atualizadoEm).toLocaleDateString("pt-BR")}${registro.atualizadoPor ? ` por ${registro.atualizadoPor}` : ""}`
+                      : "não preenchido"}
+          </span>
           <button
             type="button"
             onClick={exportar}
@@ -234,20 +324,18 @@ export function FormularioRmr({
           </button>
           <button
             type="button"
-            onClick={salvar}
-            disabled={salvando}
+            onClick={() => void descarregar(true)}
+            disabled={estado === "salvando"}
             className="rounded px-3 py-1.5 text-sm font-semibold text-white disabled:opacity-60"
             style={{ background: "var(--accent)" }}
           >
-            {salvando ? "Salvando…" : "Salvar relatório"}
+            {estado === "salvando" ? "Salvando…" : "Salvar agora"}
           </button>
         </div>
 
-        {aviso && (
-          <p className="w-full text-xs" style={{ color: "var(--text-muted)" }}>
-            {aviso}
-          </p>
-        )}
+        <p className="w-full text-xs" style={{ color: estado === "erro" ? CORES.bad : "var(--text-muted)" }}>
+          {aviso || "Grava sozinho ao sair de um campo e alguns segundos depois de parar de escrever."}
+        </p>
       </section>
 
       {/* ---------------- narrativa ---------------- */}
