@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { Pessoa } from "@/lib/indicadores";
 import { CORES } from "@/lib/indicadoresCalc";
 import { rotuloMes } from "@/lib/indicadores";
@@ -83,6 +84,12 @@ export function FormularioRmr({
 
   const registro = salvos.find((s) => s.mes === mes && s.pessoa === pessoaChave) ?? null;
   const pendentes = secoesPendentes(doc);
+  // O documento de impressão é levado para fora desta árvore, direto no <body>:
+  // é o que permite esconder todos os irmãos dele na impressão sem que o
+  // formulário continue ocupando páginas. Só depois do primeiro render, porque
+  // no servidor não existe `document`.
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
 
   // O que ainda não foi gravado. Guarda mês e pessoa junto do documento porque a
   // gravação pode acontecer DEPOIS de trocar de pessoa na tela — e aí gravar no
@@ -676,11 +683,14 @@ export function FormularioRmr({
         </div>
       </Secao>
 
-      {/* O documento do PDF vive aqui, invisível na tela (.rmr-so-impressao) e
-          visível na impressão. Fica sempre montado para refletir o formulário
-          como ele está agora — sem estado, sem espera entre clicar e imprimir.
-          aria-hidden porque é cópia: quem usa leitor de tela lê o formulário. */}
-      <DocumentoImpressao doc={doc} pessoa={pessoa.nome} mes={rotuloMes(mes)} unidade={unidadeNome} />
+      {/* Fica sempre montado, para refletir o formulário como ele está agora —
+          sem estado, sem espera entre clicar e imprimir. aria-hidden porque é
+          cópia: quem usa leitor de tela lê o formulário. */}
+      {montado &&
+        createPortal(
+          <DocumentoImpressao doc={doc} pessoa={pessoa.nome} mes={rotuloMes(mes)} unidade={unidadeNome} />,
+          document.body
+        )}
 
       {/* ---------------- 7. fechamento ---------------- */}
       <Secao titulo="Fechamento — mensagem para a coordenação" numero="7">
@@ -730,7 +740,7 @@ function DocumentoImpressao({
   const planoPreenchido = doc.plano.filter((l) => l.oQue.trim() || l.causa.trim());
 
   return (
-    <div id="rmr-impressao" className="rmr-so-impressao" aria-hidden="true">
+    <div id="rmr-impressao" aria-hidden="true">
       <div style={{ color: "#000", fontSize: "11pt", lineHeight: 1.45 }}>
         <h1 style={{ margin: "0 0 2mm", fontSize: "16pt" }}>
           RMR — {mes} — {pessoa}
