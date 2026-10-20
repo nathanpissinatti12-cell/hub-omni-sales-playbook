@@ -375,9 +375,14 @@ export function FormularioRmr({
           </button>
         </div>
 
-        <p className="w-full text-xs" style={{ color: estado === "erro" ? CORES.bad : "var(--text-muted)" }}>
-          {aviso || "Grava sozinho ao sair de um campo e alguns segundos depois de parar de escrever."}
-        </p>
+        {/* Só aparece quando há o que dizer. A explicação de que grava sozinho
+            saiu: o indicador ao lado dos botões já mostra o estado, e a frase
+            ocupava uma linha fixa para repetir o que se vê acontecer. */}
+        {aviso && (
+          <p className="w-full text-xs" style={{ color: estado === "erro" ? CORES.bad : "var(--text-muted)" }}>
+            {aviso}
+          </p>
+        )}
 
         {/* O que falta. Com sete seções é fácil salvar pela metade e não
             perceber — ainda mais agora que grava sozinho e não há um "enviar"
