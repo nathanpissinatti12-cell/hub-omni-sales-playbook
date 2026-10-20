@@ -7,6 +7,7 @@ import { rotuloMes } from "@/lib/indicadores";
 import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
   COLUNAS_PLANO,
+  EXEMPLOS_PORQUES,
   STATUS_PLANO,
   linhaPlanoVazia,
   rmrVazio,
@@ -378,7 +379,11 @@ export function FormularioRmr({
           linhas={2}
           placeholder="Negociações iniciadas — 13 realizadas vs. 32 de meta."
         />
-        <div className="mt-3 space-y-2">
+        <p className="mb-1 mt-3 text-xs" style={{ color: "var(--text-muted)" }}>
+          Cada resposta pergunta o porquê da anterior — é assim que se chega na causa raiz, e não em
+          cinco versões do mesmo motivo. Os exemplos em cinza são só sugestão de como responder.
+        </p>
+        <div className="space-y-2">
           {doc.porques.map((p, i) => (
             <div key={i} className="flex items-start gap-2">
               <span className="w-24 shrink-0 pt-2 text-xs font-bold" style={{ color: "var(--text-muted)" }}>
@@ -392,6 +397,7 @@ export function FormularioRmr({
                   alterar("porques", nova);
                 }}
                 linhas={2}
+                placeholder={EXEMPLOS_PORQUES[i]}
               />
             </div>
           ))}

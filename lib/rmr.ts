@@ -83,6 +83,23 @@ export const COLUNAS_PLANO: { chave: keyof LinhaPlano; rotulo: string; largura: 
 
 export const STATUS_PLANO = ["Não iniciada", "Em andamento", "Concluída", "Cancelada"] as const;
 
+/**
+ * Exemplos para os cinco porquês, encadeados de propósito: cada um pergunta o
+ * porquê da resposta anterior, que é a mecânica do método. Sem isso a pessoa
+ * tende a escrever cinco variações da mesma frase e a causa raiz nunca aparece.
+ *
+ * São placeholders, não valores — nada disso é gravado se o campo ficar vazio.
+ * E o quinto termina em dúvida de propósito: nem todo caso fecha no quinto
+ * porquê, e dizer "ainda preciso validar" é resposta melhor que inventar causa.
+ */
+export const EXEMPLOS_PORQUES: string[] = [
+  "Porque tive muitas reuniões na agenda e sobrou pouco tempo para prospectar.",
+  "Porque o tempo que sobrou foi consumido por follow-up das oportunidades em andamento.",
+  "Porque os follow-ups se acumulam quando o lead não responde no primeiro contato.",
+  "Porque não tenho horário fixo reservado para prospecção — ela acontece no que sobra do dia.",
+  "Ainda preciso validar se o limitador é a agenda ou a qualidade da lista que recebo.",
+];
+
 export function linhaPlanoVazia(): LinhaPlano {
   return {
     causa: "",
