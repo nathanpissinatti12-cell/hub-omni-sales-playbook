@@ -38,6 +38,135 @@ function Legenda({ itens }: { itens: { cor: string; label: string; opacidade?: n
 }
 
 
+
+// ---------------------------------------------------------------------------
+// Colunas por mês, com a régua da meta e o eixo só nos números que importam
+// ---------------------------------------------------------------------------
+
+/** "230", "1,2k", "R$ 4,9k" — curto o bastante para caber no eixo. */
+function rotuloEixo(v: number, formato: Formato): string {
+  if (formato === "pct") return `${v.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`;
+  if (formato === "x") return `${v.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}x`;
+  const n = Math.abs(v) >= 1000 ? `${(v / 1000).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}k` : v.toLocaleString("pt-BR", { maximumFractionDigits: 0 });
+  return formato === "brl" ? `R$ ${n}` : n;
+}
+
+/**
+ * Uma coluna por mês com o realizado, e a meta do mês do relatório como régua
+ * tracejada atravessando o gráfico.
+ *
+ * O eixo mostra SÓ quatro números: zero, o menor mês, a meta e o maior mês. As
+ * marcas automáticas (211.2, 158.4, 105.6…) não significam nada para quem lê —
+ * são divisões da escala, não valores que aconteceram. Os quatro que ficaram são
+ * os que respondem "quanto ela fez no melhor e no pior mês, e onde está a
+ * régua".
+ *
+ * Coluna, não ponto: volume por mês se compara por altura, e barra vazia deixa
+ * explícito o mês sem lançamento.
+ */
+export function GraficoColunasMensal({
+  serie,
+  meta,
+  formato,
+}: {
+  serie: { rotulo: string; real: number | null; pct: number | null }[];
+  meta: number | null;
+  formato: Formato;
+}) {
+  const reais = serie.map((d) => d.real).filter((v): v is number => v !== null);
+  if (reais.length === 0) return <Vazio msg="Sem realizado lançado neste ciclo para este indicador." />;
+
+  const W = 760;
+  const H = 240;
+  const ml = formato === "brl" ? 74 : 56;
+  const mr = 16;
+  const mt = 18;
+  const mb = 40;
+
+  // A marca do topo é o maior REALIZADO, não o maior entre realizado e meta: com
+  // a meta acima de todos os meses (Jéssica, 154 contra 175), as duas marcas
+  // colidiam e o melhor mês sumia justamente do eixo que existe para mostrá-lo.
+  const maior = Math.max(...reais);
+  const menor = Math.min(...reais);
+  // A escala ainda precisa caber a meta, senão a régua sai do gráfico. A folga
+  // evita a coluna mais alta encostar na borda.
+  const escala = Math.max(maior, meta ?? 0) * 1.06 || 1;
+  const y = (v: number) => mt + (1 - v / escala) * (H - mt - mb);
+  const pw = (W - ml - mr) / serie.length;
+
+  // Zero, menor, meta e maior — sem repetir valor que caia no mesmo lugar.
+  const marcas: { v: number; destaque: boolean }[] = [{ v: 0, destaque: false }, { v: menor, destaque: false }];
+  if (meta !== null) marcas.push({ v: meta, destaque: true });
+  marcas.push({ v: maior, destaque: false });
+  const vistos = new Set<number>();
+  const eixo = marcas.filter((m) => {
+    const k = Math.round(y(m.v));
+    if (vistos.has(k)) return false;
+    vistos.add(k);
+    return true;
+  });
+
+  return (
+    <>
+      <svg viewBox={`0 0 ${W} ${H}`} className="block h-auto w-full" fontFamily="inherit">
+        {eixo.map((m) => (
+          <g key={m.v}>
+            <line
+              x1={ml}
+              x2={W - mr}
+              y1={y(m.v)}
+              y2={y(m.v)}
+              stroke={m.destaque ? COR_META : "var(--border)"}
+              strokeWidth={m.destaque ? 2 : 1}
+              strokeDasharray={m.destaque ? "6 5" : undefined}
+            />
+            <text
+              x={ml - 8}
+              y={y(m.v) + 3.5}
+              fontSize="10.5"
+              fontWeight={m.destaque ? 700 : 400}
+              fill={m.destaque ? COR_META : "var(--text-muted)"}
+              textAnchor="end"
+            >
+              {rotuloEixo(m.v, formato)}
+            </text>
+          </g>
+        ))}
+
+        {serie.map((d, i) => {
+          const cx = ml + i * pw + pw / 2;
+          const bw = Math.min(pw * 0.56, 34);
+          return (
+            <g key={d.rotulo + i}>
+              {d.real !== null && (
+                <rect
+                  x={cx - bw / 2}
+                  y={y(d.real)}
+                  width={bw}
+                  height={Math.max(y(0) - y(d.real), 2)}
+                  fill={corAreaDe(d.pct)}
+                  rx={3}
+                />
+              )}
+              <text x={cx} y={H - mb + 18} fontSize="9.5" fill="var(--text-muted)" textAnchor="middle">
+                {d.rotulo}
+              </text>
+            </g>
+          );
+        })}
+      </svg>
+      <Legenda
+        itens={[
+          { cor: COR_META, label: meta === null ? "sem meta" : `meta do mês: ${rotuloEixo(meta, formato)}` },
+          { cor: CORES_AREA.ok, label: "na meta (100%+)" },
+          { cor: CORES_AREA.warn, label: "quase (85–99%)" },
+          { cor: CORES_AREA.bad, label: "abaixo (até 84%)" },
+        ]}
+      />
+    </>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Ranking mensal — todos os meses lançados, do maior para o menor, com a meta
 // encaixada na posição dela
