@@ -65,21 +65,38 @@ export type Rmr = {
   mensagem: string;
 };
 
-/** Colunas do 5W2H, na ordem da planilha — usada na tela e na exportação. */
-export const COLUNAS_PLANO: { chave: keyof LinhaPlano; rotulo: string; largura: number }[] = [
+/**
+ * Colunas do 5W2H, na ordem da planilha — usada na tela e na exportação.
+ *
+ * `quando` e `prazo` são DATA, não texto. Na planilha original os três vieram
+ * preenchidos como "A definir na RMR", e texto assim não dá para cobrar: nada
+ * consegue listar ação vencida nem avisar que o prazo passou.
+ */
+export const COLUNAS_PLANO: {
+  chave: keyof LinhaPlano;
+  rotulo: string;
+  largura: number;
+  tipo?: "data";
+}[] = [
   { chave: "causa", rotulo: "Causa / frente", largura: 26 },
   { chave: "oQue", rotulo: "O quê", largura: 30 },
   { chave: "porQue", rotulo: "Por quê", largura: 30 },
   { chave: "quem", rotulo: "Quem", largura: 18 },
-  { chave: "quando", rotulo: "Quando", largura: 16 },
+  { chave: "quando", rotulo: "Quando começa", largura: 16, tipo: "data" },
   { chave: "onde", rotulo: "Onde", largura: 18 },
   { chave: "como", rotulo: "Como", largura: 34 },
   { chave: "quanto", rotulo: "Quanto custa", largura: 14 },
   { chave: "indicador", rotulo: "Indicador impactado", largura: 24 },
   { chave: "resultado", rotulo: "Resultado esperado", largura: 32 },
   { chave: "status", rotulo: "Status", largura: 14 },
-  { chave: "prazo", rotulo: "Dias / prazo", largura: 14 },
+  { chave: "prazo", rotulo: "Prazo (data limite)", largura: 14, tipo: "data" },
 ];
+
+/** "2026-11-14" -> "14/11/2026". Vazio continua vazio. */
+export function dataBr(iso: string): string {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return iso;
+  return iso.split("-").reverse().join("/");
+}
 
 export const STATUS_PLANO = ["Não iniciada", "Em andamento", "Concluída", "Cancelada"] as const;
 
