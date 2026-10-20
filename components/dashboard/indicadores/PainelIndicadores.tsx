@@ -881,9 +881,6 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           duPeriodo={duPeriodo}
           serieMensal={serieMensal}
         />
-        <Secao titulo="Ranking de atingimento — N3">
-          <GraficoRanking dados={ranking(N3, "")} />
-        </Secao>
       </Painel>
       )}
 
