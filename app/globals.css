@@ -100,3 +100,58 @@ h3 {
 .playbook-content li.flex.gap-2:hover {
   background: var(--bg);
 }
+
+/* ---------------------------------------------------------------------------
+   Impressão do RMR
+   ---------------------------------------------------------------------------
+   O relatório é apresentado em reunião, e a saída em planilha é formato de
+   dado, não de leitura. Aqui a própria tela vira documento: Imprimir → Salvar
+   como PDF.
+
+   A regra esconde tudo e revela só o bloco do relatório, em vez de listar o que
+   ocultar — menu, botões, seletores. Assim nada novo na página precisa lembrar
+   de se esconder depois.
+
+   `visibility` em vez de `display: none` de propósito: `display` quebraria o
+   layout dos ancestrais e o bloco perderia a largura da página. */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+
+  #rmr-impressao,
+  #rmr-impressao * {
+    visibility: visible;
+  }
+
+  #rmr-impressao {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+  }
+
+  /* Seção inteira não deve partir no meio quando cabe na página seguinte. */
+  #rmr-impressao .rmr-bloco {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 16mm;
+  }
+}
+
+/* O documento de impressão fica sempre no DOM e invisível na tela: assim ele
+   reflete o que está no formulário agora, sem estado nem espera entre clicar e
+   abrir o diálogo de impressão. */
+.rmr-so-impressao {
+  display: none;
+}
+
+@media print {
+  .rmr-so-impressao {
+    display: block;
+  }
+}
