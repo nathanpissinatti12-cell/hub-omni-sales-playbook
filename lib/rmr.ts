@@ -203,6 +203,28 @@ export function normalizarRmr(bruto: unknown): Rmr {
   };
 }
 
+/**
+ * As seções que ainda não foram respondidas, pelo nome que aparece na tela.
+ *
+ * Com sete seções é fácil salvar pela metade e não perceber — ainda mais agora
+ * que o relatório grava sozinho e não há um "enviar" que faça conferir. Só olha
+ * o que a pessoa ESCREVE: resultado e priorização vêm do painel.
+ */
+export function secoesPendentes(r: Rmr): string[] {
+  const falta: string[] = [];
+  if (!r.narrativa.trim()) falta.push("narrativa do ciclo");
+  if (!r.problema.trim()) falta.push("problema");
+  // Um porquê respondido já mostra que a pessoa entrou no método; exigir os
+  // cinco marcaria como pendente um diagnóstico que fechou no terceiro.
+  if (r.porques.every((p) => !p.trim())) falta.push("5 porquês");
+  if (!r.causaRaiz.trim()) falta.push("causa raiz");
+  if (r.plano.every((l) => !l.oQue.trim())) falta.push("plano de ação");
+  // O pedido de suporte só é cobrado de quem marcou que precisa dele.
+  if (r.precisaSuporte && !r.pedido.precisa.trim()) falta.push("pedido de suporte");
+  if (!r.mensagem.trim()) falta.push("mensagem de fechamento");
+  return falta;
+}
+
 /** Relatório em branco não deve ocupar lugar na lista de "já preenchidos". */
 export function rmrVazioDeFato(r: Rmr): boolean {
   return (

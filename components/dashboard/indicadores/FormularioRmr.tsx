@@ -10,6 +10,7 @@ import {
   EXEMPLOS_PORQUES,
   STATUS_PLANO,
   dataBr,
+  secoesPendentes,
   linhaPlanoVazia,
   rmrVazio,
   rmrVazioDeFato,
@@ -81,6 +82,7 @@ export function FormularioRmr({
   );
 
   const registro = salvos.find((s) => s.mes === mes && s.pessoa === pessoaChave) ?? null;
+  const pendentes = secoesPendentes(doc);
 
   // O que ainda não foi gravado. Guarda mês e pessoa junto do documento porque a
   // gravação pode acontecer DEPOIS de trocar de pessoa na tela — e aí gravar no
@@ -338,6 +340,17 @@ export function FormularioRmr({
           </span>
           <button
             type="button"
+            onClick={() => {
+              void descarregar();
+              window.print();
+            }}
+            className="rounded border px-3 py-1.5 text-sm font-semibold"
+            style={{ borderColor: "var(--border)", color: "var(--text)" }}
+          >
+            Gerar PDF
+          </button>
+          <button
+            type="button"
             onClick={exportar}
             className="rounded border px-3 py-1.5 text-sm font-semibold"
             style={{ borderColor: "var(--border)", color: "var(--text)" }}
@@ -357,6 +370,19 @@ export function FormularioRmr({
 
         <p className="w-full text-xs" style={{ color: estado === "erro" ? CORES.bad : "var(--text-muted)" }}>
           {aviso || "Grava sozinho ao sair de um campo e alguns segundos depois de parar de escrever."}
+        </p>
+
+        {/* O que falta. Com sete seções é fácil salvar pela metade e não
+            perceber — ainda mais agora que grava sozinho e não há um "enviar"
+            que obrigue a conferir. */}
+        <p className="w-full text-xs">
+          {pendentes.length === 0 ? (
+            <span style={{ color: CORES.ok }}>Relatório completo.</span>
+          ) : (
+            <span style={{ color: CORES.warn }}>
+              Falta responder: <b>{pendentes.join(" · ")}</b>
+            </span>
+          )}
         </p>
       </section>
 
@@ -650,6 +676,12 @@ export function FormularioRmr({
         </div>
       </Secao>
 
+      {/* O documento do PDF vive aqui, invisível na tela (.rmr-so-impressao) e
+          visível na impressão. Fica sempre montado para refletir o formulário
+          como ele está agora — sem estado, sem espera entre clicar e imprimir.
+          aria-hidden porque é cópia: quem usa leitor de tela lê o formulário. */}
+      <DocumentoImpressao doc={doc} pessoa={pessoa.nome} mes={rotuloMes(mes)} unidade={unidadeNome} />
+
       {/* ---------------- 7. fechamento ---------------- */}
       <Secao titulo="Fechamento — mensagem para a coordenação" numero="7">
         <AreaTexto
@@ -676,6 +708,170 @@ export function FormularioRmr({
         </div>
       </Secao>
     </div>
+  );
+}
+
+/**
+ * O relatório como documento, para a impressão em PDF. É outra árvore, não o
+ * formulário escondido: área de texto imprime só a parte visível, então um
+ * diagnóstico longo sairia cortado no papel. Aqui o texto é texto.
+ */
+function DocumentoImpressao({
+  doc,
+  pessoa,
+  mes,
+  unidade,
+}: {
+  doc: Rmr;
+  pessoa: string;
+  mes: string;
+  unidade: string;
+}) {
+  const planoPreenchido = doc.plano.filter((l) => l.oQue.trim() || l.causa.trim());
+
+  return (
+    <div id="rmr-impressao" className="rmr-so-impressao" aria-hidden="true">
+      <div style={{ color: "#000", fontSize: "11pt", lineHeight: 1.45 }}>
+        <h1 style={{ margin: "0 0 2mm", fontSize: "16pt" }}>
+          RMR — {mes} — {pessoa}
+        </h1>
+        <p style={{ margin: "0 0 6mm", fontSize: "10pt" }}>
+          {unidade} · Diagnóstico e plano de ação
+        </p>
+
+        {doc.narrativa.trim() && (
+          <Bloco titulo="A narrativa do ciclo">
+            <Paragrafo texto={doc.narrativa} />
+          </Bloco>
+        )}
+
+        <Bloco titulo="1. Resultado — o que os indicadores mostram">
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "9.5pt" }}>
+            <thead>
+              <tr>
+                {["Indicador", "Realizado", "Meta", "Diferença", "Atingimento"].map((h, i) => (
+                  <th
+                    key={h}
+                    style={{
+                      textAlign: i === 0 ? "left" : "right",
+                      borderBottom: "1px solid #000",
+                      padding: "1mm 2mm 1mm 0",
+                    }}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {doc.resultado.map((l, i) => (
+                <tr key={`${l.indicador}-${i}`}>
+                  <td style={{ padding: "1mm 2mm 1mm 0", borderBottom: "1px solid #ddd" }}>{l.indicador}</td>
+                  <td style={{ textAlign: "right", padding: "1mm 2mm", borderBottom: "1px solid #ddd" }}>
+                    {l.realizado || "—"}
+                  </td>
+                  <td style={{ textAlign: "right", padding: "1mm 2mm", borderBottom: "1px solid #ddd" }}>{l.meta}</td>
+                  <td style={{ textAlign: "right", padding: "1mm 2mm", borderBottom: "1px solid #ddd" }}>
+                    {l.diferenca || "—"}
+                  </td>
+                  <td style={{ textAlign: "right", padding: "1mm 0 1mm 2mm", borderBottom: "1px solid #ddd" }}>
+                    {l.atingida === null ? "—" : `${l.pct} · ${l.atingida ? "realizada" : "não realizada"}`}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Bloco>
+
+        {doc.priorizacao.length > 0 && (
+          <Bloco titulo="2. Priorização — o Top 3 desvios do ciclo">
+            <ol style={{ margin: 0, paddingLeft: "6mm" }}>
+              {doc.priorizacao.map((l, i) => (
+                <li key={`${l.indicador}-${i}`}>{l.indicador}</li>
+              ))}
+            </ol>
+          </Bloco>
+        )}
+
+        <Bloco titulo="3. 5 Porquês — caminho até a causa raiz">
+          <Paragrafo rotulo="Problema" texto={doc.problema} />
+          {doc.porques.map((p, i) =>
+            p.trim() ? <Paragrafo key={i} rotulo={`Por quê? ${i + 1}`} texto={p} /> : null
+          )}
+        </Bloco>
+
+        <Bloco titulo="4. Causa raiz e governabilidade">
+          <Paragrafo texto={doc.causaRaiz} />
+          <p style={{ margin: "2mm 0 0", fontSize: "10pt" }}>
+            Acionável no meu nível: <b>{doc.acionavel ? "sim" : "não"}</b> · Precisa de suporte:{" "}
+            <b>{doc.precisaSuporte ? "sim" : "não"}</b>
+          </p>
+        </Bloco>
+
+        {planoPreenchido.length > 0 && (
+          <Bloco titulo="5. Plano de ação — 5W2H">
+            {planoPreenchido.map((l, i) => (
+              <div key={i} style={{ marginBottom: "3mm", breakInside: "avoid" }}>
+                <p style={{ margin: "0 0 1mm", fontWeight: 700 }}>
+                  {i + 1}. {l.oQue || l.causa}
+                </p>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "9.5pt" }}>
+                  <tbody>
+                    {COLUNAS_PLANO.filter((c) => c.chave !== "oQue" && l[c.chave].trim()).map((c) => (
+                      <tr key={c.chave}>
+                        <td style={{ width: "34mm", padding: "0.6mm 2mm 0.6mm 0", verticalAlign: "top", color: "#444" }}>
+                          {c.rotulo}
+                        </td>
+                        <td style={{ padding: "0.6mm 0", verticalAlign: "top" }}>
+                          {c.tipo === "data" ? dataBr(l[c.chave]) : l[c.chave]}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </Bloco>
+        )}
+
+        {(doc.pedido.desvio.trim() || doc.pedido.precisa.trim()) && (
+          <Bloco titulo="6. Pedido de suporte — decisão necessária">
+            <Paragrafo rotulo="O desvio, com número" texto={doc.pedido.desvio} />
+            <Paragrafo rotulo="A causa raiz" texto={doc.pedido.causa} />
+            <Paragrafo rotulo="O que eu preciso" texto={doc.pedido.precisa} />
+            <Paragrafo rotulo="O impacto de não resolver" texto={doc.pedido.impacto} />
+          </Bloco>
+        )}
+
+        {doc.mensagem.trim() && (
+          <Bloco titulo="7. Fechamento — mensagem para a coordenação">
+            <Paragrafo texto={doc.mensagem} />
+          </Bloco>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Bloco({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <section className="rmr-bloco" style={{ marginBottom: "5mm" }}>
+      <h2 style={{ margin: "0 0 1.5mm", fontSize: "11.5pt", borderBottom: "1px solid #000", paddingBottom: "1mm" }}>
+        {titulo}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+/** Campo vazio não vira linha em branco no papel. */
+function Paragrafo({ rotulo, texto }: { rotulo?: string; texto: string }) {
+  if (!texto.trim()) return null;
+  return (
+    <p style={{ margin: "0 0 1.5mm", whiteSpace: "pre-line" }}>
+      {rotulo && <b>{rotulo}: </b>}
+      {texto}
+    </p>
   );
 }
 
