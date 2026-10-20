@@ -3,7 +3,7 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Indicador, Pessoa } from "@/lib/indicadores";
-import { CORES, num, status } from "@/lib/indicadoresCalc";
+import { CORES, num } from "@/lib/indicadoresCalc";
 import { rotuloMes } from "@/lib/indicadores";
 import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
@@ -19,7 +19,7 @@ import {
   type Rmr,
 } from "@/lib/rmr";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
-import { GraficoLinhaMensal, type PontoEvolucao } from "./Graficos";
+import { RankingMensal, type MesLancado } from "./Graficos";
 
 /** pendente = há texto não gravado; salvo = o servidor confirmou. */
 type EstadoSalvamento = "limpo" | "pendente" | "salvando" | "salvo" | "erro";
@@ -94,31 +94,38 @@ export function FormularioRmr({
   const [aberto, setAberto] = useState<string | null>(null);
 
   /**
-   * A série do ano para o gráfico, no mesmo formato que o painel usa: linha do
-   * realizado, tracejado da meta, ponto colorido pelo atingimento.
-   *
-   * O ano inteiro, não só até o mês do relatório — é assim no painel, e ver o
-   * tracejado da meta subindo nos meses que ainda vêm é parte da leitura.
-   *
-   * Meta: o que foi digitado naquele mês, senão a meta padrão do indicador. O
-   * cronograma de MRR não entra aqui porque é do N3, e o RMR é sempre de pessoa.
+   * Todos os meses COM lançamento, de todos os ciclos. "Últimos anos" é o
+   * recorte pedido, então aqui não filtra por ano: a lista é ordenada por valor,
+   * não por tempo, e dois anos de dados enriquecem o ranking em vez de poluir.
    */
-  const serieDoAno = useCallback(
-    (ind: Indicador): PontoEvolucao[] =>
-      // Só os meses do ciclo do relatório. `meses` traz os dois ciclos, porque o
-      // seletor lista todos — num gráfico só, 24 pontos espremeriam dois anos
-      // no mesmo eixo e a comparação com a meta do ano perderia o sentido.
-      meses
-        .filter((m) => m.slice(0, 4) === mes.slice(0, 4))
-        .map((m) => {
-          const chave = `${pessoaChave}_${ind.id}`;
-          const real = num((reaisPorMes[m] ?? {})[chave]);
-          const override = (metasPorMes[m] ?? {})[chave];
-          const meta = override === undefined || override === null ? ind.meta : override;
-          return { rotulo: rotuloMes(m), real, meta, pct: status(real, meta, ind.dir).pct };
-        }),
-    [meses, mes, pessoaChave, reaisPorMes, metasPorMes]
+  const mesesLancados = useCallback(
+    (ind: Indicador): MesLancado[] => {
+      const chave = `${pessoaChave}_${ind.id}`;
+      const out: MesLancado[] = [];
+      for (const m of meses) {
+        const v = num((reaisPorMes[m] ?? {})[chave]);
+        if (v !== null) out.push({ mes: rotuloMes(m), valor: v });
+      }
+      return out;
+    },
+    [meses, pessoaChave, reaisPorMes]
   );
+
+  /**
+   * A meta que serve de régua: a do MÊS DO RELATÓRIO, não a de hoje.
+   *
+   * É o ponto que o Nathan levantou — se a meta virar 200 em novembro, o
+   * relatório de outubro continua mostrando 175, porque era isso que outubro
+   * cobrava. Cada relatório fica congelado com a régua da própria época.
+   */
+  const metaDoMes = useCallback(
+    (ind: Indicador): number | null => {
+      const override = (metasPorMes[mes] ?? {})[`${pessoaChave}_${ind.id}`];
+      return override === undefined || override === null ? ind.meta : override;
+    },
+    [metasPorMes, mes, pessoaChave]
+  );
+
   // O documento de impressão é levado para fora desta árvore, direto no <body>:
   // é o que permite esconder todos os irmãos dele na impressão sem que o
   // formulário continue ocupando páginas. Só depois do primeiro render, porque
@@ -549,13 +556,21 @@ export function FormularioRmr({
                         className="mb-1 block text-[10px] font-bold uppercase tracking-wide"
                         style={{ color: "var(--text-muted)" }}
                       >
-                        {l.indicador} — mês a mês
+                        {l.indicador} — todos os meses, do maior para o menor
                       </span>
-                      <GraficoLinhaMensal
-                        serie={serieDoAno(
-                          pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0]
-                        )}
-                      />
+                      {(() => {
+                        const ind = pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0];
+                        return (
+                          <RankingMensal
+                            pontos={mesesLancados(ind)}
+                            meta={metaDoMes(ind)}
+                            formato={ind.fmt}
+                            dir={ind.dir}
+                            rotuloMeta={`meta de ${rotuloMes(mes)}`}
+                            destaque={rotuloMes(mes)}
+                          />
+                        );
+                      })()}
                     </td>
                   </tr>
                 )}
