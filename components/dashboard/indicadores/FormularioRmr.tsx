@@ -84,6 +84,10 @@ export function FormularioRmr({
 
   const registro = salvos.find((s) => s.mes === mes && s.pessoa === pessoaChave) ?? null;
   const pendentes = secoesPendentes(doc);
+  // Mês sem nenhum lançamento daquela pessoa. Sem este aviso a seção 1 mostra
+  // nove linhas de "sem lançamento" e quem olha conclui que o dado sumiu — o
+  // formulário abre no mês anterior ao corrente, que pode estar vazio.
+  const semLancamento = doc.resultado.length > 0 && doc.resultado.every((l) => !l.realizado.trim());
   // O documento de impressão é levado para fora desta árvore, direto no <body>:
   // é o que permite esconder todos os irmãos dele na impressão sem que o
   // formulário continue ocupando páginas. Só depois do primeiro render, porque
@@ -430,6 +434,11 @@ export function FormularioRmr({
           Vem do painel, comparando com a meta <b>cheia</b> do mês — no fechamento a pergunta não é
           se está no ritmo, é se entregou o combinado. 
         </p>
+        {semLancamento ? (
+          <p className="py-2 text-sm" style={{ color: CORES.warn }}>
+            Sem lançamentos em {rotuloMes(mes)} para {pessoa.nome.split(" ")[0]}.
+          </p>
+        ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
@@ -489,6 +498,7 @@ export function FormularioRmr({
             </tbody>
           </table>
         </div>
+        )}
       </Secao>
 
       {/* ---------------- 2. priorização ---------------- */}
