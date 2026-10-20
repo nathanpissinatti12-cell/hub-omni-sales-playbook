@@ -4,7 +4,9 @@
 // Adaptados do painel HTML original: mesma leitura visual, mas usando os
 // tokens de cor do playbook em vez da paleta clara fixa do arquivo de origem.
 
-import { CORES, CORES_AREA, corAreaDe, corDe, type Situacao } from "@/lib/indicadoresCalc";
+import { Fragment } from "react";
+import { CORES, CORES_AREA, corAreaDe, corDe, fmt, type Situacao } from "@/lib/indicadoresCalc";
+import type { Formato } from "@/lib/indicadores";
 
 const COR_META = "var(--accent)";
 // Mesmo rosa escurecido das etiquetas N4 (ver COR_N4 no painel): a barra sozinha
@@ -31,6 +33,121 @@ function Legenda({ itens }: { itens: { cor: string; label: string; opacidade?: n
           {i.label}
         </span>
       ))}
+    </div>
+  );
+}
+
+
+// ---------------------------------------------------------------------------
+// Ranking mensal — todos os meses lançados, do maior para o menor, com a meta
+// encaixada na posição dela
+// ---------------------------------------------------------------------------
+export type MesLancado = { mes: string; valor: number };
+
+/**
+ * Responde "quantos meses bateram a meta, e onde o mês atual se encaixa" — que
+ * o gráfico de linha não responde de relance, porque lá o olho precisa comparar
+ * cada ponto com o tracejado.
+ *
+ * A meta entra como uma LINHA DA LISTA, na posição em que cairia se fosse mais
+ * um mês. É isso que faz a leitura ser imediata: tudo acima dela bateu, tudo
+ * abaixo não. E é a meta do mês do relatório, congelada — mudar a meta em
+ * novembro não reescreve o que outubro cobrava.
+ *
+ * Cada linha diz de que mês é, de propósito. Ordenar só por valor perderia o
+ * tempo; com o rótulo, dá para ver o ranking E se os meses recentes estão no
+ * topo ou no fim.
+ */
+export function RankingMensal({
+  pontos,
+  meta,
+  formato,
+  dir,
+  rotuloMeta,
+  destaque,
+}: {
+  pontos: MesLancado[];
+  meta: number | null;
+  formato: Formato;
+  dir: "up" | "down";
+  /** "meta de out/26" — deixa explícito de que mês é a régua. */
+  rotuloMeta: string;
+  /** Mês do relatório, marcado na lista para não se perder no meio. */
+  destaque?: string;
+}) {
+  if (pontos.length === 0) {
+    return <Vazio msg="Sem lançamento deste indicador em nenhum mês." />;
+  }
+
+  const ordenados = [...pontos].sort((a, b) => b.valor - a.valor);
+  const teto = Math.max(...ordenados.map((p) => p.valor), meta ?? 0) || 1;
+  const bateu = (v: number) => (meta === null ? null : dir === "up" ? v >= meta : v <= meta);
+
+  // A meta vira uma linha no meio da lista: entra antes do primeiro mês que
+  // ficou abaixo dela.
+  const acima = ordenados.filter((p) => p.valor > (meta ?? -Infinity));
+
+  return (
+    <div className="space-y-1">
+      {ordenados.map((p, i) => {
+        const ok = bateu(p.valor);
+        const ehDestaque = p.mes === destaque;
+        return (
+          <Fragment key={p.mes}>
+            {meta !== null && i === acima.length && <LinhaMeta meta={meta} formato={formato} rotulo={rotuloMeta} teto={teto} />}
+            <div className="flex items-center gap-2 text-xs">
+              <span
+                className="w-16 shrink-0 text-right tabular-nums"
+                style={{ color: ehDestaque ? "var(--text)" : "var(--text-muted)", fontWeight: ehDestaque ? 700 : 400 }}
+              >
+                {p.mes}
+              </span>
+              <span
+                className="h-3 rounded-sm"
+                style={{
+                  width: `${Math.max((p.valor / teto) * 100, 1)}%`,
+                  background: ok === null ? CORES_AREA.na : ok ? CORES_AREA.ok : CORES_AREA.bad,
+                }}
+              />
+              <b className="tabular-nums" style={{ color: ok === null ? "var(--text-muted)" : ok ? CORES.ok : CORES.bad }}>
+                {fmt(p.valor, formato)}
+              </b>
+            </div>
+          </Fragment>
+        );
+      })}
+      {meta !== null && acima.length === ordenados.length && (
+        <LinhaMeta meta={meta} formato={formato} rotulo={rotuloMeta} teto={teto} />
+      )}
+    </div>
+  );
+}
+
+/** A régua no meio da lista. Tracejada e roxa, como a meta nos outros gráficos. */
+function LinhaMeta({
+  meta,
+  formato,
+  rotulo,
+  teto,
+}: {
+  meta: number;
+  formato: Formato;
+  rotulo: string;
+  teto: number;
+}) {
+  return (
+    <div className="flex items-center gap-2 py-0.5 text-xs">
+      <span className="w-16 shrink-0 text-right font-bold" style={{ color: COR_META }}>
+        meta
+      </span>
+      <span
+        className="h-0 shrink-0"
+        style={{ width: `${Math.max((meta / teto) * 100, 1)}%`, borderTop: `2px dashed ${COR_META}` }}
+      />
+      <b className="tabular-nums" style={{ color: COR_META }}>
+        {fmt(meta, formato)}
+      </b>
+      <span style={{ color: "var(--text-muted)" }}>· {rotulo}</span>
     </div>
   );
 }
