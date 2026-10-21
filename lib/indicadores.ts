@@ -304,8 +304,17 @@ export const PESSOAS: Pessoa[] = [
   { chave: "julia", nome: "Julia Lopes — BDR", kpis: BDR_PADRAO },
   { chave: "taemy", nome: "Taemy Mendonça — BDR", kpis: BDR_PADRAO },
   { chave: "jessica", nome: "Jéssica Alves — BDR (rampagem)", kpis: BDR_RAMPA },
-  { chave: "joao", nome: "João Camilo — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
-  { chave: "gabriel", nome: "Gabriel Donadeli — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
+  // Os dois Closers saíram do N5 de Cerquilho em 21/10/2026, a pedido do dono
+  // do projeto: João Camilo não tem unidade nem nível vinculados, e Gabriel
+  // Donadeli é o Owner do sistema. Ninguém some do painel por causa disso — o
+  // resultado de Closer continua agregado no N4 (MRR, reuniões, taxas), que é
+  // onde ele é cobrado; o que deixa de existir é a linha individual de cada um.
+  //
+  // Para religar, basta descomentar. Os lançamentos que eles já tinham (seis
+  // valores de cada, em ago/2026) continuam no banco sob as chaves `joao_*` e
+  // `gabriel_*` e reaparecem junto — nada foi apagado.
+  // { chave: "joao", nome: "João Camilo — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
+  // { chave: "gabriel", nome: "Gabriel Donadeli — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
 ];
 
 // Times das demais unidades (informados em 15/10/2026). Closers usam a mesma
