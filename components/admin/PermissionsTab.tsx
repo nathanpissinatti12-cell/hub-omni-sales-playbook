@@ -237,15 +237,17 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
           ela vê dentro do painel.
 
           A exceção é o owner: ele vê o painel inteiro de qualquer unidade sem
-          vínculo nenhum. Os campos continuam habilitados de propósito — o dia
-          em que ele deixar de ser owner, o vínculo que já estava ali passa a
-          valer, em vez de o acesso sumir de uma vez. */}
-      {accessLevel === "owner" && (
+          vínculo nenhum, então os campos somem em vez de ficarem pedindo uma
+          unidade que o acesso dele não usa. Ao deixar de ser owner, a pessoa
+          fica sem painel até alguém definir unidade e nível — falha fechado, em
+          vez de um vínculo antigo voltando a valer sozinho. */}
+      {accessLevel === "owner" ? (
         <p className="mt-3 text-xs" style={{ color: "var(--text-muted)" }}>
-          Owner vê o painel inteiro de todas as unidades — os campos abaixo não
-          são necessários. Preencher serve só para quando o nível mudar.
+          Owner vê o painel inteiro de todas as unidades, em todos os níveis — não
+          há unidade nem nível a escolher.
         </p>
-      )}
+      ) : (
+        <>
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <label className="text-xs">
           <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
@@ -320,6 +322,8 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
         <p className="mt-1.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
           {NIVEIS_PAINEL.find((n) => n.valor === nivelPainel)?.descricao}
         </p>
+      )}
+        </>
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">

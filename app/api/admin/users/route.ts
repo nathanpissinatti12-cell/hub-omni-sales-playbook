@@ -31,9 +31,12 @@ export async function POST(req: Request) {
   const password = body?.password ?? "";
   const accessLevel = body?.accessLevel as AccessLevel | undefined;
   const bdrLevel = body?.bdrLevel as BdrLevel | undefined;
-  const unidade = body?.unidade || null;
-  const pessoaChave = body?.pessoaChave || null;
-  const nivelPainel = (body?.nivelPainel || null) as NivelPainel | null;
+  // Owner não tem vínculo: ele vê o painel inteiro de todas as unidades sem
+  // passar por este eixo. Ver o comentário no PATCH.
+  const ehOwnerAgora = body?.accessLevel === "owner";
+  const unidade = ehOwnerAgora ? null : body?.unidade || null;
+  const pessoaChave = ehOwnerAgora ? null : body?.pessoaChave || null;
+  const nivelPainel = (ehOwnerAgora ? null : body?.nivelPainel || null) as NivelPainel | null;
 
   if (!name || !email || !password) {
     return NextResponse.json({ error: "Nome, e-mail e senha são obrigatórios." }, { status: 400 });

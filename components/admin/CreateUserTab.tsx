@@ -239,7 +239,15 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
       {/* Painel de Indicadores — eixo separado do nível de acesso acima. Fica
           na criação para o usuário não nascer sem acesso e depender de alguém
           lembrar da aba Permissões: enquanto ninguém lembrava, a pessoa logava
-          e via "você ainda não tem acesso". */}
+          e via "você ainda não tem acesso".
+
+          Owner não tem este eixo: vê o painel inteiro de todas as unidades. */}
+      {accessLevel === "owner" ? (
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          Owner vê o painel inteiro de todas as unidades, em todos os níveis — não há
+          unidade nem nível a escolher.
+        </p>
+      ) : (
       <div className="space-y-2">
         <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
           Painel de Indicadores
@@ -318,6 +326,7 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
             : "Sem nível, a pessoa não abre o Painel de Indicadores. Dá para definir depois, na aba Permissões."}
         </p>
       </div>
+      )}
 
       {accessLevel !== "bdr" && (
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
