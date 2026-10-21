@@ -383,3 +383,38 @@ export async function saveCompanyLookup(input: {
   );
   return rows[0];
 }
+
+/**
+ * Exclusão definitiva de um usuário. Diferente de desativar, que é o caminho
+ * normal: desativado some do login mas mantém histórico, progresso e favoritos.
+ *
+ * O que o banco faz junto (definido nas FKs, não aqui): progresso e favoritos
+ * do playbook são apagados em cascata; histórico do /admin, sugestões e
+ * consultas de CNPJ ficam, com a referência virando nula — o registro de "quem
+ * fez" vira anônimo em vez de desaparecer.
+ *
+ * O que NÃO tem FK e portanto sobrevive apontando para um id que não existe
+ * mais: `atualizado_por` do RMR e `fechado_por` do fechamento de mês. A
+ * consulta usa LEFT JOIN, então nesses lugares o nome passa a aparecer vazio em
+ * vez de quebrar — o lançamento em si continua lá, que é o que importa.
+ */
+export async function deleteUser(id: string): Promise<AdminUser | null> {
+  const { rows } = await adminPool.query(
+    `DELETE FROM admin_users WHERE id = $1 RETURNING ${USER_COLUMNS}`,
+    [id]
+  );
+  return rows[0] ?? null;
+}
+
+/**
+ * Quantos administradores ativos existem. Serve para uma pergunta só: impedir
+ * que o último seja excluído ou desativado, que trancaria o /admin para todo
+ * mundo, sem ninguém que possa reabrir.
+ */
+export async function contarAdministradoresAtivos(): Promise<number> {
+  const { rows } = await adminPool.query(
+    `SELECT COUNT(*)::int AS total FROM admin_users
+      WHERE active = TRUE AND access_level IN ('root', 'owner')`
+  );
+  return rows[0]?.total ?? 0;
+}
