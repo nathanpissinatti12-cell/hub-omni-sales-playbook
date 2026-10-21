@@ -5,6 +5,7 @@ export const ROLE_MODULES: Record<string, number[] | "all"> = {
   bdr: [1, 2, 6],
   closer: [1, 3, 4, 5, 6],
   root: "all",
+  owner: "all",
 };
 
 export function allowedModules(accessLevel: string): number[] | "all" {

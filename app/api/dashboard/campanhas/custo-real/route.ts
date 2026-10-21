@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ehAdministrador } from "@/lib/acessoSistema";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { deleteCustoReal, getCustoReal, upsertCustoReal } from "@/db/custoCampanhaRealQueries";
 
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
 async function exigeRoot() {
   const session = await getSiteSession();
   if (!session) return { erro: NextResponse.json({ error: "Não autenticado." }, { status: 401 }) };
-  if (session.accessLevel !== "root") {
+  if (!ehAdministrador(session.accessLevel)) {
     return { erro: NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 }) };
   }
   return { session };

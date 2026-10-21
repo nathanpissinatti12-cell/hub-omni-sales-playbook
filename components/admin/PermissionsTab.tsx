@@ -164,7 +164,7 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
         </button>
       </div>
 
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+      <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         {ACCESS_LEVEL_OPTIONS.map((opt) => {
           const selected = accessLevel === opt.value;
           return (
@@ -211,7 +211,18 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
       {/* Vínculo com o Painel de Indicadores — eixo separado do nível de acesso.
           Vale para TODO mundo, root incluído: ser root diz o que a pessoa vê no
           sistema e que ela pode abrir qualquer unidade; o nível abaixo diz o que
-          ela vê dentro do painel. */}
+          ela vê dentro do painel.
+
+          A exceção é o owner: ele vê o painel inteiro de qualquer unidade sem
+          vínculo nenhum. Os campos continuam habilitados de propósito — o dia
+          em que ele deixar de ser owner, o vínculo que já estava ali passa a
+          valer, em vez de o acesso sumir de uma vez. */}
+      {accessLevel === "owner" && (
+        <p className="mt-3 text-xs" style={{ color: "var(--text-muted)" }}>
+          Owner vê o painel inteiro de todas as unidades — os campos abaixo não
+          são necessários. Preencher serve só para quando o nível mudar.
+        </p>
+      )}
       <div className="mt-3 grid gap-2 sm:grid-cols-3">
         <label className="text-xs">
           <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>

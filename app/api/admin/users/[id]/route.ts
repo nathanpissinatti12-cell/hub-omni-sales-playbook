@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
+import { NIVEIS_SISTEMA } from "@/lib/acessoSistema";
 import { getUserById, logAdminAction, updateUserAccess, type AccessLevel, type BdrLevel } from "@/db/adminQueries";
 import { unidadePorSlug } from "@/lib/indicadores";
 import { NIVEIS_PAINEL, type NivelPainel } from "@/lib/permissaoIndicadores";
 
 export const dynamic = "force-dynamic";
 
-const ACCESS_LEVELS: AccessLevel[] = ["bdr", "closer", "root"];
+const ACCESS_LEVELS: readonly AccessLevel[] = NIVEIS_SISTEMA;
 const BDR_LEVELS: BdrLevel[] = ["blue", "gold", "black", "platinum"];
 
 export async function PATCH(req: Request, { params }: { params: { id: string } }) {
@@ -79,7 +80,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     targetUserName: existing.name,
     details:
       `Nível: ${accessLevel}${accessLevel === "bdr" ? ` (${bdrLevel})` : ""} · Ativo: ${active ? "sim" : "não"}` +
-      (accessLevel !== "root" && unidade ? ` · Painel: ${unidade}/${pessoaChave}` : ""),
+      (unidade ? ` · Painel: ${unidade}${pessoaChave ? `/${pessoaChave}` : ""}` : ""),
   });
 
   return NextResponse.json(updated);

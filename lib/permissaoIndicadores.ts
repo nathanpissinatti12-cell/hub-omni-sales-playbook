@@ -3,10 +3,11 @@
 // São DOIS eixos, de propósito — antes `access_level` fazia os dois papéis e não
 // havia como representar supervisão:
 //
-//   access_level (sistema)  root / closer / bdr
+//   access_level (sistema)  owner / root / closer / bdr
 //     → o que a pessoa vê no resto do Hub (dashboard, equipamentos, admin) e se
-//       pode abrir o painel de OUTRAS unidades. Root é o único que atravessa
-//       unidade.
+//       pode abrir o painel de OUTRAS unidades. Root e owner atravessam
+//       unidade; owner, além disso, não passa por este eixo nenhum — ver
+//       lib/acessoSistema.ts.
 //
 //   nivel_painel (dentro do painel)  n3 / n4 / n5
 //     Cada nível vê o seu e os de baixo:
@@ -28,6 +29,7 @@
 // (o que renderiza) e, principalmente, na rota de API — esconder na tela não é
 // proteção, porque qualquer pessoa logada chama a API direto.
 
+import { ehAdministrador, ehOwner } from "./acessoSistema";
 import { unidadePorSlug, type Unidade } from "./indicadores";
 
 export type NivelPainel = "n3" | "n4" | "n5";
@@ -60,14 +62,19 @@ export type Permissao = {
   unidadesPermitidas: string[];
 };
 
-/** Vê o painel inteiro da unidade — N3 incluído. */
+/**
+ * Vê o painel inteiro da unidade — N3 incluído.
+ *
+ * O owner entra sem nível marcado: ele é o dono do sistema, e exigir que
+ * alguém o cadastre como n3 em cada unidade seria configuração sem função.
+ */
 export function ehHead(usuario: UsuarioPainel): boolean {
-  return usuario.nivelPainel === "n3";
+  return ehOwner(usuario.accessLevel) || usuario.nivelPainel === "n3";
 }
 
 /** Vê o time inteiro: n4 por definição, e n3 porque enxerga mais que o n4. */
 export function veTimeTodo(usuario: UsuarioPainel): boolean {
-  return usuario.nivelPainel === "n3" || usuario.nivelPainel === "n4";
+  return ehHead(usuario) || usuario.nivelPainel === "n4";
 }
 
 /**
@@ -76,7 +83,7 @@ export function veTimeTodo(usuario: UsuarioPainel): boolean {
  * abrir as outras quatro.
  */
 export function podeTodasUnidades(usuario: UsuarioPainel): boolean {
-  return usuario.accessLevel === "root";
+  return ehAdministrador(usuario.accessLevel);
 }
 
 export function permissaoDe(usuario: UsuarioPainel): Permissao {
@@ -100,6 +107,8 @@ export function permissaoDe(usuario: UsuarioPainel): Permissao {
  * linha para mostrar; n3 e n4 precisam só da unidade, porque olham o time.
  */
 export function painelLiberado(usuario: UsuarioPainel): boolean {
+  // Owner não passa pela porta: é o único nível que vê o painel sem vínculo.
+  if (ehOwner(usuario.accessLevel)) return true;
   if (usuario.nivelPainel === null) return false;
   if (!usuario.unidade || !unidadePorSlug(usuario.unidade)) return false;
   if (usuario.nivelPainel === "n5") return Boolean(usuario.pessoaChave);
@@ -107,6 +116,7 @@ export function painelLiberado(usuario: UsuarioPainel): boolean {
 }
 
 export function podeAbrirUnidade(usuario: UsuarioPainel, slug: string): boolean {
+  if (ehOwner(usuario.accessLevel)) return Boolean(unidadePorSlug(slug));
   if (usuario.nivelPainel === null) return false;
   if (podeTodasUnidades(usuario)) return Boolean(unidadePorSlug(slug));
   return painelLiberado(usuario) && usuario.unidade === slug;
