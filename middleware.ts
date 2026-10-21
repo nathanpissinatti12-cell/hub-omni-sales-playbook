@@ -1,5 +1,4 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { ADMIN_SESSION_COOKIE, isValidSessionCookieValue } from "@/lib/adminSession";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
 import { allowedModules } from "@/lib/playbookAccess";
 import { ehAdministrador } from "@/lib/acessoSistema";
@@ -7,29 +6,42 @@ import { ehAdministrador } from "@/lib/acessoSistema";
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // --- /admin e /equipamentos: mesma senha única compartilhada ---
+  // --- /admin e /equipamentos: login individual, nível de administrador ---
+  //
+  // Até 21/10/2026 estas rotas ficavam atrás de uma SENHA ÚNICA compartilhada
+  // (ADMIN_PASSWORD), separada do login de cada pessoa. Saiu a pedido do dono
+  // do projeto, e era o elo fraco do modelo de acesso: senha que todo mundo
+  // digita não identifica ninguém — o histórico do /admin registrava a ação sem
+  // saber quem a fez, e quem soubesse a senha editava permissão de qualquer um,
+  // inclusive se promovendo. Agora quem entra é administrador (root ou owner)
+  // pelo login dele.
   if (
     pathname.startsWith("/admin") ||
     pathname.startsWith("/api/admin") ||
     pathname.startsWith("/equipamentos") ||
     pathname.startsWith("/api/equipamentos")
   ) {
-    const isLoginPage = pathname === "/admin/login";
-    const isLoginApi = pathname === "/api/admin/login";
-    if (isLoginPage || isLoginApi) {
-      return NextResponse.next();
-    }
+    const ehApi = pathname.startsWith("/api/admin") || pathname.startsWith("/api/equipamentos");
+    const cookie = req.cookies.get(SITE_SESSION_COOKIE)?.value;
+    const session = await readSiteSession(cookie);
 
-    const cookie = req.cookies.get(ADMIN_SESSION_COOKIE)?.value;
-    const authenticated = await isValidSessionCookieValue(cookie);
-
-    if (!authenticated) {
-      if (pathname.startsWith("/api/admin") || pathname.startsWith("/api/equipamentos")) {
+    if (!session) {
+      if (ehApi) {
         return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
       }
-      const loginUrl = new URL("/admin/login", req.url);
+      const loginUrl = new URL("/login", req.url);
       loginUrl.searchParams.set("next", pathname);
       return NextResponse.redirect(loginUrl);
+    }
+    // O nível vem do cookie assinado, que é o que o Edge consegue ler sem
+    // banco. Quem muda de nível só sente na próxima entrada — para tirar acesso
+    // na hora, desativar o usuário, que derruba a sessão na primeira rota que
+    // consulta o banco.
+    if (!ehAdministrador(session.accessLevel)) {
+      if (ehApi) {
+        return NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 });
+      }
+      return NextResponse.redirect(new URL("/playbook", req.url));
     }
     return NextResponse.next();
   }
