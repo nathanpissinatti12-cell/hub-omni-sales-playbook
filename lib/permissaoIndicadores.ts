@@ -1,25 +1,47 @@
 // Quem enxerga o quê no Painel de Indicadores.
 //
-// Regra, definida pelo dono do projeto em 15/10/2026:
-//   root        → Head: vê N3, N4 e o N5 inteiro, de qualquer unidade, e lança
-//                 tudo (realizado e meta).
-//   colaborador → vê N4 e SÓ a própria linha do N5, apenas na unidade dele, e
-//                 lança apenas o próprio realizado. Nunca vê N3, nunca vê nota
-//                 ou meta de colega, nunca edita meta.
+// São DOIS eixos, de propósito — antes `access_level` fazia os dois papéis e não
+// havia como representar supervisão:
 //
-// Isto é só o cálculo da permissão. O bloqueio de verdade é feito em dois
-// lugares: na página (o que renderiza) e, principalmente, na rota de API — a
-// tela esconder não é proteção, porque qualquer um pode chamar a API direto.
+//   access_level (sistema)  root / closer / bdr
+//     → o que a pessoa vê no resto do Hub (dashboard, equipamentos, admin) e se
+//       pode abrir o painel de OUTRAS unidades. Root é o único que atravessa
+//       unidade.
+//
+//   nivel_painel (dentro do painel)  n3 / n4 / n5
+//     → n3  painel inteiro da unidade: N3, N4 e todas as pessoas. Único que
+//           edita meta.
+//     → n4  supervisão: N4 e todas as pessoas, SEM o N3. Lança pelo time.
+//     → n5  a própria linha, mais os agregados do N4 (que dão contexto ao
+//           número individual). Lança só o seu.
+//     → null sem acesso nenhum ao painel.
+//
+// Regras definidas pelo dono do projeto: a separação dos eixos e o que cada
+// nível pode, em 21/10/2026; a visão do colaborador, em 15/10/2026.
+//
+// Isto é só o cálculo. O bloqueio de verdade acontece em dois lugares: na página
+// (o que renderiza) e, principalmente, na rota de API — esconder na tela não é
+// proteção, porque qualquer pessoa logada chama a API direto.
 
 import { unidadePorSlug, type Unidade } from "./indicadores";
+
+export type NivelPainel = "n3" | "n4" | "n5";
+
+export const NIVEIS_PAINEL: { valor: NivelPainel; rotulo: string; descricao: string }[] = [
+  { valor: "n3", rotulo: "N3", descricao: "Painel inteiro da unidade e edição de meta" },
+  { valor: "n4", rotulo: "N4", descricao: "Supervisão: o time todo, sem os números do N3" },
+  { valor: "n5", rotulo: "N5", descricao: "Só a própria linha, mais os agregados do N4" },
+];
 
 export type UsuarioPainel = {
   accessLevel: string;
   unidade: string | null;
   pessoaChave: string | null;
+  nivelPainel: NivelPainel | null;
 };
 
 export type Permissao = {
+  /** n3: vê o painel inteiro da unidade. O nome ficou por compatibilidade. */
   ehHead: boolean;
   verN3: boolean;
   /** null = todas as pessoas do N5; string = só essa chave. */
@@ -27,78 +49,126 @@ export type Permissao = {
   podeEditarMeta: boolean;
   podeLimparMes: boolean;
   podeExportar: boolean;
-  /** Unidades que o usuário pode abrir. */
+  /** Unidades que o usuário pode abrir. Vazio = todas (root). */
   unidadesPermitidas: string[];
 };
 
+/** Vê o painel inteiro da unidade — N3 incluído. */
 export function ehHead(usuario: UsuarioPainel): boolean {
+  return usuario.nivelPainel === "n3";
+}
+
+/** Vê o time inteiro: n4 por definição, e n3 porque enxerga mais que o n4. */
+export function veTimeTodo(usuario: UsuarioPainel): boolean {
+  return usuario.nivelPainel === "n3" || usuario.nivelPainel === "n4";
+}
+
+/**
+ * Pode atravessar unidade. É o eixo do SISTEMA, não o do painel: o nível diz o
+ * que a pessoa vê dentro da unidade dela, e ser root é o que dá o direito de
+ * abrir as outras quatro.
+ */
+export function podeTodasUnidades(usuario: UsuarioPainel): boolean {
   return usuario.accessLevel === "root";
 }
 
 export function permissaoDe(usuario: UsuarioPainel): Permissao {
-  if (ehHead(usuario)) {
-    return {
-      ehHead: true,
-      verN3: true,
-      somentePessoa: null,
-      podeEditarMeta: true,
-      podeLimparMes: true,
-      podeExportar: true,
-      unidadesPermitidas: [],
-    };
-  }
+  const n3 = ehHead(usuario);
   return {
-    ehHead: false,
-    verN3: false,
-    somentePessoa: usuario.pessoaChave,
-    podeEditarMeta: false,
-    podeLimparMes: false,
-    podeExportar: false,
-    unidadesPermitidas: usuario.unidade ? [usuario.unidade] : [],
+    ehHead: n3,
+    verN3: n3,
+    // Só o n5 fica preso à própria linha; n3 e n4 veem o time.
+    somentePessoa: veTimeTodo(usuario) ? null : usuario.pessoaChave,
+    podeEditarMeta: n3,
+    podeLimparMes: n3,
+    podeExportar: n3,
+    unidadesPermitidas: podeTodasUnidades(usuario) ? [] : usuario.unidade ? [usuario.unidade] : [],
   };
 }
 
-/** Colaborador sem unidade ou sem pessoa vinculada não tem painel nenhum. */
+/**
+ * Sem nível no painel não há painel nenhum — falha fechado, mesmo para quem é
+ * root no sistema. Quem é n5 ainda precisa da pessoa vinculada, senão não há
+ * linha para mostrar; n3 e n4 precisam só da unidade, porque olham o time.
+ */
 export function painelLiberado(usuario: UsuarioPainel): boolean {
-  if (ehHead(usuario)) return true;
-  return Boolean(usuario.unidade && usuario.pessoaChave && unidadePorSlug(usuario.unidade));
+  if (usuario.nivelPainel === null) return false;
+  if (!usuario.unidade || !unidadePorSlug(usuario.unidade)) return false;
+  if (usuario.nivelPainel === "n5") return Boolean(usuario.pessoaChave);
+  return true;
 }
 
 export function podeAbrirUnidade(usuario: UsuarioPainel, slug: string): boolean {
-  if (ehHead(usuario)) return true;
+  if (usuario.nivelPainel === null) return false;
+  if (podeTodasUnidades(usuario)) return Boolean(unidadePorSlug(slug));
   return painelLiberado(usuario) && usuario.unidade === slug;
 }
 
 /**
- * Chaves de lançamento que o usuário pode LER naquela unidade. Head lê tudo
- * (devolve null). Colaborador lê o N4 e as próprias linhas do N5 — nada de N3,
- * nada de colega.
+ * Chaves de lançamento que o usuário pode LER naquela unidade. null = todas.
+ *
+ * n4 recebe o time inteiro, mas não o N3: é a diferença que faz o papel existir.
  */
 export function chavesLegiveis(usuario: UsuarioPainel, unidade: Unidade): Set<string> | null {
   if (ehHead(usuario)) return null;
+  // Sem acesso ao painel, conjunto vazio — não as chaves do N4. A API já recusa
+  // antes de chegar aqui, mas uma função de permissão não deve devolver nada
+  // legível para quem não tem permissão nenhuma: no dia em que alguém chamar
+  // isto de outro lugar, o vazamento seria silencioso.
+  if (!painelLiberado(usuario)) return new Set<string>();
 
   const permitidas = new Set<string>();
   for (const linha of unidade.n4) {
     if ("id" in linha) permitidas.add(linha.id);
   }
-  const pessoa = unidade.pessoas.find((p) => p.chave === usuario.pessoaChave);
-  if (pessoa) {
+
+  const pessoas = veTimeTodo(usuario)
+    ? unidade.pessoas
+    : unidade.pessoas.filter((p) => p.chave === usuario.pessoaChave);
+  for (const pessoa of pessoas) {
     for (const kpi of pessoa.kpis) permitidas.add(`${pessoa.chave}_${kpi.id}`);
   }
   return permitidas;
 }
 
 /**
- * Pode gravar esse lançamento? Colaborador só grava realizado das próprias
- * linhas do N5 — nem meta, nem N3/N4, nem linha de colega.
+ * Pessoas cujo RMR o usuário pode ler e escrever. null = todas.
+ *
+ * Mesma fonte que o painel usa, em vez da regra repetida dentro da rota: se
+ * amanhã surgir outro nível, muda num lugar só.
+ */
+export function pessoasLegiveis(usuario: UsuarioPainel): string[] | null {
+  // Mesma defesa de `chavesLegiveis`: sem acesso ao painel, lista vazia. Com
+  // vínculo quebrado — n5 apontando para unidade que não existe — isto devolvia
+  // a chave da pessoa mesmo assim.
+  if (!painelLiberado(usuario)) return [];
+  if (veTimeTodo(usuario)) return null;
+  return usuario.pessoaChave ? [usuario.pessoaChave] : [];
+}
+
+/**
+ * Pode gravar esse lançamento?
+ *
+ * Meta é só do n3: meta é compromisso combinado, e quem a edita precisa ver a
+ * operação inteira. n4 lança realizado de qualquer pessoa do time — com uma
+ * consequência que vale saber: o histórico registra o supervisor, não a pessoa.
+ * n5 lança só as próprias linhas.
  */
 export function podeGravar(
   usuario: UsuarioPainel,
   args: { unidade: string; tipo: "real" | "meta"; chave: string }
 ): boolean {
+  if (!podeAbrirUnidade(usuario, args.unidade)) return false;
   if (ehHead(usuario)) return true;
-  if (!painelLiberado(usuario)) return false;
-  if (usuario.unidade !== args.unidade) return false;
   if (args.tipo !== "real") return false;
+
+  const unidade = unidadePorSlug(args.unidade);
+  if (!unidade) return false;
+
+  if (veTimeTodo(usuario)) {
+    // O N4 agregado e qualquer pessoa daquele time.
+    if (unidade.n4.some((l) => "id" in l && l.id === args.chave)) return true;
+    return unidade.pessoas.some((p) => args.chave.startsWith(`${p.chave}_`));
+  }
   return args.chave.startsWith(`${usuario.pessoaChave}_`);
 }

@@ -11,6 +11,8 @@ export type AdminUser = {
   unidade: string | null;
   /** Linha dele no N5 daquela unidade. */
   pessoa_chave: string | null;
+  /** O que vê DENTRO do Painel de Indicadores — eixo separado do access_level. */
+  nivel_painel: "n3" | "n4" | "n5" | null;
   active: boolean;
   created_at: string;
   updated_at: string;
