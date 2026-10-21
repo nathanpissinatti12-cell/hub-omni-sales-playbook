@@ -301,7 +301,11 @@ function bdr(chave: string, nome: string): Pessoa {
 export const PESSOAS: Pessoa[] = [
   { chave: "sara", nome: "Sara Pereira — BDR", kpis: BDR_PADRAO },
   { chave: "jeferson", nome: "Jeferson Nunes — BDR", kpis: BDR_PADRAO },
-  { chave: "julia", nome: "Julia Lopes — BDR", kpis: BDR_PADRAO },
+  // Julia Lopes saiu da empresa em outubro/2026. A linha fica comentada em vez
+  // de apagada porque os 9 lançamentos dela (ago/2026) continuam no banco sob as
+  // chaves `julia_*`: é o histórico do mês, e ele deve continuar batendo com o
+  // que o N4 agregou na época. Descomentar traz tudo de volta.
+  // { chave: "julia", nome: "Julia Lopes — BDR", kpis: BDR_PADRAO },
   { chave: "taemy", nome: "Taemy Mendonça — BDR", kpis: BDR_PADRAO },
   { chave: "jessica", nome: "Jéssica Alves — BDR (rampagem)", kpis: BDR_RAMPA },
   // Os dois Closers saíram do N5 de Cerquilho em 21/10/2026, a pedido do dono
