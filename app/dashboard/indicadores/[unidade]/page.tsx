@@ -58,7 +58,9 @@ export default async function PainelIndicadoresUnidadePage({ params }: { params:
           <p className="mt-1 text-sm" style={{ color: "var(--text-muted)" }}>
             {permissao.ehHead
               ? "N3 Head · N4 Supervisão · N5 Operação · Meta proporcional por dia útil"
-              : `N4 Supervisão · N5 de ${pessoa?.nome ?? "você"} · Meta proporcional por dia útil`}
+              : permissao.verN4
+                ? "N4 Supervisão · N5 do time · Meta proporcional por dia útil"
+                : `N5 de ${pessoa?.nome ?? "você"} · Meta proporcional por dia útil`}
           </p>
         </div>
 
