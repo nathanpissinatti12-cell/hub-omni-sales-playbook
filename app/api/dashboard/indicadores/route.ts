@@ -5,6 +5,7 @@ import {
   limparRealizados,
   listFechamentos,
   listHistorico,
+  listResolucoes,
   listValores,
   mesFechado,
   upsertValor,
@@ -13,6 +14,7 @@ import { mesesValidos, unidadeComVinculos, unidadePorSlug } from "@/lib/indicado
 import {
   chavesLegiveis,
   ehHead,
+  pessoasLegiveis,
   painelLiberado,
   podeAbrirUnidade,
   podeGravar,
@@ -63,11 +65,16 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Sem acesso a esta unidade." }, { status: 403 });
   }
 
-  const [valores, fechamentos, historico] = await Promise.all([
+  const [valores, fechamentos, historico, resolucoes] = await Promise.all([
     listValores(unidade.slug),
     listFechamentos(unidade.slug),
     listHistorico(unidade.slug),
+    listResolucoes(unidade.slug),
   ]);
+
+  // A resolução é texto sobre a dificuldade de uma pessoa — filtra pela mesma
+  // regra do RMR, que é o documento mais próximo disto.
+  const pessoas = pessoasLegiveis(usuario);
 
   const permitidas = chavesLegiveis(usuario, unidade);
   // Filtrar aqui, e não na tela: o colaborador não pode nem receber o número do
@@ -76,6 +83,7 @@ export async function GET(req: Request) {
     valores: permitidas ? valores.filter((v) => permitidas.has(v.chave)) : valores,
     fechamentos,
     historico: permitidas ? historico.filter((h) => permitidas.has(h.chave)) : historico,
+    resolucoes: pessoas ? resolucoes.filter((r) => pessoas.includes(r.pessoa)) : resolucoes,
   });
 }
 
