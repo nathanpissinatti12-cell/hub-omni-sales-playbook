@@ -8,6 +8,7 @@ import { SiteWidgets } from "@/components/SiteWidgets";
 import { getUsuarioPainel } from "@/db/adminQueries";
 import { UNIDADES } from "@/lib/indicadores";
 import { ehAdministrador } from "@/lib/acessoSistema";
+import { PLAYBOOK_VISIVEL } from "@/lib/playbookVisivel";
 import { ehHead } from "@/lib/permissaoIndicadores";
 import { SiteLogoutButton } from "@/components/SiteLogoutButton";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
@@ -62,9 +63,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/assets/onvox-logo-light.png" alt="Onvox" className="h-7 w-auto" />
             </span>
-            <Link href="/playbook" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
-              Playbook de Vendas
-            </Link>
+            {/* Oculto por enquanto — ver lib/playbookVisivel.ts. */}
+            {PLAYBOOK_VISIVEL && (
+              <Link href="/playbook" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
+                Playbook de Vendas
+              </Link>
+            )}
             {ehAdministrador(session?.accessLevel) && (
               <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
                 Dashboard
