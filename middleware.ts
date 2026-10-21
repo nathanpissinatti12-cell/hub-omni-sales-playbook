@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
 import { allowedModules } from "@/lib/playbookAccess";
+import { rotaInicial } from "@/lib/playbookVisivel";
 import { ehAdministrador } from "@/lib/acessoSistema";
 
 export async function middleware(req: NextRequest) {
@@ -41,7 +42,7 @@ export async function middleware(req: NextRequest) {
       if (ehApi) {
         return NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 });
       }
-      return NextResponse.redirect(new URL("/playbook", req.url));
+      return NextResponse.redirect(new URL(rotaInicial(), req.url));
     }
     return NextResponse.next();
   }
@@ -82,7 +83,7 @@ export async function middleware(req: NextRequest) {
         if (pathname.startsWith("/api/dashboard")) {
           return NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 });
         }
-        return NextResponse.redirect(new URL("/playbook", req.url));
+        return NextResponse.redirect(new URL(rotaInicial(), req.url));
       }
       return NextResponse.next();
     }

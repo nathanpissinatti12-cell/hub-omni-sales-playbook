@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { rotaInicial } from "@/lib/playbookVisivel";
 
 function LoginForm() {
   const router = useRouter();
@@ -27,7 +28,7 @@ function LoginForm() {
         setError(data.error || "Não foi possível entrar.");
         return;
       }
-      router.push(searchParams.get("next") || "/playbook");
+      router.push(searchParams.get("next") || rotaInicial());
       router.refresh();
     } catch {
       setError("Erro de conexão. Tente novamente.");
