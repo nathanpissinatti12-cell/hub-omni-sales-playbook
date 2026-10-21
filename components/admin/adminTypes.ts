@@ -64,5 +64,6 @@ export const ACTION_LABELS: Record<string, string> = {
   permissao_alterada: "Permissão alterada",
   usuario_desativado: "Usuário desativado",
   usuario_reativado: "Usuário reativado",
+  usuario_excluido: "Usuário excluído",
   senha_redefinida: "Senha redefinida",
 };

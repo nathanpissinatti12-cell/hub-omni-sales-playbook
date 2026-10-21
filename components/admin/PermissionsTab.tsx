@@ -48,6 +48,11 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
   const [unidade, setUnidade] = useState(user.unidade ?? "");
   const [pessoaChave, setPessoaChave] = useState(user.pessoa_chave ?? "");
   const [nivelPainel, setNivelPainel] = useState<string>(user.nivel_painel ?? "");
+  // Exclusão em dois passos: o primeiro clique só arma, o segundo executa.
+  // `confirm()` do navegador some junto da aba e não diz de quem se trata — num
+  // painel com oito linhas iguais, errar de linha é fácil demais.
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -130,6 +135,24 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
       setErro(corpo?.error ?? "Não foi possível salvar.");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function excluir() {
+    setExcluindo(true);
+    setErro(null);
+    try {
+      const res = await fetch(`/api/admin/users/${user.id}`, { method: "DELETE" });
+      if (res.ok) {
+        // A linha some da lista quando o pai recarrega; nada a limpar aqui.
+        onChanged();
+        return;
+      }
+      const corpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      setErro(corpo?.error ?? "Não foi possível excluir.");
+      setConfirmandoExclusao(false);
+    } finally {
+      setExcluindo(false);
     }
   }
 
@@ -322,7 +345,55 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
         >
           {showPasswordForm ? "Cancelar" : "Trocar senha"}
         </button>
+
+        {/* Excluir fica por último e sem preenchimento: desativar continua
+            sendo o caminho normal — mantém histórico e progresso, e é
+            reversível. */}
+        {confirmandoExclusao ? (
+          <>
+            <span className="text-xs font-semibold" style={{ color: "#DC2626" }}>
+              Excluir {user.name} para sempre?
+            </span>
+            <button
+              type="button"
+              onClick={excluir}
+              disabled={excluindo}
+              className="rounded-md px-3 py-1.5 text-xs font-semibold disabled:opacity-50"
+              style={{ background: "#DC2626", color: "#fff" }}
+            >
+              {excluindo ? "Excluindo..." : "Confirmar exclusão"}
+            </button>
+            <button
+              type="button"
+              onClick={() => setConfirmandoExclusao(false)}
+              className="rounded-md border px-3 py-1.5 text-xs font-semibold"
+              style={{ borderColor: "var(--border)", color: "var(--text)" }}
+            >
+              Cancelar
+            </button>
+          </>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setErro(null);
+              setConfirmandoExclusao(true);
+            }}
+            className="rounded-md border px-3 py-1.5 text-xs font-semibold"
+            style={{ borderColor: "var(--border)", color: "#DC2626" }}
+          >
+            Excluir
+          </button>
+        )}
       </div>
+
+      {confirmandoExclusao && (
+        <p className="mt-2 text-[11px]" style={{ color: "var(--text-muted)" }}>
+          Apaga o login, o progresso e os favoritos do playbook. O histórico do
+          /admin e as sugestões ficam, sem o vínculo. Para só tirar o acesso,
+          use <b>Desativar</b> — é reversível.
+        </p>
+      )}
 
       {showPasswordForm && (
         <div className="mt-3 flex flex-wrap items-center gap-2 rounded-md border p-3" style={{ borderColor: "var(--border)" }}>

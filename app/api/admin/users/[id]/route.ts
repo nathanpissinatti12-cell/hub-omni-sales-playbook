@@ -1,6 +1,16 @@
 import { NextResponse } from "next/server";
 import { NIVEIS_SISTEMA } from "@/lib/acessoSistema";
-import { getUserById, logAdminAction, updateUserAccess, type AccessLevel, type BdrLevel } from "@/db/adminQueries";
+import {
+  contarAdministradoresAtivos,
+  deleteUser,
+  getUserById,
+  logAdminAction,
+  updateUserAccess,
+  type AccessLevel,
+  type BdrLevel,
+} from "@/db/adminQueries";
+import { ehAdministrador } from "@/lib/acessoSistema";
+import { getSiteSession } from "@/lib/getSiteSession";
 import { unidadePorSlug } from "@/lib/indicadores";
 import { NIVEIS_PAINEL, type NivelPainel } from "@/lib/permissaoIndicadores";
 
@@ -65,6 +75,17 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     }
   }
 
+  // Mesma trava do DELETE: a última conta de administrador ativa não pode
+  // perder o nível nem ser desativada, senão ninguém reabre o /admin.
+  const deixaDeSerAdmin = ehAdministrador(existing.access_level) && existing.active
+    && (!active || !ehAdministrador(accessLevel));
+  if (deixaDeSerAdmin && (await contarAdministradoresAtivos()) <= 1) {
+    return NextResponse.json(
+      { error: "Este é o último administrador ativo — sem ele ninguém reabre o /admin." },
+      { status: 400 }
+    );
+  }
+
   const updated = await updateUserAccess(params.id, {
     accessLevel,
     bdrLevel: accessLevel === "bdr" ? (bdrLevel as BdrLevel) : null,
@@ -84,4 +105,54 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   });
 
   return NextResponse.json(updated);
+}
+
+/**
+ * Exclusão definitiva. O caminho normal continua sendo DESATIVAR: o usuário
+ * some do login e o que ele fez continua registrado. Excluir é para quem foi
+ * criado errado ou nunca deveria ter entrado.
+ *
+ * Duas recusas, e as duas existem para não trancar ninguém do lado de fora:
+ * ninguém exclui a si mesmo, e o último administrador ativo não pode ser
+ * excluído — sem ele não há quem reabra o /admin.
+ */
+export async function DELETE(_req: Request, { params }: { params: { id: string } }) {
+  const existing = await getUserById(params.id);
+  if (!existing) {
+    return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
+  }
+
+  const session = await getSiteSession();
+  if (session?.uid === params.id) {
+    return NextResponse.json(
+      { error: "Você não pode excluir o próprio usuário." },
+      { status: 400 }
+    );
+  }
+
+  if (ehAdministrador(existing.access_level) && existing.active) {
+    const administradores = await contarAdministradoresAtivos();
+    if (administradores <= 1) {
+      return NextResponse.json(
+        { error: "Este é o último administrador ativo — excluí-lo trancaria o /admin." },
+        { status: 400 }
+      );
+    }
+  }
+
+  const removido = await deleteUser(params.id);
+  if (!removido) {
+    return NextResponse.json({ error: "Usuário não encontrado." }, { status: 404 });
+  }
+
+  // targetUserId fica nulo de propósito: a linha do histórico sobrevive à
+  // exclusão (a FK é ON DELETE SET NULL) e o nome preserva de quem se tratava.
+  await logAdminAction({
+    action: "usuario_excluido",
+    targetUserId: null,
+    targetUserName: removido.name,
+    details: `${removido.email} · Nível: ${removido.access_level} · Exclusão definitiva`,
+  });
+
+  return NextResponse.json({ ok: true });
 }
