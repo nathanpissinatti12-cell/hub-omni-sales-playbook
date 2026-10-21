@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getUserById, logAdminAction, updateUserAccess, type AccessLevel, type BdrLevel } from "@/db/adminQueries";
 import { unidadePorSlug } from "@/lib/indicadores";
+import { NIVEIS_PAINEL, type NivelPainel } from "@/lib/permissaoIndicadores";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     active?: boolean;
     unidade?: string | null;
     pessoaChave?: string | null;
+    nivelPainel?: string | null;
   } | null;
 
   const accessLevel = (body?.accessLevel as AccessLevel | undefined) ?? existing.access_level;
@@ -26,6 +28,9 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   const active = body?.active ?? existing.active;
   const unidade = body?.unidade === undefined ? existing.unidade : body.unidade || null;
   const pessoaChave = body?.pessoaChave === undefined ? existing.pessoa_chave : body.pessoaChave || null;
+  const nivelPainel = (body?.nivelPainel === undefined ? existing.nivel_painel : body.nivelPainel || null) as
+    | NivelPainel
+    | null;
 
   if (!ACCESS_LEVELS.includes(accessLevel)) {
     return NextResponse.json({ error: "Nível de acesso inválido." }, { status: 400 });
@@ -34,15 +39,28 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: "Nível BDR inválido." }, { status: 400 });
   }
 
-  // O par unidade+pessoa precisa existir de verdade: vínculo quebrado abriria o
-  // painel do colaborador vazio, sem explicar o motivo.
-  if (accessLevel !== "root" && (unidade || pessoaChave)) {
+  if (nivelPainel !== null && !NIVEIS_PAINEL.some((n) => n.valor === nivelPainel)) {
+    return NextResponse.json({ error: "Nível do painel inválido." }, { status: 400 });
+  }
+
+  // O vínculo é validado pelo NÍVEL DO PAINEL, não pelo nível de acesso: desde
+  // que os dois eixos se separaram, um root pode ter nível n5 (vê só a própria
+  // linha) e um bdr pode ter n4. Vínculo quebrado abriria o painel vazio, sem
+  // explicar o motivo.
+  if (nivelPainel !== null) {
     const alvo = unidadePorSlug(unidade ?? "");
     if (!alvo) {
-      return NextResponse.json({ error: "Unidade inválida." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Escolha a unidade do painel para este nível." },
+        { status: 400 }
+      );
     }
-    if (!pessoaChave || !alvo.pessoas.some((p) => p.chave === pessoaChave)) {
-      return NextResponse.json({ error: `Pessoa não encontrada no time de ${alvo.nome}.` }, { status: 400 });
+    // Só o n5 precisa de pessoa: n3 e n4 olham o time inteiro.
+    if (nivelPainel === "n5" && (!pessoaChave || !alvo.pessoas.some((p) => p.chave === pessoaChave))) {
+      return NextResponse.json(
+        { error: `Escolha a pessoa do N5 no time de ${alvo.nome}.` },
+        { status: 400 }
+      );
     }
   }
 
@@ -52,6 +70,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     active,
     unidade,
     pessoaChave,
+    nivelPainel,
   });
 
   await logAdminAction({

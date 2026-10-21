@@ -6,7 +6,7 @@ import { listValores } from "@/db/indicadoresQueries";
 import { listRmr } from "@/db/rmrQueries";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { mesesValidos, unidadePorSlug } from "@/lib/indicadores";
-import { painelLiberado, permissaoDe, podeAbrirUnidade } from "@/lib/permissaoIndicadores";
+import { painelLiberado, permissaoDe, pessoasLegiveis, podeAbrirUnidade } from "@/lib/permissaoIndicadores";
 import { normalizarRmr } from "@/lib/rmr";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +55,8 @@ export default async function RmrPage({ params }: { params: { unidade: string } 
 
   const [valores, relatorios] = await Promise.all([
     listValores(unidade.slug),
-    listRmr(unidade.slug, permissao.somentePessoa ? [permissao.somentePessoa] : null),
+    // Mesma função da API, para a página não ter a sua própria versão da regra.
+    listRmr(unidade.slug, pessoasLegiveis(usuario)),
   ]);
 
   // Os lançamentos chegam como lista; o formulário precisa deles por mês, no

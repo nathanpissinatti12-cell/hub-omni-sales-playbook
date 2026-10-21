@@ -1,4 +1,5 @@
 import { adminPool } from "./adminClient";
+import type { NivelPainel, UsuarioPainel } from "@/lib/permissaoIndicadores";
 import { hashPassword } from "@/lib/adminAuth";
 
 export type AccessLevel = "bdr" | "closer" | "root";
@@ -10,28 +11,29 @@ export type AdminUser = {
   email: string;
   access_level: AccessLevel;
   bdr_level: BdrLevel | null;
-  /** Unidade do Painel de Indicadores que este usuário enxerga (só não-root). */
+  /** Unidade do Painel de Indicadores que este usuário enxerga. */
   unidade: string | null;
-  /** Linha dele no N5 daquela unidade — a `chave` da pessoa. */
+  /** Linha dele no N5 daquela unidade — a `chave` da pessoa. Só no nível n5. */
   pessoa_chave: string | null;
+  /** O que vê DENTRO do painel: n3, n4, n5 ou nada. Eixo separado do access_level. */
+  nivel_painel: NivelPainel | null;
   active: boolean;
   created_at: string;
   updated_at: string;
 };
 
 const USER_COLUMNS =
-  "id, name, email, access_level, bdr_level, unidade, pessoa_chave, active, created_at, updated_at";
+  "id, name, email, access_level, bdr_level, unidade, pessoa_chave, nivel_painel, active, created_at, updated_at";
 
 /**
  * Dados que o Painel de Indicadores precisa pra decidir o que mostrar. Vem do
  * banco a cada requisição, e não do cookie de sessão, porque tirar o acesso de
  * alguém tem que valer na hora — cookie assinado continuaria válido até expirar.
  */
-export async function getUsuarioPainel(
-  id: string
-): Promise<{ accessLevel: string; unidade: string | null; pessoaChave: string | null } | null> {
+export async function getUsuarioPainel(id: string): Promise<UsuarioPainel | null> {
   const { rows } = await adminPool.query(
-    `SELECT access_level, unidade, pessoa_chave FROM admin_users WHERE id = $1 AND active = TRUE`,
+    `SELECT access_level, unidade, pessoa_chave, nivel_painel
+       FROM admin_users WHERE id = $1 AND active = TRUE`,
     [id]
   );
   if (rows.length === 0) return null;
@@ -39,6 +41,7 @@ export async function getUsuarioPainel(
     accessLevel: rows[0].access_level,
     unidade: rows[0].unidade,
     pessoaChave: rows[0].pessoa_chave,
+    nivelPainel: rows[0].nivel_painel,
   };
 }
 
@@ -78,15 +81,23 @@ export async function updateUserAccess(
     accessLevel: AccessLevel;
     bdrLevel: BdrLevel | null;
     active: boolean;
-    /** Vínculo com o Painel de Indicadores; ignorado quando o nível é root. */
+    /** Vínculo com o Painel de Indicadores. Vale para QUALQUER nível de acesso. */
     unidade: string | null;
     pessoaChave: string | null;
+    nivelPainel: NivelPainel | null;
   }
 ): Promise<AdminUser | null> {
-  const ehRoot = input.accessLevel === "root";
+  // O vínculo NÃO é mais apagado para root. Antes era dado morto, porque root
+  // via tudo; agora os dois eixos são separados — root é o que a pessoa vê no
+  // sistema, e unidade + nível do painel é o que ela vê no painel. Apagar aqui
+  // tiraria do Head a unidade que ele acabou de escolher.
+  //
+  // A pessoa do N5, essa sim, só faz sentido no nível n5: guardá-la num n3 ou n4
+  // deixaria um vínculo que nada lê e que confunde na próxima edição.
   const { rows } = await adminPool.query(
     `UPDATE admin_users
-     SET access_level = $2, bdr_level = $3, active = $4, unidade = $5, pessoa_chave = $6, updated_at = now()
+     SET access_level = $2, bdr_level = $3, active = $4, unidade = $5, pessoa_chave = $6,
+         nivel_painel = $7, updated_at = now()
      WHERE id = $1
      RETURNING ${USER_COLUMNS}`,
     [
@@ -94,10 +105,9 @@ export async function updateUserAccess(
       input.accessLevel,
       input.accessLevel === "bdr" ? input.bdrLevel : null,
       input.active,
-      // Root vê todas as unidades e não é uma pessoa do N5 — guardar vínculo
-      // nele deixaria dado morto que confunde na próxima leitura.
-      ehRoot ? null : input.unidade,
-      ehRoot ? null : input.pessoaChave,
+      input.unidade,
+      input.nivelPainel === "n5" ? input.pessoaChave : null,
+      input.nivelPainel,
     ]
   );
   return rows[0] ?? null;

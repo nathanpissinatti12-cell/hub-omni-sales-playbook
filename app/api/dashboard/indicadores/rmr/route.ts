@@ -3,7 +3,10 @@ import { getUsuarioPainel } from "@/db/adminQueries";
 import { getRmr, listRmr, upsertRmr } from "@/db/rmrQueries";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { mesesValidos, unidadePorSlug } from "@/lib/indicadores";
-import { painelLiberado, permissaoDe, podeAbrirUnidade, type UsuarioPainel } from "@/lib/permissaoIndicadores";
+// A regra de quem vê o RMR de quem vem do mesmo módulo do painel, não de uma
+// cópia aqui dentro: eram duas implementações da mesma coisa, e um nível novo
+// obrigaria a lembrar das duas.
+import { painelLiberado, pessoasLegiveis, podeAbrirUnidade, type UsuarioPainel } from "@/lib/permissaoIndicadores";
 import { normalizarRmr } from "@/lib/rmr";
 
 export const dynamic = "force-dynamic";
@@ -29,17 +32,6 @@ function exigeUnidade(slug: string | null | undefined) {
     return { erro: NextResponse.json({ error: "Unidade desconhecida." }, { status: 400 }) };
   }
   return { unidade };
-}
-
-/**
- * Quais pessoas este usuário pode ler. null = todas (Head). A lista sai da
- * permissão e nunca do cliente: é o que impede pedir o diagnóstico do colega
- * trocando um parâmetro na URL.
- */
-function pessoasLegiveis(usuario: UsuarioPainel): string[] | null {
-  const permissao = permissaoDe(usuario);
-  if (permissao.somentePessoa === null) return null;
-  return [permissao.somentePessoa];
 }
 
 export async function GET(req: Request) {

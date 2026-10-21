@@ -9,6 +9,7 @@ import {
   type BdrLevel,
 } from "./adminTypes";
 import { UNIDADES, unidadePorSlug } from "@/lib/indicadores";
+import { NIVEIS_PAINEL } from "@/lib/permissaoIndicadores";
 
 export function PermissionsTab({
   users,
@@ -46,6 +47,7 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
   const [active, setActive] = useState(user.active);
   const [unidade, setUnidade] = useState(user.unidade ?? "");
   const [pessoaChave, setPessoaChave] = useState(user.pessoa_chave ?? "");
+  const [nivelPainel, setNivelPainel] = useState<string>(user.nivel_painel ?? "");
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -88,13 +90,19 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
         (accessLevel === "bdr" && bdrLevel !== (user.bdr_level ?? "blue")) ||
         active !== user.active ||
         unidade !== (user.unidade ?? "") ||
-        pessoaChave !== (user.pessoa_chave ?? "")
+        pessoaChave !== (user.pessoa_chave ?? "") ||
+        nivelPainel !== (user.nivel_painel ?? "")
     );
-  }, [accessLevel, bdrLevel, active, unidade, pessoaChave, user]);
+  }, [accessLevel, bdrLevel, active, unidade, pessoaChave, nivelPainel, user]);
 
   // Trocar de unidade invalida a pessoa escolhida: o time é outro.
   useEffect(() => {
-    if (unidade !== (user.unidade ?? "")) setPessoaChave("");
+    if (unidade !== (user.unidade ?? "")) {
+      setPessoaChave("");
+      // O nível também: n5 numa unidade sem a pessoa escolhida seria recusado
+      // pela API, e o erro apareceria só ao salvar.
+      setNivelPainel("");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unidade]);
 
@@ -111,6 +119,7 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
           active,
           unidade: unidade || null,
           pessoaChave: pessoaChave || null,
+          nivelPainel: nivelPainel || null,
         }),
       });
       if (res.ok) {
@@ -199,49 +208,77 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
         </div>
       )}
 
-      {/* Vínculo com o Painel de Indicadores. Root não precisa: vê todas as
-          unidades e não é uma pessoa do N5. */}
-      {accessLevel !== "root" && (
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          <label className="text-xs">
-            <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
-              Painel de Indicadores — unidade
-            </span>
-            <select
-              value={unidade}
-              onChange={(e) => setUnidade(e.target.value)}
-              className="w-full rounded-md border px-2 py-1.5 text-xs"
-              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
-            >
-              <option value="">Sem acesso ao painel</option>
-              {UNIDADES.filter((u) => u.pessoas.length > 0).map((u) => (
-                <option key={u.slug} value={u.slug}>
-                  {u.nome}
-                </option>
-              ))}
-            </select>
-          </label>
+      {/* Vínculo com o Painel de Indicadores — eixo separado do nível de acesso.
+          Vale para TODO mundo, root incluído: ser root diz o que a pessoa vê no
+          sistema e que ela pode abrir qualquer unidade; o nível abaixo diz o que
+          ela vê dentro do painel. */}
+      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+        <label className="text-xs">
+          <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+            Painel — unidade
+          </span>
+          <select
+            value={unidade}
+            onChange={(e) => setUnidade(e.target.value)}
+            className="w-full rounded-md border px-2 py-1.5 text-xs"
+            style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+          >
+            <option value="">Nenhuma</option>
+            {UNIDADES.filter((u) => u.pessoas.length > 0).map((u) => (
+              <option key={u.slug} value={u.slug}>
+                {u.nome}
+              </option>
+            ))}
+          </select>
+        </label>
 
-          <label className="text-xs">
-            <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
-              Pessoa no N5
-            </span>
-            <select
-              value={pessoaChave}
-              onChange={(e) => setPessoaChave(e.target.value)}
-              disabled={!unidade}
-              className="w-full rounded-md border px-2 py-1.5 text-xs disabled:opacity-50"
-              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
-            >
-              <option value="">{unidade ? "Escolha a pessoa" : "Escolha a unidade primeiro"}</option>
-              {(unidadePorSlug(unidade)?.pessoas ?? []).map((p) => (
-                <option key={p.chave} value={p.chave}>
-                  {p.nome}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <label className="text-xs">
+          <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+            Painel — nível
+          </span>
+          <select
+            value={nivelPainel}
+            onChange={(e) => setNivelPainel(e.target.value)}
+            disabled={!unidade}
+            className="w-full rounded-md border px-2 py-1.5 text-xs disabled:opacity-50"
+            style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+          >
+            <option value="">{unidade ? "Sem acesso ao painel" : "Escolha a unidade"}</option>
+            {NIVEIS_PAINEL.map((n) => (
+              <option key={n.valor} value={n.valor}>
+                {n.rotulo}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {/* A pessoa só existe no N5: n3 e n4 olham o time inteiro, então pedir
+            uma linha individual deles seria vínculo que nada lê. */}
+        <label className="text-xs">
+          <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+            Pessoa no N5
+          </span>
+          <select
+            value={pessoaChave}
+            onChange={(e) => setPessoaChave(e.target.value)}
+            disabled={nivelPainel !== "n5"}
+            className="w-full rounded-md border px-2 py-1.5 text-xs disabled:opacity-50"
+            style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+          >
+            <option value="">{nivelPainel === "n5" ? "Escolha a pessoa" : "só no N5"}</option>
+            {(unidadePorSlug(unidade)?.pessoas ?? []).map((p) => (
+              <option key={p.chave} value={p.chave}>
+                {p.nome}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
+      {nivelPainel && (
+        <p className="mt-1.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
+          {NIVEIS_PAINEL.find((n) => n.valor === nivelPainel)?.descricao}
+        </p>
       )}
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
