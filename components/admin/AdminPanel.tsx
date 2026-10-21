@@ -87,9 +87,10 @@ export function AdminPanel() {
     loadHistory();
   }
 
+  // Sair do /admin é sair do Hub: não existe mais sessão separada de admin.
   async function handleLogout() {
-    await fetch("/api/admin/logout", { method: "POST" });
-    router.push("/admin/login");
+    await fetch("/api/logout", { method: "POST" });
+    router.push("/login");
     router.refresh();
   }
 
@@ -98,7 +99,7 @@ export function AdminPanel() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-            Omni Assessoria
+            Onvox
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Painel Administrativo</h1>
         </div>

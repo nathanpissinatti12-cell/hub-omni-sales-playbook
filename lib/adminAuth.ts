@@ -1,9 +1,12 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
-// Hash de senha (para os usuários criados no painel) e verificação da senha
-// única de admin. Usa node:crypto (scrypt) — só roda em API routes (runtime
-// Node.js), nunca no middleware. O cookie de sessão em si fica em
-// lib/adminSession.ts, que é Edge-safe.
+// Hash e verificação de senha dos usuários do Hub. Usa node:crypto (scrypt),
+// então só roda em API routes (runtime Node.js), nunca no middleware.
+//
+// A senha única de /admin saiu em 21/10/2026, junto de `verifyAdminPassword` e
+// do cookie `admin_session` (lib/adminSession.ts): /admin passou a pedir o
+// login individual de um administrador. O cookie de sessão do Hub está em
+// lib/siteSession.ts, que é Edge-safe.
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
@@ -19,19 +22,3 @@ export function verifyPassword(password: string, stored: string): boolean {
   if (candidate.length !== expected.length) return false;
   return timingSafeEqual(candidate, expected);
 }
-
-export function verifyAdminPassword(password: string): boolean {
-  const expected = process.env.ADMIN_PASSWORD;
-  if (!expected) return false;
-  const a = Buffer.from(password);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length) return false;
-  return timingSafeEqual(a, b);
-}
-
-export {
-  ADMIN_SESSION_COOKIE,
-  ADMIN_SESSION_MAX_AGE_SECONDS,
-  createSessionCookieValue,
-  isValidSessionCookieValue,
-} from "./adminSession";
