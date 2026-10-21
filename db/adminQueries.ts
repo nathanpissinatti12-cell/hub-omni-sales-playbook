@@ -55,17 +55,30 @@ export async function listUsers(): Promise<AdminUser[]> {
   return rows;
 }
 
+/**
+ * O vínculo com o Painel de Indicadores entra já na criação. Antes o usuário
+ * nascia sem nada e alguém precisava lembrar de abrir a aba Permissões depois —
+ * e enquanto não lembrasse, a pessoa logava e via "você ainda não tem acesso".
+ *
+ * Mesma regra da edição: `pessoa_chave` só é guardada no nível n5, porque n3 e
+ * n4 olham o time inteiro e um vínculo individual deles não é lido por nada.
+ */
 export async function createUser(input: {
   name: string;
   email: string;
   password: string;
   accessLevel: AccessLevel;
   bdrLevel: BdrLevel | null;
+  unidade?: string | null;
+  pessoaChave?: string | null;
+  nivelPainel?: NivelPainel | null;
 }): Promise<AdminUser> {
   const passwordHash = hashPassword(input.password);
+  const nivelPainel = input.nivelPainel ?? null;
   const { rows } = await adminPool.query(
-    `INSERT INTO admin_users (name, email, password_hash, access_level, bdr_level)
-     VALUES ($1, $2, $3, $4, $5)
+    `INSERT INTO admin_users (name, email, password_hash, access_level, bdr_level,
+                              unidade, pessoa_chave, nivel_painel)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
      RETURNING ${USER_COLUMNS}`,
     [
       input.name,
@@ -73,6 +86,9 @@ export async function createUser(input: {
       passwordHash,
       input.accessLevel,
       input.accessLevel === "bdr" ? input.bdrLevel : null,
+      input.unidade ?? null,
+      nivelPainel === "n5" ? input.pessoaChave ?? null : null,
+      nivelPainel,
     ]
   );
   return rows[0];
