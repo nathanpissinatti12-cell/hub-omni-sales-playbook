@@ -35,13 +35,30 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
   } | null;
 
   const accessLevel = (body?.accessLevel as AccessLevel | undefined) ?? existing.access_level;
+  // Owner vê o painel inteiro de todas as unidades sem passar pelo vínculo, então
+  // ele não é pedido nem guardado — o registro ficaria dizendo uma coisa
+  // (unidade X, nível N4) enquanto o acesso é outro. Consequência que vale
+  // saber: ao deixar de ser owner, a pessoa fica SEM painel até alguém definir
+  // unidade e nível. É a falha fechada de sempre, e é melhor do que um vínculo
+  // antigo voltando a valer sozinho.
+  const ehOwnerAgora = accessLevel === "owner";
   const bdrLevel = (body?.bdrLevel as BdrLevel | undefined) ?? existing.bdr_level;
   const active = body?.active ?? existing.active;
-  const unidade = body?.unidade === undefined ? existing.unidade : body.unidade || null;
-  const pessoaChave = body?.pessoaChave === undefined ? existing.pessoa_chave : body.pessoaChave || null;
-  const nivelPainel = (body?.nivelPainel === undefined ? existing.nivel_painel : body.nivelPainel || null) as
-    | NivelPainel
-    | null;
+  const unidade = ehOwnerAgora
+    ? null
+    : body?.unidade === undefined
+      ? existing.unidade
+      : body.unidade || null;
+  const pessoaChave = ehOwnerAgora
+    ? null
+    : body?.pessoaChave === undefined
+      ? existing.pessoa_chave
+      : body.pessoaChave || null;
+  const nivelPainel = (ehOwnerAgora
+    ? null
+    : body?.nivelPainel === undefined
+      ? existing.nivel_painel
+      : body.nivelPainel || null) as NivelPainel | null;
 
   if (!ACCESS_LEVELS.includes(accessLevel)) {
     return NextResponse.json({ error: "Nível de acesso inválido." }, { status: 400 });
