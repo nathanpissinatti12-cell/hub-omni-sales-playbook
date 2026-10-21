@@ -23,10 +23,17 @@ const inter = Inter({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Playbook de Vendas",
-  description: "Playbook de vendas e dashboard de performance",
-};
+// O título da aba e o que vai no favorito seguem a mesma chave do menu: com o
+// playbook oculto, a aba não deve anunciar a área escondida.
+export const metadata: Metadata = PLAYBOOK_VISIVEL
+  ? {
+      title: "Playbook de Vendas",
+      description: "Playbook de vendas e dashboard de performance",
+    }
+  : {
+      title: "Hub Onvox",
+      description: "Painel de indicadores e dashboard de performance",
+    };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await readSiteSession(cookies().get(SITE_SESSION_COOKIE)?.value);
