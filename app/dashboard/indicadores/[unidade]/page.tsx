@@ -1,16 +1,22 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PainelIndicadores } from "@/components/dashboard/indicadores/PainelIndicadores";
-import { getUsuarioPainel } from "@/db/adminQueries";
+import { getUsuarioPainel, pessoasVinculadas } from "@/db/adminQueries";
 import { getSiteSession } from "@/lib/getSiteSession";
-import { unidadePorSlug } from "@/lib/indicadores";
+import { unidadeComVinculos, unidadePorSlug } from "@/lib/indicadores";
 import { painelLiberado, permissaoDe, podeAbrirUnidade } from "@/lib/permissaoIndicadores";
 
 export const dynamic = "force-dynamic";
 
 export default async function PainelIndicadoresUnidadePage({ params }: { params: { unidade: string } }) {
-  const unidade = unidadePorSlug(params.unidade);
-  if (!unidade) notFound();
+  const cadastrada = unidadePorSlug(params.unidade);
+  if (!cadastrada) notFound();
+
+  // Quem aparece no N5 são as pessoas vinculadas a um usuário desta unidade. O
+  // cadastro do time continua definindo as metas e os indicadores de cada uma;
+  // o vínculo decide só quem entra na tela.
+  const unidade = unidadeComVinculos(cadastrada, await pessoasVinculadas(cadastrada.slug));
+  const semVinculo = cadastrada.pessoas.length > 0 && unidade.pessoas.length === 0;
 
   // O middleware já garantiu que existe sessão; aqui resolvemos O QUE a pessoa
   // vê. O vínculo vem do banco a cada abertura, não do cookie.
@@ -88,7 +94,7 @@ export default async function PainelIndicadoresUnidadePage({ params }: { params:
           para não exibir o número de outra pessoa.
         </Aviso>
       ) : (
-        <PainelIndicadores unidade={unidade} permissao={permissao} />
+        <PainelIndicadores unidade={unidade} permissao={permissao} semVinculo={semVinculo} />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSiteSession } from "@/lib/getSiteSession";
-import { getUsuarioPainel } from "@/db/adminQueries";
+import { getUsuarioPainel, pessoasVinculadas } from "@/db/adminQueries";
 import {
   limparRealizados,
   listFechamentos,
@@ -9,7 +9,7 @@ import {
   mesFechado,
   upsertValor,
 } from "@/db/indicadoresQueries";
-import { mesesValidos, unidadePorSlug } from "@/lib/indicadores";
+import { mesesValidos, unidadeComVinculos, unidadePorSlug } from "@/lib/indicadores";
 import {
   chavesLegiveis,
   ehHead,
@@ -40,19 +40,23 @@ const TIPOS = ["real", "meta"] as const;
 
 // A unidade nunca vem do cliente sem passar por aqui: slug fora de UNIDADES é
 // recusado, então não há como gravar lançamento numa unidade inventada.
-function exigeUnidade(slug: string | null | undefined) {
-  const unidade = unidadePorSlug(slug?.trim());
-  if (!unidade) {
+//
+// O N5 sai daqui já reduzido a quem está vinculado a um usuário — mesma lista
+// que a tela mostra. Fosse o time cadastrado inteiro, a API continuaria
+// devolvendo (e aceitando) lançamento de quem não aparece mais no painel.
+async function exigeUnidade(slug: string | null | undefined) {
+  const bruta = unidadePorSlug(slug?.trim());
+  if (!bruta) {
     return { erro: NextResponse.json({ error: "Unidade desconhecida." }, { status: 400 }) };
   }
-  return { unidade };
+  return { unidade: unidadeComVinculos(bruta, await pessoasVinculadas(bruta.slug)) };
 }
 
 export async function GET(req: Request) {
   const { erro, usuario } = await exigeUsuario();
   if (erro) return erro;
 
-  const { erro: erroUnidade, unidade } = exigeUnidade(new URL(req.url).searchParams.get("unidade"));
+  const { erro: erroUnidade, unidade } = await exigeUnidade(new URL(req.url).searchParams.get("unidade"));
   if (erroUnidade) return erroUnidade;
 
   if (!podeAbrirUnidade(usuario, unidade.slug)) {
@@ -87,7 +91,7 @@ export async function POST(req: Request) {
     valor?: number | string | null;
   } | null;
 
-  const { erro: erroUnidade, unidade } = exigeUnidade(body?.unidade);
+  const { erro: erroUnidade, unidade } = await exigeUnidade(body?.unidade);
   if (erroUnidade) return erroUnidade;
 
   const mes = body?.mes?.trim();
@@ -104,7 +108,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Chave do indicador é obrigatória." }, { status: 400 });
   }
 
-  if (!podeGravar(usuario, { unidade: unidade.slug, tipo: tipo as "real" | "meta", chave })) {
+  if (!podeGravar(usuario, { unidade, tipo: tipo as "real" | "meta", chave })) {
     return NextResponse.json(
       { error: "Você só pode lançar o próprio realizado, na sua unidade." },
       { status: 403 }
@@ -154,7 +158,7 @@ export async function DELETE(req: Request) {
   }
 
   const { searchParams } = new URL(req.url);
-  const { erro: erroUnidade, unidade } = exigeUnidade(searchParams.get("unidade"));
+  const { erro: erroUnidade, unidade } = await exigeUnidade(searchParams.get("unidade"));
   if (erroUnidade) return erroUnidade;
 
   const mes = searchParams.get("mes");

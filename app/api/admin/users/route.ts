@@ -61,9 +61,15 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    if (nivelPainel === "n5" && (!pessoaChave || !alvo.pessoas.some((p) => p.chave === pessoaChave))) {
+    if (nivelPainel === "n5" && !pessoaChave) {
       return NextResponse.json(
         { error: `Escolha a pessoa do N5 no time de ${alvo.nome}.` },
+        { status: 400 }
+      );
+    }
+    if (pessoaChave && !alvo.pessoas.some((p) => p.chave === pessoaChave)) {
+      return NextResponse.json(
+        { error: `Essa pessoa não está no time de ${alvo.nome}.` },
         { status: 400 }
       );
     }

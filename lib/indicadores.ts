@@ -380,6 +380,20 @@ export const UNIDADES: Unidade[] = [
 /** Unidade do painel que já existia antes da separação — recebe o histórico. */
 export const UNIDADE_PADRAO = "cerquilho";
 
+/**
+ * A mesma unidade, com o N5 reduzido a quem está vinculado a um usuário.
+ *
+ * O cadastro do time (em UNIDADES) continua sendo a fonte das METAS e dos
+ * indicadores de cada pessoa; isto decide apenas QUEM aparece. Separar as duas
+ * coisas é o que permite alguém sair do painel sem perder a definição dos
+ * indicadores dela — e voltar depois, com o histórico inteiro, bastando
+ * revincular o usuário.
+ */
+export function unidadeComVinculos(unidade: Unidade, chaves: Iterable<string>): Unidade {
+  const permitidas = new Set(chaves);
+  return { ...unidade, pessoas: unidade.pessoas.filter((p) => permitidas.has(p.chave)) };
+}
+
 export function unidadePorSlug(slug: string | undefined): Unidade | null {
   return UNIDADES.find((u) => u.slug === slug) ?? null;
 }

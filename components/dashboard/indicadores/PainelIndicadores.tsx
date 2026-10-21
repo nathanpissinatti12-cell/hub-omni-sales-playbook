@@ -134,7 +134,18 @@ function quando(iso: string | null): string {
   )}`;
 }
 
-export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; permissao: Permissao }) {
+export function PainelIndicadores({
+  unidade,
+  permissao,
+  // Separa os dois motivos de o N5 vir vazio: time que ainda não foi cadastrado
+  // no código, e time cadastrado em que ninguém foi vinculado a um usuário. A
+  // saída é a mesma tela, mas o que a pessoa precisa fazer é bem diferente.
+  semVinculo = false,
+}: {
+  unidade: Unidade;
+  permissao: Permissao;
+  semVinculo?: boolean;
+}) {
   const { n3: N3, n4: N4 } = unidade;
   // Colaborador só enxerga a própria linha do N5 — o seletor de pessoa e o
   // comparativo entre pessoas somem junto, senão mostrariam nome de colega.
@@ -952,6 +963,14 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         }
       >
         {pessoa == null ? (
+          semVinculo ? (
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+              O N5 mostra as pessoas vinculadas a um usuário desta unidade, e nenhuma está — por
+              isso a seção está vazia, mesmo com o time cadastrado. O vínculo é feito em{" "}
+              <b>/admin → Permissões</b>, escolhendo a unidade, o nível e a pessoa. O N3 e o N4
+              acima já funcionam normalmente.
+            </p>
+          ) : (
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             O N5 é nominal: cada linha é a meta e a nota de uma pessoa específica. Como o time desta
             unidade ainda não foi cadastrado, não há o que lançar aqui — mostrar o time de outra
@@ -960,6 +979,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
             <code className="mx-1">lib/indicadores.ts</code>. O N3 e o N4 acima já funcionam
             normalmente.
           </p>
+          )
         ) : (
           <>
             {PESSOAS.length > 1 && (

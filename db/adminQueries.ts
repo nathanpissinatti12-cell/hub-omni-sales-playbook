@@ -60,8 +60,8 @@ export async function listUsers(): Promise<AdminUser[]> {
  * nascia sem nada e alguém precisava lembrar de abrir a aba Permissões depois —
  * e enquanto não lembrasse, a pessoa logava e via "você ainda não tem acesso".
  *
- * Mesma regra da edição: `pessoa_chave` só é guardada no nível n5, porque n3 e
- * n4 olham o time inteiro e um vínculo individual deles não é lido por nada.
+ * Mesma regra da edição: `pessoa_chave` vale no n5 (obrigatória) e no n4
+ * (opcional, a linha individual do supervisor), e não no n3.
  */
 export async function createUser(input: {
   name: string;
@@ -87,7 +87,7 @@ export async function createUser(input: {
       input.accessLevel,
       input.accessLevel === "bdr" ? input.bdrLevel : null,
       input.unidade ?? null,
-      nivelPainel === "n5" ? input.pessoaChave ?? null : null,
+      nivelPainel === "n5" || nivelPainel === "n4" ? input.pessoaChave ?? null : null,
       nivelPainel,
     ]
   );
@@ -111,8 +111,11 @@ export async function updateUserAccess(
   // sistema, e unidade + nível do painel é o que ela vê no painel. Apagar aqui
   // tiraria do Head a unidade que ele acabou de escolher.
   //
-  // A pessoa do N5, essa sim, só faz sentido no nível n5: guardá-la num n3 ou n4
-  // deixaria um vínculo que nada lê e que confunde na próxima edição.
+  // A pessoa fica guardada no n5 e no n4, não no n3: o supervisor também tem
+  // linha individual (a Sara é N4 e BDR), e desde que o N5 passou a listar quem
+  // tem vínculo, sem isto a única pessoa do time que ela não veria seria ela
+  // mesma. No n3 não se guarda: o Head olha a operação inteira e não tem linha
+  // nominal — seria vínculo que nada lê.
   const { rows } = await adminPool.query(
     `UPDATE admin_users
      SET access_level = $2, bdr_level = $3, active = $4, unidade = $5, pessoa_chave = $6,
@@ -125,7 +128,7 @@ export async function updateUserAccess(
       input.accessLevel === "bdr" ? input.bdrLevel : null,
       input.active,
       input.unidade,
-      input.nivelPainel === "n5" ? input.pessoaChave : null,
+      input.nivelPainel === "n5" || input.nivelPainel === "n4" ? input.pessoaChave : null,
       input.nivelPainel,
     ]
   );
@@ -417,4 +420,27 @@ export async function contarAdministradoresAtivos(): Promise<number> {
       WHERE active = TRUE AND access_level IN ('root', 'owner')`
   );
   return rows[0]?.total ?? 0;
+}
+
+/**
+ * Chaves de pessoa vinculadas a usuários ATIVOS daquela unidade — é o que
+ * define quem aparece no N5 do painel, decidido em 21/10/2026: "quem deve
+ * aparecer no N5 são as pessoas atreladas ao N5".
+ *
+ * Vale para qualquer nível, não só n5. O caso que obrigou isso é o do
+ * supervisor: a Sara é N4 (vê o time todo) e também tem linha individual de BDR
+ * — se só o nível n5 contasse, a única pessoa do time que ela não veria seria
+ * ela mesma.
+ *
+ * Usuário desativado não conta: tirar o acesso de alguém não deve ser o que
+ * apaga a linha dele do painel, mas também não faz sentido manter no N5 quem
+ * saiu da empresa — por isso `active`.
+ */
+export async function pessoasVinculadas(unidade: string): Promise<string[]> {
+  const { rows } = await adminPool.query(
+    `SELECT DISTINCT pessoa_chave FROM admin_users
+      WHERE active = TRUE AND unidade = $1 AND pessoa_chave IS NOT NULL`,
+    [unidade]
+  );
+  return rows.map((r) => r.pessoa_chave as string);
 }
