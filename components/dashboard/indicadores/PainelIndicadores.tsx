@@ -415,7 +415,9 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
     if (permissao.verN3) {
       for (const l of N3) if (!isGrupo(l)) visiveis.push({ ind: l, chave: l.id });
     }
-    for (const l of N4) if (!isGrupo(l)) visiveis.push({ ind: l, chave: l.id });
+    if (permissao.verN4) {
+      for (const l of N4) if (!isGrupo(l)) visiveis.push({ ind: l, chave: l.id });
+    }
     for (const p of PESSOAS) {
       for (const ind of p.kpis) visiveis.push({ ind, chave: `${p.chave}_${ind.id}` });
     }
@@ -477,15 +479,22 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       }
     }
 
+    // Reuniões e SAL são agregados do N4: quem não vê o nível não vê o cartão.
+    // Para o n5 a faixa fica só com o contador, que é o que vale para ele — o
+    // "x de y abaixo de 85%" conta as linhas dele.
+    const doN4 = permissao.verN4
+      ? [cartao("n4_reun", "Reuniões agendadas"), cartao("n4_sql", "SAL")]
+      : [];
+
     return {
-      cartoes: [mrr, cartao("n4_reun", "Reuniões agendadas"), cartao("n4_sql", "SAL")].filter(
+      cartoes: [mrr, ...doN4].filter(
         (c): c is NonNullable<typeof c> => c !== null
       ),
       foraDaMeta,
       comMeta,
       semLancamento,
     };
-  }, [N3, N4, PESSOAS, permissao.verN3, reais, metasOverride, dtIni, dtFim]);
+  }, [N3, N4, PESSOAS, permissao.verN3, permissao.verN4, reais, metasOverride, dtIni, dtFim]);
 
   // null quando a unidade ainda não tem time cadastrado — o N5 vira aviso.
   const pessoa = PESSOAS.find((p) => p.chave === pessoaSel) ?? PESSOAS[0] ?? null;
@@ -581,7 +590,23 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
   }, [mesAtivo, meses]);
 
   // ---- evolução mensal -----------------------------------------------------
-  const planos = useMemo(() => indicadoresPlanos([...N3, ...N4]), [N3, N4]);
+  // Só os níveis que a pessoa enxerga. Sem o filtro, o seletor de evolução
+  // listaria indicador de N3/N4 para quem não vê aquele nível — e o gráfico
+  // sairia vazio, porque a API nem manda esses lançamentos.
+  const planos = useMemo(
+    () =>
+      indicadoresPlanos([
+        ...(permissao.verN3 ? N3 : []),
+        ...(permissao.verN4 ? N4 : []),
+      ]),
+    [N3, N4, permissao.verN3, permissao.verN4]
+  );
+
+  // O padrão é um indicador do N3; quem não vê o N3 precisa cair no primeiro
+  // indicador que enxerga, senão o seletor abre num item que não está na lista.
+  useEffect(() => {
+    if (planos.length > 0 && !planos.some((r) => r.id === indEvo)) setIndEvo(planos[0].id);
+  }, [planos, indEvo]);
 
   /**
    * Chave de lançamento -> nome legível e formato. O histórico guarda a chave
@@ -891,6 +916,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
       )}
 
       {/* ---------------- N4 ---------------- */}
+      {permissao.verN4 && (
       <Painel titulo="Supervisão" tag="N4" tagCor={COR_N4} desc="9 indicadores agregados por função">
         <Tabela
           defs={N4}
@@ -912,6 +938,7 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
           <GraficoRanking dados={ranking(N4, "")} />
         </Secao>
       </Painel>
+      )}
 
       {/* ---------------- N5 ---------------- */}
       <Painel
@@ -983,36 +1010,54 @@ export function PainelIndicadores({ unidade, permissao }: { unidade: Unidade; pe
         )}
       </Painel>
 
-      {/* ---------------- evolução ---------------- */}
+      {/* ---------------- evolução ----------------
+          Os dois burn-ups são do MRR, que é N3: para quem não vê o N3 eles
+          sairiam como "lance o MRR" — pedindo um lançamento que a pessoa não
+          pode fazer. E sem nenhum indicador de N3/N4 visível (o caso do n5) o
+          painel inteiro não tem o que mostrar: a evolução da linha individual
+          abre clicando no nome do indicador, na tabela do N5. */}
+      {(permissao.verN3 || planos.length > 0) && (
       <Painel
         titulo="Evolução e ritmo"
-        desc="Curvas acumuladas do cronograma do ciclo, alimentadas pelo histórico de cada mês registrado."
+        desc={
+          permissao.verN3
+            ? "Curvas acumuladas do cronograma do ciclo, alimentadas pelo histórico de cada mês registrado."
+            : "Histórico mês a mês dos indicadores que você acompanha."
+        }
       >
-        <Secao titulo="Burn-up do trimestre" primeira>
-          <GraficoBurnup
-            serie={serieBurnup(mesesTrimestre)}
-            vazioMsg="Lance o MRR novo (outbound e inbound) para desenhar a curva."
-          />
-        </Secao>
-        <Secao titulo={`Burn-up do ARR — ciclo ${ano}`}>
-          <GraficoBurnup
-            serie={serieBurnup(meses)}
-            vazioMsg="Lance o MRR novo (outbound e inbound) para desenhar a curva."
-          />
-        </Secao>
-        <Secao
-          titulo="Evolução mensal"
-          acao={
-            <Select
-              value={indEvo}
-              onChange={setIndEvo}
-              opcoes={planos.map((r) => ({ valor: r.id, rotulo: r.nome }))}
-            />
-          }
-        >
-          <GraficoEvolucao serie={serieEvolucao} />
-        </Secao>
+        {permissao.verN3 && (
+          <>
+            <Secao titulo="Burn-up do trimestre" primeira>
+              <GraficoBurnup
+                serie={serieBurnup(mesesTrimestre)}
+                vazioMsg="Lance o MRR novo (outbound e inbound) para desenhar a curva."
+              />
+            </Secao>
+            <Secao titulo={`Burn-up do ARR — ciclo ${ano}`}>
+              <GraficoBurnup
+                serie={serieBurnup(meses)}
+                vazioMsg="Lance o MRR novo (outbound e inbound) para desenhar a curva."
+              />
+            </Secao>
+          </>
+        )}
+        {planos.length > 0 && (
+          <Secao
+            titulo="Evolução mensal"
+            primeira={!permissao.verN3}
+            acao={
+              <Select
+                value={indEvo}
+                onChange={setIndEvo}
+                opcoes={planos.map((r) => ({ valor: r.id, rotulo: r.nome }))}
+              />
+            }
+          >
+            <GraficoEvolucao serie={serieEvolucao} />
+          </Secao>
+        )}
       </Painel>
+      )}
 
       {/* ---------------- histórico ---------------- */}
       <Painel

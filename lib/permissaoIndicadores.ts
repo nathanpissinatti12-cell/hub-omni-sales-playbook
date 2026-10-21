@@ -9,15 +9,20 @@
 //       unidade.
 //
 //   nivel_painel (dentro do painel)  n3 / n4 / n5
-//     → n3  painel inteiro da unidade: N3, N4 e todas as pessoas. Único que
-//           edita meta.
-//     → n4  supervisão: N4 e todas as pessoas, SEM o N3. Lança pelo time.
-//     → n5  a própria linha, mais os agregados do N4 (que dão contexto ao
-//           número individual). Lança só o seu.
+//     Cada nível vê o seu e os de baixo:
+//     → n3  o painel inteiro — o próprio N3, o N4 e todas as pessoas. Único
+//           que edita meta.
+//     → n4  o N4 e todas as pessoas, SEM o N3. Lança pelo time.
+//     → n5  só a própria linha. Nem o N4 agregado: abaixo do N5 não há nada.
 //     → null sem acesso nenhum ao painel.
 //
 // Regras definidas pelo dono do projeto: a separação dos eixos e o que cada
 // nível pode, em 21/10/2026; a visão do colaborador, em 15/10/2026.
+//
+// O N5 enxergava os agregados do N4 até 21/10/2026, como contexto do número
+// individual. Saiu quando a regra foi fechada em "cada nível vê do seu para
+// baixo": o agregado do N4 soma o resultado dos colegas, e quem vê o agregado
+// e a própria linha deduz o resto do time.
 //
 // Isto é só o cálculo. O bloqueio de verdade acontece em dois lugares: na página
 // (o que renderiza) e, principalmente, na rota de API — esconder na tela não é
@@ -28,9 +33,9 @@ import { unidadePorSlug, type Unidade } from "./indicadores";
 export type NivelPainel = "n3" | "n4" | "n5";
 
 export const NIVEIS_PAINEL: { valor: NivelPainel; rotulo: string; descricao: string }[] = [
-  { valor: "n3", rotulo: "N3", descricao: "Painel inteiro da unidade e edição de meta" },
-  { valor: "n4", rotulo: "N4", descricao: "Supervisão: o time todo, sem os números do N3" },
-  { valor: "n5", rotulo: "N5", descricao: "Só a própria linha, mais os agregados do N4" },
+  { valor: "n3", rotulo: "N3", descricao: "Painel inteiro: N3, N4, N5 e edição de meta" },
+  { valor: "n4", rotulo: "N4", descricao: "N4 e N5 do time todo, sem os números do N3" },
+  { valor: "n5", rotulo: "N5", descricao: "Só a própria linha do N5" },
 ];
 
 export type UsuarioPainel = {
@@ -44,6 +49,8 @@ export type Permissao = {
   /** n3: vê o painel inteiro da unidade. O nome ficou por compatibilidade. */
   ehHead: boolean;
   verN3: boolean;
+  /** Vê o N4 agregado: n3 e n4. O n5 não. */
+  verN4: boolean;
   /** null = todas as pessoas do N5; string = só essa chave. */
   somentePessoa: string | null;
   podeEditarMeta: boolean;
@@ -77,6 +84,7 @@ export function permissaoDe(usuario: UsuarioPainel): Permissao {
   return {
     ehHead: n3,
     verN3: n3,
+    verN4: veTimeTodo(usuario),
     // Só o n5 fica preso à própria linha; n3 e n4 veem o time.
     somentePessoa: veTimeTodo(usuario) ? null : usuario.pessoaChave,
     podeEditarMeta: n3,
@@ -107,7 +115,8 @@ export function podeAbrirUnidade(usuario: UsuarioPainel, slug: string): boolean 
 /**
  * Chaves de lançamento que o usuário pode LER naquela unidade. null = todas.
  *
- * n4 recebe o time inteiro, mas não o N3: é a diferença que faz o papel existir.
+ * n4 recebe o time inteiro e o N4 agregado, mas não o N3: é a diferença que faz
+ * o papel existir. n5 recebe só as próprias linhas.
  */
 export function chavesLegiveis(usuario: UsuarioPainel, unidade: Unidade): Set<string> | null {
   if (ehHead(usuario)) return null;
@@ -118,8 +127,11 @@ export function chavesLegiveis(usuario: UsuarioPainel, unidade: Unidade): Set<st
   if (!painelLiberado(usuario)) return new Set<string>();
 
   const permitidas = new Set<string>();
-  for (const linha of unidade.n4) {
-    if ("id" in linha) permitidas.add(linha.id);
+  // O N4 agregado é leitura de supervisão — entra para o n4 e fica fora do n5.
+  if (veTimeTodo(usuario)) {
+    for (const linha of unidade.n4) {
+      if ("id" in linha) permitidas.add(linha.id);
+    }
   }
 
   const pessoas = veTimeTodo(usuario)
