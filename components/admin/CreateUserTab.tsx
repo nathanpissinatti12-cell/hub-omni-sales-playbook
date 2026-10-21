@@ -7,6 +7,8 @@ import {
   type AccessLevel,
   type BdrLevel,
 } from "./adminTypes";
+import { UNIDADES, unidadePorSlug } from "@/lib/indicadores";
+import { NIVEIS_PAINEL } from "@/lib/permissaoIndicadores";
 
 export function CreateUserTab({ onCreated }: { onCreated: () => void }) {
   const [mode, setMode] = useState<"single" | "bulk">("single");
@@ -51,6 +53,10 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
   const [password, setPassword] = useState("");
   const [accessLevel, setAccessLevel] = useState<AccessLevel>("bdr");
   const [bdrLevel, setBdrLevel] = useState<BdrLevel>("blue");
+  // Vínculo com o Painel de Indicadores — eixo separado do nível de acesso.
+  const [unidade, setUnidade] = useState("");
+  const [nivelPainel, setNivelPainel] = useState("");
+  const [pessoaChave, setPessoaChave] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -60,6 +66,22 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
     setPassword("");
     setAccessLevel("bdr");
     setBdrLevel("blue");
+    setUnidade("");
+    setNivelPainel("");
+    setPessoaChave("");
+  }
+
+  // Trocar a unidade invalida o que veio dela: o nível sem unidade não é aceito
+  // e a pessoa escolhida é do time da unidade anterior.
+  function mudarUnidade(valor: string) {
+    setUnidade(valor);
+    setNivelPainel("");
+    setPessoaChave("");
+  }
+
+  function mudarNivelPainel(valor: string) {
+    setNivelPainel(valor);
+    if (valor !== "n5") setPessoaChave("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -76,6 +98,9 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
           password,
           accessLevel,
           bdrLevel: accessLevel === "bdr" ? bdrLevel : undefined,
+          unidade: unidade || null,
+          nivelPainel: nivelPainel || null,
+          pessoaChave: nivelPainel === "n5" ? pessoaChave || null : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -209,6 +234,82 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
         </div>
       )}
 
+      {/* Painel de Indicadores — eixo separado do nível de acesso acima. Fica
+          na criação para o usuário não nascer sem acesso e depender de alguém
+          lembrar da aba Permissões: enquanto ninguém lembrava, a pessoa logava
+          e via "você ainda não tem acesso". */}
+      <div className="space-y-2">
+        <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+          Painel de Indicadores
+        </label>
+        <div className="grid gap-2 sm:grid-cols-3">
+          <label className="text-xs">
+            <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+              Unidade
+            </span>
+            <select
+              value={unidade}
+              onChange={(e) => mudarUnidade(e.target.value)}
+              className="w-full rounded-md border px-2 py-2 text-xs"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+            >
+              <option value="">Nenhuma</option>
+              {UNIDADES.filter((u) => u.pessoas.length > 0).map((u) => (
+                <option key={u.slug} value={u.slug}>
+                  {u.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="text-xs">
+            <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+              Nível
+            </span>
+            <select
+              value={nivelPainel}
+              onChange={(e) => mudarNivelPainel(e.target.value)}
+              disabled={!unidade}
+              className="w-full rounded-md border px-2 py-2 text-xs disabled:opacity-50"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+            >
+              <option value="">{unidade ? "Sem acesso ao painel" : "Escolha a unidade"}</option>
+              {NIVEIS_PAINEL.map((n) => (
+                <option key={n.valor} value={n.valor}>
+                  {n.rotulo}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* A pessoa só existe no N5: N3 e N4 olham o time inteiro. */}
+          <label className="text-xs">
+            <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
+              Pessoa no N5
+            </span>
+            <select
+              value={pessoaChave}
+              onChange={(e) => setPessoaChave(e.target.value)}
+              disabled={nivelPainel !== "n5"}
+              className="w-full rounded-md border px-2 py-2 text-xs disabled:opacity-50"
+              style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
+            >
+              <option value="">{nivelPainel === "n5" ? "Escolha a pessoa" : "só no N5"}</option>
+              {(unidadePorSlug(unidade)?.pessoas ?? []).map((p) => (
+                <option key={p.chave} value={p.chave}>
+                  {p.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+          {nivelPainel
+            ? NIVEIS_PAINEL.find((n) => n.valor === nivelPainel)?.descricao
+            : "Sem nível, a pessoa não abre o Painel de Indicadores. Dá para definir depois, na aba Permissões."}
+        </p>
+      </div>
+
       {accessLevel !== "bdr" && (
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
           {selectedAccessDescription}
@@ -306,6 +407,8 @@ function BulkCreateForm({ onCreated }: { onCreated: () => void }) {
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
           Um por linha: <code>Nome, email, nível</code> (bdr / closer / root / owner) — para BDR,
           opcionalmente um 4º campo com o nível BDR (blue / gold / black / platinum, padrão blue).
+          Quem entra por aqui nasce <b>sem acesso ao Painel de Indicadores</b>: a unidade e o nível
+          N3/N4/N5 se definem um a um, na criação &quot;um por vez&quot; ou na aba Permissões.
         </p>
         <textarea
           value={text}
