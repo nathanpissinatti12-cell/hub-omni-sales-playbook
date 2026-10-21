@@ -55,11 +55,14 @@ function rotuloEixo(v: number, formato: Formato): string {
  * Uma coluna por mês com o realizado, e a meta do mês do relatório como régua
  * tracejada atravessando o gráfico.
  *
- * O eixo mostra SÓ quatro números: zero, o menor mês, a meta e o maior mês. As
- * marcas automáticas (211.2, 158.4, 105.6…) não significam nada para quem lê —
- * são divisões da escala, não valores que aconteceram. Os quatro que ficaram são
- * os que respondem "quanto ela fez no melhor e no pior mês, e onde está a
- * régua".
+ * O eixo mostra SÓ o zero e a meta; o valor de cada mês vai escrito em cima da
+ * coluna. As marcas automáticas (211.2, 158.4, 105.6…) não significam nada para
+ * quem lê — são divisões da escala, não valores que aconteceram.
+ *
+ * Escrever o valor na coluna também desfaz a briga por espaço no eixo: o melhor
+ * mês da Sara (179) e a meta (175) ficam a quatro pixels um do outro, e enquanto
+ * os dois eram marca de eixo, um tinha de sumir. Agora cada um tem o seu lugar —
+ * e dá para ler o valor de TODO mês, não só do melhor e do pior.
  *
  * Coluna, não ponto: volume por mês se compara por altura, e barra vazia deixa
  * explícito o mês sem lançamento.
@@ -83,39 +86,20 @@ export function GraficoColunasMensal({
   const mt = 18;
   const mb = 40;
 
-  // A marca do topo é o maior REALIZADO, não o maior entre realizado e meta: com
-  // a meta acima de todos os meses (Jéssica, 154 contra 175), as duas marcas
-  // colidiam e o melhor mês sumia justamente do eixo que existe para mostrá-lo.
   const maior = Math.max(...reais);
-  const menor = Math.min(...reais);
-  // A escala ainda precisa caber a meta, senão a régua sai do gráfico. A folga
-  // evita a coluna mais alta encostar na borda.
-  const escala = Math.max(maior, meta ?? 0) * 1.06 || 1;
+  // A escala precisa caber a meta, senão a régua sai do gráfico, e deixar folga
+  // em cima da coluna mais alta para o rótulo dela não ser cortado.
+  const escala = Math.max(maior, meta ?? 0) * 1.14 || 1;
   const y = (v: number) => mt + (1 - v / escala) * (H - mt - mb);
   const pw = (W - ml - mr) / serie.length;
 
-  // Zero, menor, meta e maior — mas rótulo colado em rótulo fica ilegível, e
-  // "mesmo pixel" não bastava como critério: o melhor mês da Sara é 179 e a meta
-  // é 175, quatro pixels de distância, e os dois textos saíram sobrepostos.
-  // Agora exige 13px de folga, que é a altura da fonte do eixo.
-  //
-  // A ordem decide quem sobrevive à colisão, e a meta vai por último de
-  // propósito: a régua já é visível pela linha tracejada e pela legenda, que diz
-  // o valor dela. O maior e o menor mês só existem como rótulo — se eles caírem,
-  // a informação some.
-  const candidatas: { v: number; destaque: boolean }[] = [
-    { v: 0, destaque: false },
-    { v: menor, destaque: false },
-    { v: maior, destaque: false },
-    ...(meta !== null ? [{ v: meta, destaque: true }] : []),
-  ];
-  const postas: number[] = [];
-  const eixo = candidatas.filter((m) => {
-    const pos = y(m.v);
-    if (postas.some((p) => Math.abs(p - pos) < 13)) return false;
-    postas.push(pos);
-    return true;
-  });
+  // O eixo guarda só o zero e a META. O valor de cada mês passou a ser escrito
+  // EM CIMA da coluna, que resolve de uma vez o problema dos rótulos colados:
+  // antes o melhor mês (179) e a meta (175) disputavam o mesmo lugar no eixo, e
+  // um dos dois tinha de sumir. Agora cada um tem o seu espaço — e dá para ler o
+  // valor de todo mês, não só do melhor e do pior.
+  const eixo: { v: number; destaque: boolean }[] = [{ v: 0, destaque: false }];
+  if (meta !== null) eixo.push({ v: meta, destaque: true });
 
   return (
     <>
@@ -157,14 +141,28 @@ export function GraficoColunasMensal({
           return (
             <g key={d.rotulo + i}>
               {d.real !== null && (
-                <rect
-                  x={cx - bw / 2}
-                  y={y(d.real)}
-                  width={bw}
-                  height={Math.max(y(0) - y(d.real), 2)}
-                  fill={corAreaDe(d.pct)}
-                  rx={3}
-                />
+                <>
+                  <rect
+                    x={cx - bw / 2}
+                    y={y(d.real)}
+                    width={bw}
+                    height={Math.max(y(0) - y(d.real), 2)}
+                    fill={corAreaDe(d.pct)}
+                    rx={3}
+                  />
+                  {/* O número em cima da coluna, na cor do semáforo: é o que
+                      mostra "passou da meta" sem o leitor medir altura. */}
+                  <text
+                    x={cx}
+                    y={y(d.real) - 6}
+                    fontSize="10.5"
+                    fontWeight={700}
+                    fill={corDe(d.pct)}
+                    textAnchor="middle"
+                  >
+                    {rotuloEixo(d.real, formato)}
+                  </text>
+                </>
               )}
               <text x={cx} y={H - mb + 18} fontSize="9.5" fill="var(--text-muted)" textAnchor="middle">
                 {d.rotulo}
