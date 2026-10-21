@@ -81,7 +81,9 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
 
   function mudarNivelPainel(valor: string) {
     setNivelPainel(valor);
-    if (valor !== "n5") setPessoaChave("");
+    // A linha individual existe no N5 (obrigatória) e no N4 (opcional, a do
+    // supervisor). No N3 não há linha nominal, então o que estava escolhido sai.
+    if (valor !== "n5" && valor !== "n4") setPessoaChave("");
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -100,7 +102,7 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
           bdrLevel: accessLevel === "bdr" ? bdrLevel : undefined,
           unidade: unidade || null,
           nivelPainel: nivelPainel || null,
-          pessoaChave: nivelPainel === "n5" ? pessoaChave || null : null,
+          pessoaChave: nivelPainel === "n5" || nivelPainel === "n4" ? pessoaChave || null : null,
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -282,19 +284,26 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
             </select>
           </label>
 
-          {/* A pessoa só existe no N5: N3 e N4 olham o time inteiro. */}
+          {/* Obrigatória no N5, opcional no N4 (a linha individual do
+              supervisor). No N3 não existe. */}
           <label className="text-xs">
             <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
-              Pessoa no N5
+              Linha individual no N5
             </span>
             <select
               value={pessoaChave}
               onChange={(e) => setPessoaChave(e.target.value)}
-              disabled={nivelPainel !== "n5"}
+              disabled={nivelPainel !== "n5" && nivelPainel !== "n4"}
               className="w-full rounded-md border px-2 py-2 text-xs disabled:opacity-50"
               style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
             >
-              <option value="">{nivelPainel === "n5" ? "Escolha a pessoa" : "só no N5"}</option>
+              <option value="">
+                {nivelPainel === "n5"
+                  ? "Escolha a pessoa"
+                  : nivelPainel === "n4"
+                    ? "Nenhuma (opcional)"
+                    : "só no N4 e no N5"}
+              </option>
               {(unidadePorSlug(unidade)?.pessoas ?? []).map((p) => (
                 <option key={p.chave} value={p.chave}>
                   {p.nome}

@@ -178,14 +178,15 @@ export function pessoasLegiveis(usuario: UsuarioPainel): string[] | null {
  */
 export function podeGravar(
   usuario: UsuarioPainel,
-  args: { unidade: string; tipo: "real" | "meta"; chave: string }
+  // A unidade entra resolvida, e não como slug: quem chama já filtrou o N5
+  // pelos vínculos, e refazer a busca aqui devolveria o time cadastrado inteiro
+  // — abrindo lançamento em nome de quem não aparece mais no painel.
+  args: { unidade: Unidade; tipo: "real" | "meta"; chave: string }
 ): boolean {
-  if (!podeAbrirUnidade(usuario, args.unidade)) return false;
+  const unidade = args.unidade;
+  if (!podeAbrirUnidade(usuario, unidade.slug)) return false;
   if (ehHead(usuario)) return true;
   if (args.tipo !== "real") return false;
-
-  const unidade = unidadePorSlug(args.unidade);
-  if (!unidade) return false;
 
   if (veTimeTodo(usuario)) {
     // O N4 agregado e qualquer pessoa daquele time.

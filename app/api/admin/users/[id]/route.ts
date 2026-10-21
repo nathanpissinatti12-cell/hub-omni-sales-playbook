@@ -66,10 +66,18 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
         { status: 400 }
       );
     }
-    // Só o n5 precisa de pessoa: n3 e n4 olham o time inteiro.
-    if (nivelPainel === "n5" && (!pessoaChave || !alvo.pessoas.some((p) => p.chave === pessoaChave))) {
+    // O n5 PRECISA de pessoa; o n4 pode ter (é a linha individual do supervisor,
+    // que também aparece no N5). Em ambos, a pessoa tem que ser do time daquela
+    // unidade — senão o vínculo aponta para alguém que não existe ali.
+    if (nivelPainel === "n5" && !pessoaChave) {
       return NextResponse.json(
         { error: `Escolha a pessoa do N5 no time de ${alvo.nome}.` },
+        { status: 400 }
+      );
+    }
+    if (pessoaChave && !alvo.pessoas.some((p) => p.chave === pessoaChave)) {
+      return NextResponse.json(
+        { error: `Essa pessoa não está no time de ${alvo.nome}.` },
         { status: 400 }
       );
     }

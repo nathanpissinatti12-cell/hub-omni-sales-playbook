@@ -286,20 +286,27 @@ function UserRow({ user, onChanged }: { user: AdminUser; onChanged: () => void }
           </select>
         </label>
 
-        {/* A pessoa só existe no N5: n3 e n4 olham o time inteiro, então pedir
-            uma linha individual deles seria vínculo que nada lê. */}
+        {/* Obrigatória no N5 e opcional no N4 — é a linha individual do
+            supervisor, que também aparece na seção N5 do painel. No N3 não
+            existe: o Head olha a operação inteira, sem linha nominal. */}
         <label className="text-xs">
           <span className="mb-1 block font-semibold" style={{ color: "var(--text-muted)" }}>
-            Pessoa no N5
+            Linha individual no N5
           </span>
           <select
             value={pessoaChave}
             onChange={(e) => setPessoaChave(e.target.value)}
-            disabled={nivelPainel !== "n5"}
+            disabled={nivelPainel !== "n5" && nivelPainel !== "n4"}
             className="w-full rounded-md border px-2 py-1.5 text-xs disabled:opacity-50"
             style={{ borderColor: "var(--border)", background: "var(--surface)", color: "var(--text)" }}
           >
-            <option value="">{nivelPainel === "n5" ? "Escolha a pessoa" : "só no N5"}</option>
+            <option value="">
+              {nivelPainel === "n5"
+                ? "Escolha a pessoa"
+                : nivelPainel === "n4"
+                  ? "Nenhuma (opcional)"
+                  : "só no N4 e no N5"}
+            </option>
             {(unidadePorSlug(unidade)?.pessoas ?? []).map((p) => (
               <option key={p.chave} value={p.chave}>
                 {p.nome}

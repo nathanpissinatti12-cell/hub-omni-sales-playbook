@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { FormularioRmr } from "@/components/dashboard/indicadores/FormularioRmr";
-import { getUsuarioPainel } from "@/db/adminQueries";
+import { getUsuarioPainel, pessoasVinculadas } from "@/db/adminQueries";
 import { listValores } from "@/db/indicadoresQueries";
 import { listRmr } from "@/db/rmrQueries";
 import { getSiteSession } from "@/lib/getSiteSession";
-import { mesesValidos, unidadePorSlug } from "@/lib/indicadores";
+import { mesesValidos, unidadeComVinculos, unidadePorSlug } from "@/lib/indicadores";
 import { painelLiberado, permissaoDe, pessoasLegiveis, podeAbrirUnidade } from "@/lib/permissaoIndicadores";
 import { normalizarRmr } from "@/lib/rmr";
 
@@ -21,8 +21,12 @@ export const dynamic = "force-dynamic";
  * vê um relatório vazio e começa a digitar número que o painel já sabe.
  */
 export default async function RmrPage({ params }: { params: { unidade: string } }) {
-  const unidade = unidadePorSlug(params.unidade);
-  if (!unidade) notFound();
+  const cadastrada = unidadePorSlug(params.unidade);
+  if (!cadastrada) notFound();
+
+  // Mesma lista do painel: o RMR é por pessoa, e pessoa aqui é quem está
+  // vinculada a um usuário desta unidade.
+  const unidade = unidadeComVinculos(cadastrada, await pessoasVinculadas(cadastrada.slug));
 
   const session = await getSiteSession();
   if (!session) redirect("/login");
@@ -46,8 +50,9 @@ export default async function RmrPage({ params }: { params: { unidade: string } 
         <Voltar unidade={unidade.slug} />
         <h1 className="text-2xl font-semibold">RMR — {unidade.nome}</h1>
         <p className="rounded-lg border p-4 text-sm" style={{ borderColor: "var(--border)", color: "var(--text-muted)" }}>
-          Esta unidade ainda não tem time cadastrado no N5, e o RMR é por pessoa. Assim que o time
-          existir, cada um terá o seu relatório aqui.
+          O RMR é por pessoa, e ninguém desta unidade está vinculado a uma linha do N5 — então não
+          há relatório a preencher. O vínculo é feito em /admin → Permissões, escolhendo a unidade,
+          o nível e a pessoa; assim que existir, cada um terá o seu relatório aqui.
         </p>
       </div>
     );
