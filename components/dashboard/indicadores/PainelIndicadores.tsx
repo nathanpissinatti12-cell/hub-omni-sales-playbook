@@ -74,10 +74,19 @@ type HistoricoApi = {
   alteradoEm: string;
 };
 
+type ResolucaoApi = {
+  mes: string;
+  pessoa: string;
+  texto: string;
+  atualizadoEm: string;
+  atualizadoPor: string | null;
+};
+
 type RespostaApi = {
   valores: ValorApi[];
   fechamentos: FechamentoApi[];
   historico: HistoricoApi[];
+  resolucoes?: ResolucaoApi[];
 };
 
 /** Estado local: mapa mes -> tipo -> chave -> valor bruto (string, como digitado). */
@@ -185,6 +194,8 @@ export function PainelIndicadores({
   const [edicoes, setEdicoes] = useState<Record<string, Record<string, string>>>({});
   const [carregando, setCarregando] = useState(true);
   const [aviso, setAviso] = useState("");
+  // Resolução da prioridade, por "mes|pessoa". Chega junto da carga do painel.
+  const [resolucoes, setResolucoes] = useState<Record<string, ResolucaoApi>>({});
 
   // ---- carga ---------------------------------------------------------------
   // Uma função só, usada na abertura e no botão "Atualizar" do histórico: a
@@ -210,6 +221,9 @@ export function PainelIndicadores({
       setEdicoes(ed);
       setFechados(Object.fromEntries((resp.fechamentos ?? []).map((f) => [f.mes, f])));
       setHistorico(resp.historico ?? []);
+      setResolucoes(
+        Object.fromEntries((resp.resolucoes ?? []).map((r) => [`${r.mes}|${r.pessoa}`, r]))
+      );
       return m;
     } catch {
       setAviso("Não foi possível carregar os lançamentos.");
@@ -541,6 +555,91 @@ export function PainelIndicadores({
     }
     return out.sort((a, b) => a.pct - b.pct);
   }, [pessoa, reais, metasOverride, dtIni, dtFim]);
+
+  /**
+   * A prioridade do mês: o pior indicador da pessoa selecionada.
+   *
+   * Mesma régua da tabela logo acima — meta PROPORCIONAL aos dias úteis
+   * decorridos, não a cheia. Usar a cheia no meio do mês apontaria como
+   * prioridade qualquer indicador que simplesmente ainda não teve tempo de
+   * acontecer, e a pessoa escreveria um plano para um problema que não existe.
+   *
+   * Só entra o que está ABAIXO da meta: se nada está, não há prioridade a
+   * eleger — é a mesma resposta que o RMR dá na seção 2.
+   */
+  const prioridade = useMemo(() => {
+    if (!pessoa) return null;
+    let pior: { ind: Indicador; chave: string; pct: number; real: number | null; proporcional: number | null } | null =
+      null;
+    for (const ind of pessoa.kpis) {
+      if (ind.meta === null) continue; // baseline não tem o que cobrar
+      const chave = `${pessoa.chave}_${ind.id}`;
+      const { proporcional } = resolveMeta(ind, chave, metasOverride, dtIni, dtFim);
+      const real = num(reais[chave]);
+      const { pct } = status(real, proporcional, ind.dir);
+      if (pct === null || pct >= 100) continue;
+      if (pior === null || pct < pior.pct) pior = { ind, chave, pct, real, proporcional };
+    }
+    return pior;
+  }, [pessoa, reais, metasOverride, dtIni, dtFim]);
+
+  // ---- resolução ----------------------------------------------------------
+  // Mesmo desenho da gravação dos lançamentos: espera uma pausa na digitação e
+  // descarrega na hora quando o campo perde o foco. Sem o debounce seria uma
+  // requisição por tecla; sem o descarregar no blur, sair da tela logo depois
+  // de escrever perderia a última frase em silêncio.
+  const chaveResolucao = pessoa ? `${mesAtivo}|${pessoa.chave}` : "";
+  const [resolucaoEstado, setResolucaoEstado] = useState<EstadoCampo | null>(null);
+  const timerResolucao = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resolucaoPendente = useRef<{ mes: string; pessoa: string; texto: string } | null>(null);
+
+  const enviarResolucao = useCallback(async () => {
+    const p = resolucaoPendente.current;
+    if (!p) return;
+    resolucaoPendente.current = null;
+    if (timerResolucao.current) clearTimeout(timerResolucao.current);
+    setResolucaoEstado("salvando");
+    try {
+      const r = await fetch("/api/dashboard/indicadores/resolucao", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ unidade: unidade.slug, mes: p.mes, pessoa: p.pessoa, texto: p.texto }),
+      });
+      if (!r.ok) throw new Error();
+      setResolucaoEstado("salvo");
+    } catch {
+      setResolucaoEstado("erro");
+      setAviso("Não foi possível salvar a resolução.");
+    }
+  }, [unidade.slug]);
+
+  // Trocar de pessoa, trocar de mês ou sair da página descarrega o que ainda
+  // não foi enviado. O pendente guarda mês e pessoa, então o envio tardio ainda
+  // acerta o destino certo mesmo depois da troca.
+  useEffect(() => {
+    return () => {
+      void enviarResolucao();
+    };
+  }, [chaveResolucao, enviarResolucao]);
+
+  function escreverResolucao(texto: string) {
+    if (!pessoa) return;
+    const chave = `${mesAtivo}|${pessoa.chave}`;
+    setResolucoes((prev) => ({
+      ...prev,
+      [chave]: {
+        mes: mesAtivo,
+        pessoa: pessoa.chave,
+        texto,
+        atualizadoEm: new Date().toISOString(),
+        atualizadoPor: prev[chave]?.atualizadoPor ?? null,
+      },
+    }));
+    resolucaoPendente.current = { mes: mesAtivo, pessoa: pessoa.chave, texto };
+    setResolucaoEstado("pendente");
+    if (timerResolucao.current) clearTimeout(timerResolucao.current);
+    timerResolucao.current = setTimeout(enviarResolucao, 1200);
+  }
 
   // ---- comparativo entre pessoas ------------------------------------------
   const comparativo = useMemo((): ItemComparativo[] => {
@@ -1009,6 +1108,24 @@ export function PainelIndicadores({
               duPeriodo={duPeriodo}
               serieMensal={serieMensal}
             />
+            {/* Prioridade e resolução: o mesmo par do RMR (seção 2 e plano),
+                reduzido ao que cabe no meio do mês — um indicador e uma frase.
+                Fica aqui, logo abaixo da tabela da pessoa, porque é a leitura
+                que ela faz do próprio número; o RMR é o fechamento, e lá o
+                mesmo desvio volta com os cinco porquês e o 5W2H. */}
+            <Secao titulo="Prioridade do mês e resolução">
+              <PrioridadeResolucao
+                prioridade={prioridade}
+                duPeriodo={duPeriodo}
+                texto={resolucoes[chaveResolucao]?.texto ?? ""}
+                atualizadoEm={resolucoes[chaveResolucao]?.atualizadoEm ?? null}
+                atualizadoPor={resolucoes[chaveResolucao]?.atualizadoPor ?? null}
+                estado={resolucaoEstado}
+                travado={mesTravado}
+                onChange={escreverResolucao}
+                onSair={enviarResolucao}
+              />
+            </Secao>
             <Secao titulo="Ranking de atingimento — pessoa selecionada">
               <GraficoRanking dados={rankingPessoa} />
             </Secao>
@@ -1367,6 +1484,116 @@ function Resumo({
         </div>
       </div>
     </section>
+  );
+}
+
+/**
+ * A prioridade do mês de uma pessoa e o que ela pretende fazer a respeito.
+ *
+ * Mostra UM indicador, não três: é o pior deles, pela mesma régua da tabela
+ * acima (meta proporcional aos dias úteis). Três prioridades no meio do mês
+ * viram nenhuma — o Top 3 é do RMR, que é onde o ciclo inteiro é discutido.
+ */
+function PrioridadeResolucao({
+  prioridade,
+  duPeriodo,
+  texto,
+  atualizadoEm,
+  atualizadoPor,
+  estado,
+  travado,
+  onChange,
+  onSair,
+}: {
+  prioridade: { ind: Indicador; pct: number; real: number | null; proporcional: number | null } | null;
+  duPeriodo: number;
+  texto: string;
+  atualizadoEm: string | null;
+  atualizadoPor: string | null;
+  estado: EstadoCampo | null;
+  travado: boolean;
+  onChange: (texto: string) => void;
+  onSair: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      {prioridade === null ? (
+        <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+          Nenhum indicador abaixo da meta proporcional neste período — não há prioridade a eleger.
+        </p>
+      ) : (
+        <div
+          className="rounded-lg border p-4"
+          style={{ borderColor: CORES.bad, background: "var(--surface)" }}
+        >
+          <span
+            className="block text-[10px] font-bold uppercase tracking-wide"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Pior indicador do período
+          </span>
+          <div className="mt-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <b className="text-lg">{prioridade.ind.nome}</b>
+            <span className="text-lg font-bold tabular-nums" style={{ color: corDe(prioridade.pct) }}>
+              {prioridade.pct.toFixed(0)}%
+            </span>
+          </div>
+          <span className="mt-1 block text-sm" style={{ color: "var(--text-muted)" }}>
+            {fmt(prioridade.real, prioridade.ind.fmt)} realizado · meta até hoje{" "}
+            {fmt(prioridade.proporcional, prioridade.ind.fmt)}
+            {/* A falta por dia útil é o que transforma o desvio em plano: diz o
+                tamanho do esforço diário que fecha o mês na meta. */}
+            {prioridade.real !== null && prioridade.proporcional !== null && duPeriodo > 0 && (
+              <> · faltam {fmt(prioridade.proporcional - prioridade.real, prioridade.ind.fmt)} para
+                chegar na régua de hoje</>
+            )}
+          </span>
+        </div>
+      )}
+
+      <div>
+        <div className="mb-1.5 flex flex-wrap items-baseline justify-between gap-2">
+          <label
+            htmlFor="resolucao"
+            className="text-xs font-extrabold uppercase tracking-wide"
+            style={{ color: "var(--text-muted)" }}
+          >
+            Resolução
+          </label>
+          <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+            {estado === "salvando"
+              ? "salvando…"
+              : estado === "erro"
+                ? "não salvou"
+                : estado === "salvo"
+                  ? "salvo"
+                  : atualizadoEm
+                    ? `escrito ${quando(atualizadoEm)}${atualizadoPor ? ` por ${atualizadoPor}` : ""}`
+                    : "salva sozinho"}
+          </span>
+        </div>
+        <textarea
+          id="resolucao"
+          value={texto}
+          onChange={(e) => onChange(e.target.value)}
+          onBlur={onSair}
+          disabled={travado}
+          rows={4}
+          placeholder={
+            prioridade === null
+              ? "Sem indicador abaixo da meta. Se quiser, registre o que está sustentando o resultado."
+              : `O que você vai fazer para recuperar ${prioridade.ind.nome.toLowerCase()} até o fim do mês?`
+          }
+          className="w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none disabled:opacity-60"
+          style={{ borderColor: "var(--border)", color: "var(--text)" }}
+        />
+        <p className="mt-1.5 text-[11px]" style={{ color: "var(--text-muted)" }}>
+          {travado
+            ? "Mês fechado — a resolução deste mês não aceita mais edição."
+            : "Uma ação concreta, com prazo. No fechamento, este mesmo desvio volta no RMR com os cinco porquês e o plano."}
+        </p>
+      </div>
+    </div>
   );
 }
 

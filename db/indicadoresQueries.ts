@@ -232,3 +232,50 @@ export async function reabrirMes(unidade: string, mes: string): Promise<void> {
     mes,
   ]);
 }
+
+export type Resolucao = {
+  mes: string;
+  pessoa: string;
+  texto: string;
+  atualizadoEm: string;
+  atualizadoPor: string | null;
+};
+
+/**
+ * Resoluções de todos os meses da unidade. Mesmo critério de `listValores`: o
+ * volume é de uma linha por pessoa por mês, então ler tudo de uma vez custa
+ * menos que uma chamada por mês selecionado.
+ */
+export async function listResolucoes(unidade: string): Promise<Resolucao[]> {
+  const { rows } = await adminPool.query(
+    `SELECT r.mes,
+            r.pessoa,
+            r.texto,
+            r.atualizado_em AS "atualizadoEm",
+            u.name AS "atualizadoPor"
+       FROM indicadores_resolucao r
+       LEFT JOIN admin_users u ON u.id = r.atualizado_por
+      WHERE r.unidade = $1
+      ORDER BY r.mes`,
+    [unidade]
+  );
+  return rows;
+}
+
+export async function upsertResolucao(input: {
+  unidade: string;
+  mes: string;
+  pessoa: string;
+  texto: string;
+  por: string | null;
+}): Promise<void> {
+  await adminPool.query(
+    `INSERT INTO indicadores_resolucao (unidade, mes, pessoa, texto, atualizado_por)
+     VALUES ($1, $2, $3, $4, $5)
+     ON CONFLICT (unidade, mes, pessoa)
+     DO UPDATE SET texto = EXCLUDED.texto,
+                   atualizado_em = now(),
+                   atualizado_por = EXCLUDED.atualizado_por`,
+    [input.unidade, input.mes, input.pessoa, input.texto, input.por]
+  );
+}

@@ -195,3 +195,21 @@ export function podeGravar(
   }
   return args.chave.startsWith(`${usuario.pessoaChave}_`);
 }
+
+/**
+ * Pode escrever a resolução da prioridade daquela pessoa?
+ *
+ * A pessoa escreve a sua; o supervisor e o Head escrevem a de qualquer um do
+ * time — na prática, quando a resolução sai da conversa da reunião e quem está
+ * com o painel aberto é o supervisor. Quem é n5 não alcança a de ninguém.
+ */
+export function podeGravarResolucao(
+  usuario: UsuarioPainel,
+  unidade: Unidade,
+  pessoa: string
+): boolean {
+  if (!podeAbrirUnidade(usuario, unidade.slug)) return false;
+  if (!unidade.pessoas.some((p) => p.chave === pessoa)) return false;
+  if (veTimeTodo(usuario)) return true;
+  return usuario.pessoaChave === pessoa;
+}
