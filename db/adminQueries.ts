@@ -1,8 +1,11 @@
 import { adminPool } from "./adminClient";
 import type { NivelPainel, UsuarioPainel } from "@/lib/permissaoIndicadores";
 import { hashPassword } from "@/lib/adminAuth";
+import type { AccessLevel } from "@/lib/acessoSistema";
 
-export type AccessLevel = "bdr" | "closer" | "root";
+// O tipo vive em lib/acessoSistema.ts, junto das regras de quem abre o quê;
+// aqui fica o reexport para não quebrar quem já importa de @/db/adminQueries.
+export type { AccessLevel };
 export type BdrLevel = "blue" | "gold" | "black" | "platinum";
 
 export type AdminUser = {

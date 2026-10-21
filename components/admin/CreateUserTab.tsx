@@ -150,7 +150,7 @@ function SingleCreateForm({ onCreated }: { onCreated: () => void }) {
         <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
           Nível de Acesso
         </label>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {ACCESS_LEVEL_OPTIONS.map((opt) => {
             const selected = accessLevel === opt.value;
             return (
@@ -304,8 +304,8 @@ function BulkCreateForm({ onCreated }: { onCreated: () => void }) {
           Lista de usuários
         </label>
         <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-          Um por linha: <code>Nome, email, nível</code> (bdr / closer / root) — para BDR, opcionalmente um 4º
-          campo com o nível BDR (blue / gold / black / platinum, padrão blue).
+          Um por linha: <code>Nome, email, nível</code> (bdr / closer / root / owner) — para BDR,
+          opcionalmente um 4º campo com o nível BDR (blue / gold / black / platinum, padrão blue).
         </p>
         <textarea
           value={text}

@@ -7,6 +7,7 @@ import { MenuOnvox } from "@/components/MenuOnvox";
 import { SiteWidgets } from "@/components/SiteWidgets";
 import { getUsuarioPainel } from "@/db/adminQueries";
 import { UNIDADES } from "@/lib/indicadores";
+import { ehAdministrador } from "@/lib/acessoSistema";
 import { ehHead } from "@/lib/permissaoIndicadores";
 import { SiteLogoutButton } from "@/components/SiteLogoutButton";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
@@ -64,7 +65,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <Link href="/playbook" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
               Playbook de Vendas
             </Link>
-            {session?.accessLevel === "root" && (
+            {ehAdministrador(session?.accessLevel) && (
               <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
                 Dashboard
               </Link>
@@ -73,9 +74,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             {/* Admin e Equipamentos ficam atrás da senha única de administrador.
                 Mostrar o link pra todo mundo levava o colaborador a uma tela de
                 senha que ele não tem — o menu passa a listar só o que a pessoa
-                consegue abrir. Quem tem a senha e não é root ainda chega pela
+                consegue abrir. Quem tem a senha e não é administrador ainda chega pela
                 URL direta. */}
-            {session?.accessLevel === "root" && (
+            {ehAdministrador(session?.accessLevel) && (
               <>
                 <Link href="/admin" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
                   Admin

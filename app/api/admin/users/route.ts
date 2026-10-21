@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { NIVEIS_SISTEMA } from "@/lib/acessoSistema";
 import { createUser, listUsers, logAdminAction, type AccessLevel, type BdrLevel } from "@/db/adminQueries";
 
 export const dynamic = "force-dynamic";
 
-const ACCESS_LEVELS: AccessLevel[] = ["bdr", "closer", "root"];
+const ACCESS_LEVELS: readonly AccessLevel[] = NIVEIS_SISTEMA;
 const BDR_LEVELS: BdrLevel[] = ["blue", "gold", "black", "platinum"];
 
 export async function GET() {

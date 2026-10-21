@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_SESSION_COOKIE, isValidSessionCookieValue } from "@/lib/adminSession";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
 import { allowedModules } from "@/lib/playbookAccess";
+import { ehAdministrador } from "@/lib/acessoSistema";
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -63,9 +64,9 @@ export async function middleware(req: NextRequest) {
     const ehPainelIndicadores =
       pathname.startsWith("/dashboard/indicadores") || pathname.startsWith("/api/dashboard/indicadores");
 
-    // Resto do dashboard: só Root.
+    // Resto do dashboard: só administrador (root e owner).
     if (!ehPainelIndicadores && (pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard"))) {
-      if (session.accessLevel !== "root") {
+      if (!ehAdministrador(session.accessLevel)) {
         if (pathname.startsWith("/api/dashboard")) {
           return NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 });
         }

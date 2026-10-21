@@ -1,4 +1,6 @@
-export type AccessLevel = "bdr" | "closer" | "root";
+import type { AccessLevel } from "@/lib/acessoSistema";
+
+export type { AccessLevel };
 export type BdrLevel = "blue" | "gold" | "black" | "platinum";
 
 export type AdminUser = {
@@ -46,7 +48,8 @@ export type ProgressEntry = {
 export const ACCESS_LEVEL_OPTIONS: { value: AccessLevel; label: string; description: string }[] = [
   { value: "bdr", label: "BDR", description: "Módulos 01, 02, 06" },
   { value: "closer", label: "Closer", description: "Módulos 01, 03, 04, 05, 06" },
-  { value: "root", label: "Root", description: "Acesso total" },
+  { value: "root", label: "Root", description: "Administrador: dashboard, admin e todas as unidades" },
+  { value: "owner", label: "Owner", description: "Acesso irrestrito, sem depender de vínculo" },
 ];
 
 export const BDR_LEVEL_OPTIONS: { value: BdrLevel; label: string; description: string }[] = [
