@@ -325,12 +325,16 @@ export const PESSOAS: Pessoa[] = [
 // meta de MRR de Cerquilho por enquanto — quando a meta de cada unidade for
 // definida, dá pra ajustar por mês direto na coluna Meta do painel, sem mexer
 // aqui.
+// Nomes completos informados em 22/10/2026, junto dos logins. As chaves são as
+// mesmas de 15/10 — só o nome mudou, e trocar a chave começaria o histórico do
+// zero. A função (Closer/BDR) continua como foi cadastrada: o que veio agora foi
+// o nível do painel de cada um, que é outro eixo.
 export const PESSOAS_TATUI: Pessoa[] = [
-  closer("eduarda", "Eduarda — Closer"),
-  closer("jose", "Jose — Closer"),
-  bdr("carlos", "Carlos — BDR"),
-  bdr("aline", "Aline — BDR"),
-  bdr("helena", "Helena — BDR"),
+  closer("jose", "Jose Henrique — Closer"),
+  closer("eduarda", "Eduarda Ciconelo — Closer"),
+  bdr("carlos", "Carlos Carvalho — BDR"),
+  bdr("aline", "Aline Arantes — BDR"),
+  bdr("helena", "Helena Pereira — BDR"),
 ];
 
 // Time de Ribeirão completo em 22/10/2026. As chaves de Otavio e Nathalia são as
