@@ -3,10 +3,14 @@
 // novamente, retomamos dessa mesma forma que já tem".
 //
 // Nada foi apagado. As rotas (/playbook e os seis módulos), o conteúdo em
-// lib/playbookModule*.ts, a busca, o chat, a trilha de progresso e a aba
-// Progresso do /admin continuam inteiros e funcionando. O que esta chave
-// controla é só o que APARECE: o link do topo, os botões da página inicial e
-// para onde vão os redirecionamentos que antes mandavam todo mundo ao playbook.
+// lib/playbookModule*.ts, a busca, o chat e a trilha de progresso continuam
+// inteiros e funcionando. O que esta chave controla é só o que APARECE: o link
+// do topo, os botões da página inicial e para onde vão os redirecionamentos que
+// antes mandavam todo mundo ao playbook.
+//
+// As abas Progresso e Sugestões do /admin foram escondidas junto, em 22/10/2026,
+// mas por fora desta chave: a lista TABS de components/admin/AdminPanel.tsx.
+// Para retomar o playbook, olhe lá também.
 //
 // Para retomar: troque para `true`. Não há mais nada a fazer — nenhum arquivo
 // para restaurar, nenhum dado para reimportar.

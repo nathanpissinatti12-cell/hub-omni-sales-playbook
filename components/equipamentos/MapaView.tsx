@@ -675,8 +675,14 @@ export function MapaView({
               }}
               className="iso-desk absolute"
               style={{
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
+                // clamp mantém a mesa inteira dentro da planta: a etiqueta tem
+                // 128px e fica centrada na posição, então quem foi arrastado
+                // para a borda direita tinha o nome cortado pelo overflow da
+                // cena (visível com 96%, o limite do arrasto, em qualquer
+                // largura de tela). Em px, não em %, porque o que precisa caber
+                // é a etiqueta, que não escala junto com a planta.
+                left: `clamp(64px, ${pos.x}%, calc(100% - 64px))`,
+                top: `clamp(54px, ${pos.y}%, calc(100% - 54px))`,
                 width: 128,
                 height: 108,
                 marginLeft: -64,

@@ -321,6 +321,13 @@ export type Atingimento = { situacao: Situacao; pct: number | null };
 /** Verde ≥ 100% · amarelo ≥ 85% · vermelho abaixo disso. */
 export function status(real: number | null, meta: number | null, dir: Direcao): Atingimento {
   if (real === null || meta === null || meta === 0) return { situacao: "na", pct: null };
+  // Zero num indicador de "quanto menor melhor" (no-show, churn, dormentes) é o
+  // melhor resultado possível, mas meta ÷ 0 não é número: sem este caso o
+  // painel caía em "na" e mostrava travessão cinza — o mês perfeito lido como
+  // mês sem lançamento, fora da contagem de fora-da-meta, fora do ranking e
+  // fora da prioridade do RMR. Registra meta batida; 100% em vez de infinito
+  // porque a porcentagem vai para eixo de gráfico e para toFixed.
+  if (dir === "down" && real === 0) return { situacao: "ok", pct: 100 };
   const pct = dir === "down" ? (meta / real) * 100 : (real / meta) * 100;
   if (!Number.isFinite(pct)) return { situacao: "na", pct: null };
   if (pct >= 100) return { situacao: "ok", pct };
