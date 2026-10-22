@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
+import { quemVeDashboard } from "@/lib/acessoDashboard";
 import {
   getCampaignById,
   getCampaignCnaeGroups,
@@ -42,6 +43,10 @@ const LEAD_STATUS_LABELS: Record<string, string> = {
 };
 
 export default async function CampaignDetailPage({ params }: { params: { id: string } }) {
+  // Mesma porta da home do dashboard: aqui aparece custo por lead e desempenho
+  // por campanha, que não é informação de colaborador.
+  if (!(await quemVeDashboard())) redirect("/dashboard/indicadores");
+
   const campaign = await getCampaignById(params.id);
   if (!campaign) notFound();
 

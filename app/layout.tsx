@@ -7,7 +7,7 @@ import { SiteWidgets } from "@/components/SiteWidgets";
 import { getUsuarioPainel } from "@/db/adminQueries";
 import { ehAdministrador } from "@/lib/acessoSistema";
 import { PLAYBOOK_VISIVEL } from "@/lib/playbookVisivel";
-import { painelLiberado } from "@/lib/permissaoIndicadores";
+import { painelLiberado, podeVerDashboard } from "@/lib/permissaoIndicadores";
 import { SiteLogoutButton } from "@/components/SiteLogoutButton";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
 
@@ -44,6 +44,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // obrigatória) sem o item no menu.
   const usuarioPainel = session ? await getUsuarioPainel(session.uid) : null;
   const temPainel = usuarioPainel !== null && painelLiberado(usuarioPainel);
+  // Dashboard de Prospecção: administrador e N3 — a mesma regra que a página usa.
+  const temDashboard = usuarioPainel !== null && podeVerDashboard(usuarioPainel);
 
   return (
     <html lang="pt-BR" className={inter.variable}>
@@ -71,7 +73,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 Playbook de Vendas
               </Link>
             )}
-            {ehAdministrador(session?.accessLevel) && (
+            {temDashboard && (
               <Link href="/dashboard" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
                 Dashboard
               </Link>
