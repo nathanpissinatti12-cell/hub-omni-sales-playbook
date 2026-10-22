@@ -331,10 +331,7 @@ export const PESSOAS: Pessoa[] = [
 // o nível do painel de cada um, que é outro eixo.
 export const PESSOAS_TATUI: Pessoa[] = [
   closer("jose", "Jose Henrique — Closer"),
-  // Eduarda segue cadastrada: ninguém disse que saiu, e tirar do cadastro é o
-  // que apaga a definição dos indicadores dela. Sem login vinculado, ela
-  // simplesmente não aparece na tela.
-  closer("eduarda", "Eduarda — Closer"),
+  closer("eduarda", "Eduarda Ciconelo — Closer"),
   bdr("carlos", "Carlos Carvalho — BDR"),
   bdr("aline", "Aline Arantes — BDR"),
   bdr("helena", "Helena Pereira — BDR"),
