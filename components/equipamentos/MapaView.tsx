@@ -623,7 +623,7 @@ export function MapaView({
           ].join(","),
         }}
       >
-        {/* Parede de fundo com o mural geométrico amarelo/cinza e a marca OMNI */}
+        {/* Parede de fundo com o mural geométrico amarelo/cinza e a marca ONVOX */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-x-0 top-0 flex items-center justify-between px-4"
@@ -651,10 +651,10 @@ export function MapaView({
             </g>
           </svg>
           <span
-            className="text-lg font-bold tracking-[0.35em]"
+            className="text-lg font-bold tracking-[0.3em]"
             style={{ color: "var(--accent)", opacity: 0.9 }}
           >
-            OMNI
+            ONVOX
           </span>
         </div>
 

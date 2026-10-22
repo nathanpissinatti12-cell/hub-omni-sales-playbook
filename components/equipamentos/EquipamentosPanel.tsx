@@ -218,7 +218,7 @@ export function EquipamentosPanel() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: "var(--accent)" }}>
-            Omni Assessoria
+            Onvox
           </p>
           <h1 className="mt-1 text-2xl font-semibold">Controle de Equipamentos</h1>
         </div>
