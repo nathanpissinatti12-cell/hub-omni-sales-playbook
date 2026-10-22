@@ -338,7 +338,101 @@ export const PESSOAS_RIBEIRAO: Pessoa[] = [
   bdr("nathalia", "Nathalia Dadalte — BDR"),
 ];
 
-export const PESSOAS_PARTNERS: Pessoa[] = [bdr("alessandra", "Alessandra Thibes — BDR")];
+// ---------------------------------------------------------------------------
+// Partners — Time de Canais
+//
+// Indicadores próprios, informados em 17/10/2026 ("Indicadores e Metas - Time
+// de Canais"). Até aqui a unidade usava a definição de Cerquilho, que fala de
+// outra operação: canais vende POR parceiro, então o que se mede é
+// credenciamento, ativação e carteira — não reunião e fechamento direto.
+//
+// Os ids levam `can_` e NÃO reaproveitam `n3_mrr_out`/`n3_mrr_in`: esses dois
+// têm a meta puxada do CRONOGRAMA (ver dependeDoCronograma), que é o do ciclo
+// de Cerquilho. Reusá-los faria a meta de outubro virar R$9.254 em vez dos
+// R$6.400 do canal, silenciosamente.
+// ---------------------------------------------------------------------------
+export const CANAIS_N3: LinhaTabela[] = [
+  {
+    id: "n3_can_mrr",
+    nome: "MRR novo do canal",
+    hint: "outbound + inbound · meta de out/26",
+    meta: 8000,
+    fmt: "brl",
+    dir: "up",
+    esc: "mes",
+  },
+  { id: "n3_can_mrr_out", nome: "MRR novo — outbound", hint: "80% do MRR do canal", meta: 6400, fmt: "brl", dir: "up", esc: "mes" },
+  { id: "n3_can_mrr_in", nome: "MRR novo — inbound", hint: "20% do MRR do canal", meta: 1600, fmt: "brl", dir: "up", esc: "mes" },
+  { id: "n3_can_conc", nome: "Concentração de risco", hint: "% do MRR num só parceiro", meta: 30, fmt: "pct", dir: "down", esc: null },
+  { id: "n3_can_eng", nome: "Engajamento da carteira", hint: "parceiros que venderam no mês", meta: 30, fmt: "pct", dir: "up", esc: null },
+  { id: "n3_can_tkt", nome: "Ticket médio por parceiro ativo", meta: 2261.76, fmt: "brl", dir: "up", esc: null },
+  { id: "n3_can_churn", nome: "Churn mensal do canal", meta: 1, fmt: "pct", dir: "down", esc: null },
+];
+
+export const CANAIS_N4: LinhaTabela[] = [
+  { grupo: "Gerentes de Canais", cor: "p4" },
+  { id: "n4_can_mrr_par", nome: "MRR via parceiros", meta: 7430, fmt: "brl", dir: "up", esc: "mes" },
+  { id: "n4_can_mrr_prop", nome: "MRR venda própria", meta: 570, fmt: "brl", dir: "up", esc: "mes" },
+  { id: "n4_can_cred", nome: "Credenciamentos", meta: 12, fmt: "num", dir: "up", esc: "mes" },
+  { id: "n4_can_ativ", nome: "Ativações", meta: 4, fmt: "num", dir: "up", esc: "mes" },
+  { grupo: "Conversões do funil de canal", cor: "p4" },
+  { id: "n4_can_sal_cred", nome: "SAL → Credenciamento", meta: 20, fmt: "pct", dir: "up", esc: null },
+  { id: "n4_can_cred_ativ", nome: "Credenciamento → Ativação", meta: 30, fmt: "pct", dir: "up", esc: null },
+  {
+    id: "n4_can_tempo",
+    nome: "Tempo cadastro → 1ª venda",
+    hint: "dias corridos · quanto menor melhor",
+    meta: 60,
+    fmt: "num",
+    dir: "down",
+    esc: null,
+  },
+  { grupo: "Gestão da carteira", cor: "p4" },
+  { id: "n4_can_nutri", nome: "Cadência de nutrição cumprida", meta: 90, fmt: "pct", dir: "up", esc: null },
+  { id: "n4_can_ot", nome: "On-time", meta: 90, fmt: "pct", dir: "up", esc: null },
+  { id: "n4_can_dorm", nome: "Parceiros dormentes", hint: "sem venda no período", meta: 40, fmt: "pct", dir: "down", esc: null },
+  { id: "n4_can_nota", nome: "Nota de qualidade de atendimento", meta: 90, fmt: "num", dir: "up", esc: null },
+];
+
+/**
+ * Dias úteis usados para converter meta diária em mensal.
+ *
+ * O painel trabalha com meta MENSAL e proporcionaliza pelos dias úteis
+ * decorridos; não existe meta "por dia" na definição. Então "26/dia" entra como
+ * 26 × 22. O mês real tem 21, 22 ou 23 dias úteis, e nesses casos a conversão
+ * fica alguns leads acima ou abaixo do combinado — quando isso importar, a
+ * coluna Meta do próprio painel ajusta o mês específico, sem mexer aqui.
+ */
+const DIAS_UTEIS_REFERENCIA = 22;
+
+/** BDR de canais — prospecção outbound de parceiros. */
+export const CANAIS_BDR: Indicador[] = [
+  { id: "ini", nome: "Leads iniciados", hint: `26/dia × ${DIAS_UTEIS_REFERENCIA} dias úteis`, meta: 26 * DIAS_UTEIS_REFERENCIA, fmt: "num", dir: "up", esc: "mes" },
+  { id: "fin", nome: "Leads finalizados", hint: `26/dia × ${DIAS_UTEIS_REFERENCIA} dias úteis`, meta: 26 * DIAS_UTEIS_REFERENCIA, fmt: "num", dir: "up", esc: "mes" },
+  { id: "conex", nome: "Taxa de conexão", meta: 25, fmt: "pct", dir: "up", esc: null },
+  { id: "agend", nome: "Taxa de agendamento", meta: 30, fmt: "pct", dir: "up", esc: null },
+  { id: "reun", nome: "Reuniões agendadas", meta: 40, fmt: "num", dir: "up", esc: "mes" },
+  { id: "comp", nome: "Taxa de comparecimento", meta: 80, fmt: "pct", dir: "up", esc: null },
+  { id: "qual", nome: "Qualificação (conectada → SAL)", meta: 85, fmt: "pct", dir: "up", esc: null },
+  { id: "sal", nome: "SAL gerados", meta: 27, fmt: "num", dir: "up", esc: "mes" },
+  { id: "evo", nome: "Nota Onvox AI", meta: 90, fmt: "num", dir: "up", esc: null },
+  { id: "min", nome: "Minutos falados", meta: 500, fmt: "num", dir: "up", esc: "mes" },
+  { id: "ot", nome: "On-time", meta: 90, fmt: "pct", dir: "up", esc: null },
+];
+
+/**
+ * SDR de canais — inbound. O documento de 17/10 traz só estes dois indicadores;
+ * a tabela dele termina aí. Fica como está até o time fechar o resto, em vez de
+ * herdar os do BDR, que medem prospecção ativa.
+ */
+export const CANAIS_SDR: Indicador[] = [
+  { id: "sla", nome: "SLA de resposta ao inbound", hint: "% respondido em até 5 min", meta: 90, fmt: "pct", dir: "up", esc: null },
+  { id: "qual", nome: "Qualificação (conectada → SQL)", meta: 85, fmt: "pct", dir: "up", esc: null },
+];
+
+export const PESSOAS_PARTNERS: Pessoa[] = [
+  { chave: "alessandra", nome: "Alessandra Thibes — BDR de Canais", kpis: CANAIS_BDR },
+];
 
 /** Todos os indicadores de N3 e N4 achatados — usado no seletor de evolução. */
 export function indicadoresPlanos(defs: LinhaTabela[] = [...N3, ...N4]): Indicador[] {
@@ -368,17 +462,35 @@ export type Unidade = {
   n3: LinhaTabela[];
   n4: LinhaTabela[];
   pessoas: Pessoa[];
+  /**
+   * Ids que viram cartão na faixa de resumo, no topo do painel — os dois ou três
+   * números que respondem "estamos no caminho?" sem rolar a página. Cada
+   * operação tem os seus: em canais, a pergunta é credenciamento e ativação, não
+   * reunião agendada.
+   */
+  destaques: string[];
 };
 
 // Cada unidade tem o seu time no N5 — nunca repetir a mesma pessoa em duas,
 // porque o N5 é nominal e isso lançaria meta individual no nome de quem não
 // trabalha ali. Unidade sem time cadastrado mostra aviso no lugar da tabela.
+const DESTAQUES_COMERCIAL = ["n4_reun", "n4_sql"];
+
 export const UNIDADES: Unidade[] = [
-  { slug: "cerquilho", nome: "Cerquilho", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS },
-  { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_TATUI },
-  { slug: "mkt", nome: "Mkt", temDefinicao: false, n3: MKT_N3, n4: MKT_N4, pessoas: MKT_PESSOAS },
-  { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_RIBEIRAO },
-  { slug: "partners", nome: "Partners", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_PARTNERS },
+  { slug: "cerquilho", nome: "Cerquilho", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS, destaques: DESTAQUES_COMERCIAL },
+  { slug: "tatui", nome: "Tatuí", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_TATUI, destaques: DESTAQUES_COMERCIAL },
+  { slug: "mkt", nome: "Mkt", temDefinicao: false, n3: MKT_N3, n4: MKT_N4, pessoas: MKT_PESSOAS, destaques: [] },
+  { slug: "ribeirao", nome: "Ribeirão", temDefinicao: true, n3: N3, n4: N4, pessoas: PESSOAS_RIBEIRAO, destaques: DESTAQUES_COMERCIAL },
+  // Partners tem definição própria desde 22/10/2026 — ver CANAIS_N3/CANAIS_N4.
+  {
+    slug: "partners",
+    nome: "Partners",
+    temDefinicao: true,
+    n3: CANAIS_N3,
+    n4: CANAIS_N4,
+    pessoas: PESSOAS_PARTNERS,
+    destaques: ["n3_can_mrr", "n4_can_cred", "n4_can_ativ"],
+  },
 ];
 
 /** Unidade do painel que já existia antes da separação — recebe o histórico. */

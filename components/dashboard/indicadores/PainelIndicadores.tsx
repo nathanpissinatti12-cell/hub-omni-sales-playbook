@@ -156,6 +156,17 @@ export function PainelIndicadores({
   semVinculo?: boolean;
 }) {
   const { n3: N3, n4: N4 } = unidade;
+  /**
+   * Os burn-ups e o cartão de MRR falam dos indicadores do cronograma do ciclo
+   * (`n3_mrr_out` e `n3_mrr_in`). Unidade com definição própria não os tem — em
+   * Partners o MRR do canal é outro indicador, com outra meta. Sem esta
+   * verificação, a unidade ganhava duas curvas vazias pedindo "lance o MRR
+   * novo", de um indicador que não existe no painel dela.
+   */
+  const temMrrDoCronograma = useMemo(
+    () => N3.some((l) => !isGrupo(l) && l.id === "n3_mrr_out"),
+    [N3]
+  );
   // Colaborador só enxerga a própria linha do N5 — o seletor de pessoa e o
   // comparativo entre pessoas somem junto, senão mostrariam nome de colega.
   const PESSOAS = useMemo(
@@ -482,9 +493,11 @@ export function PainelIndicadores({
     };
 
     // MRR do mês é a soma de outbound e inbound — os dois cartões separados
-    // ocupariam metade da faixa dizendo quase a mesma coisa.
+    // ocupariam metade da faixa dizendo quase a mesma coisa. Só existe onde a
+    // unidade tem esses dois indicadores: em canais, o MRR do canal é um
+    // indicador só e entra pelos destaques, logo abaixo.
     let mrr: ReturnType<typeof cartao> = null;
-    if (permissao.verN3) {
+    if (permissao.verN3 && temMrrDoCronograma) {
       const out = cartao("n3_mrr_out", "");
       const inb = cartao("n3_mrr_in", "");
       const soma = (a: number | null, b: number | null) =>
@@ -504,22 +517,39 @@ export function PainelIndicadores({
       }
     }
 
-    // Reuniões e SAL são agregados do N4: quem não vê o nível não vê o cartão.
-    // Para o n5 a faixa fica só com o contador, que é o que vale para ele — o
-    // "x de y abaixo de 85%" conta as linhas dele.
-    const doN4 = permissao.verN4
-      ? [cartao("n4_reun", "Reuniões agendadas"), cartao("n4_sql", "SAL")]
-      : [];
+    // Os destaques são de N3 e N4; quem não vê o nível não vê o cartão. Para o
+    // n5 a faixa fica só com o contador, que é o que vale para ele — o "x de y
+    // abaixo de 85%" conta as linhas dele. O rótulo é o nome do próprio
+    // indicador, para não haver dois nomes para o mesmo número.
+    const destaques = unidade.destaques
+      .map((id) => {
+        const linha = visiveis.find((v) => v.chave === id);
+        return linha ? cartao(id, linha.ind.nome) : null;
+      })
+      .filter((c): c is NonNullable<typeof c> => c !== null)
+      .slice(0, 3);
 
     return {
-      cartoes: [mrr, ...doN4].filter(
+      cartoes: [mrr, ...destaques].filter(
         (c): c is NonNullable<typeof c> => c !== null
       ),
       foraDaMeta,
       comMeta,
       semLancamento,
     };
-  }, [N3, N4, PESSOAS, permissao.verN3, permissao.verN4, reais, metasOverride, dtIni, dtFim]);
+  }, [
+    N3,
+    N4,
+    PESSOAS,
+    unidade.destaques,
+    temMrrDoCronograma,
+    permissao.verN3,
+    permissao.verN4,
+    reais,
+    metasOverride,
+    dtIni,
+    dtFim,
+  ]);
 
   // null quando a unidade ainda não tem time cadastrado — o N5 vira aviso.
   const pessoa = PESSOAS.find((p) => p.chave === pessoaSel) ?? PESSOAS[0] ?? null;
@@ -1153,16 +1183,16 @@ export function PainelIndicadores({
           pode fazer. E sem nenhum indicador de N3/N4 visível (o caso do n5) o
           painel inteiro não tem o que mostrar: a evolução da linha individual
           abre clicando no nome do indicador, na tabela do N5. */}
-      {(permissao.verN3 || planos.length > 0) && (
+      {((permissao.verN3 && temMrrDoCronograma) || planos.length > 0) && (
       <Painel
         titulo="Evolução e ritmo"
         desc={
-          permissao.verN3
+          permissao.verN3 && temMrrDoCronograma
             ? "Curvas acumuladas do cronograma do ciclo, alimentadas pelo histórico de cada mês registrado."
             : "Histórico mês a mês dos indicadores que você acompanha."
         }
       >
-        {permissao.verN3 && (
+        {permissao.verN3 && temMrrDoCronograma && (
           <>
             <Secao titulo="Burn-up do trimestre" primeira>
               <GraficoBurnup
@@ -1181,7 +1211,7 @@ export function PainelIndicadores({
         {planos.length > 0 && (
           <Secao
             titulo="Evolução mensal"
-            primeira={!permissao.verN3}
+            primeira={!(permissao.verN3 && temMrrDoCronograma)}
             acao={
               <Select
                 value={indEvo}
