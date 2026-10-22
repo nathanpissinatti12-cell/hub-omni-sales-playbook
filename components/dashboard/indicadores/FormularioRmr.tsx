@@ -1072,10 +1072,21 @@ function Secao({
 }) {
   return (
     <section className="rounded-lg border p-5" style={{ borderColor: "var(--border)", background: "var(--surface)" }}>
-      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-base font-semibold">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+        {/* O número vem na mesma bolinha roxa que o painel usa para N3, N4 e N5
+            — lá é a etiqueta do nível, aqui é a ordem da seção, e as duas telas
+            passam a marcar "este bloco é tal coisa" do mesmo jeito.
+
+            `items-center` no lugar de `items-baseline`: com a bolinha, alinhar
+            pela linha de base do texto deixaria o círculo subindo acima do
+            título. */}
+        <h2 className="flex items-center gap-2.5 text-base font-semibold">
           {numero && (
-            <span className="mr-2 text-sm font-bold" style={{ color: "var(--accent)" }}>
+            <span
+              className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-extrabold"
+              style={{ background: "var(--accent)", color: "#fff" }}
+              aria-hidden="true"
+            >
               {numero}
             </span>
           )}
