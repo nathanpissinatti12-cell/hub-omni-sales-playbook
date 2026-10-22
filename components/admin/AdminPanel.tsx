@@ -6,13 +6,15 @@ import { CreateUserTab } from "./CreateUserTab";
 import { PermissionsTab } from "./PermissionsTab";
 import { SuggestionsTab } from "./SuggestionsTab";
 import { HistoryTab } from "./HistoryTab";
-import { ProgressTab } from "./ProgressTab";
-import type { AdminHistoryEntry, AdminUser, ProgressEntry, Suggestion } from "./adminTypes";
+import type { AdminHistoryEntry, AdminUser, Suggestion } from "./adminTypes";
 
+// Progresso fora da lista enquanto o playbook não está em uso: a aba existia
+// para acompanhar quem avançou nos módulos, e sem módulo em uso o ranking é
+// uma lista de zeros. ProgressTab.tsx e /api/admin/progress continuam no repo
+// — para trazer de volta, basta a linha da aba e o loadProgress.
 const TABS = [
   { id: "criar", label: "Criar Usuário" },
   { id: "permissoes", label: "Permissões" },
-  { id: "progresso", label: "Progresso" },
   { id: "sugestoes", label: "Sugestões" },
   { id: "historico", label: "Histórico" },
 ] as const;
@@ -29,8 +31,6 @@ export function AdminPanel() {
   const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const [history, setHistory] = useState<AdminHistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [progress, setProgress] = useState<ProgressEntry[]>([]);
-  const [progressLoading, setProgressLoading] = useState(true);
 
   const loadUsers = useCallback(async () => {
     setUsersLoading(true);
@@ -62,25 +62,11 @@ export function AdminPanel() {
     }
   }, []);
 
-  const loadProgress = useCallback(async () => {
-    setProgressLoading(true);
-    try {
-      const res = await fetch("/api/admin/progress");
-      if (res.ok) {
-        const data = await res.json();
-        setProgress(data.progress ?? []);
-      }
-    } finally {
-      setProgressLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     loadUsers();
     loadSuggestions();
     loadHistory();
-    loadProgress();
-  }, [loadUsers, loadSuggestions, loadHistory, loadProgress]);
+  }, [loadUsers, loadSuggestions, loadHistory]);
 
   function refreshAfterChange() {
     loadUsers();
@@ -137,9 +123,6 @@ export function AdminPanel() {
         {tab === "criar" && <CreateUserTab onCreated={refreshAfterChange} />}
         {tab === "permissoes" && (
           <PermissionsTab users={users} loading={usersLoading} onChanged={refreshAfterChange} />
-        )}
-        {tab === "progresso" && (
-          <ProgressTab users={users} progress={progress} loading={usersLoading || progressLoading} />
         )}
         {tab === "sugestoes" && (
           <SuggestionsTab suggestions={suggestions} loading={suggestionsLoading} onChanged={loadSuggestions} />
