@@ -4,16 +4,20 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CreateUserTab } from "./CreateUserTab";
 import { PermissionsTab } from "./PermissionsTab";
-import { SuggestionsTab } from "./SuggestionsTab";
 import { HistoryTab } from "./HistoryTab";
-import { ProgressTab } from "./ProgressTab";
-import type { AdminHistoryEntry, AdminUser, ProgressEntry, Suggestion } from "./adminTypes";
+import type { AdminHistoryEntry, AdminUser } from "./adminTypes";
 
+// Progresso e Sugestões ficam fora da lista enquanto o playbook não está em
+// uso: as duas vivem do conteúdo dos módulos — uma mostra quem avançou, a
+// outra o que os usuários mandaram de dentro deles. Sem playbook, é um
+// ranking de zeros e uma caixa vazia.
+//
+// Só escondidas: ProgressTab.tsx, SuggestionsTab.tsx e as rotas
+// /api/admin/progress e /api/admin/suggestions continuam no repo. Para trazer
+// de volta, basta a linha da aba, o load e o branch de render.
 const TABS = [
   { id: "criar", label: "Criar Usuário" },
   { id: "permissoes", label: "Permissões" },
-  { id: "progresso", label: "Progresso" },
-  { id: "sugestoes", label: "Sugestões" },
   { id: "historico", label: "Histórico" },
 ] as const;
 
@@ -25,12 +29,8 @@ export function AdminPanel() {
 
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [suggestionsLoading, setSuggestionsLoading] = useState(true);
   const [history, setHistory] = useState<AdminHistoryEntry[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
-  const [progress, setProgress] = useState<ProgressEntry[]>([]);
-  const [progressLoading, setProgressLoading] = useState(true);
 
   const loadUsers = useCallback(async () => {
     setUsersLoading(true);
@@ -39,16 +39,6 @@ export function AdminPanel() {
       if (res.ok) setUsers(await res.json());
     } finally {
       setUsersLoading(false);
-    }
-  }, []);
-
-  const loadSuggestions = useCallback(async () => {
-    setSuggestionsLoading(true);
-    try {
-      const res = await fetch("/api/admin/suggestions");
-      if (res.ok) setSuggestions(await res.json());
-    } finally {
-      setSuggestionsLoading(false);
     }
   }, []);
 
@@ -62,25 +52,10 @@ export function AdminPanel() {
     }
   }, []);
 
-  const loadProgress = useCallback(async () => {
-    setProgressLoading(true);
-    try {
-      const res = await fetch("/api/admin/progress");
-      if (res.ok) {
-        const data = await res.json();
-        setProgress(data.progress ?? []);
-      }
-    } finally {
-      setProgressLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
     loadUsers();
-    loadSuggestions();
     loadHistory();
-    loadProgress();
-  }, [loadUsers, loadSuggestions, loadHistory, loadProgress]);
+  }, [loadUsers, loadHistory]);
 
   function refreshAfterChange() {
     loadUsers();
@@ -137,12 +112,6 @@ export function AdminPanel() {
         {tab === "criar" && <CreateUserTab onCreated={refreshAfterChange} />}
         {tab === "permissoes" && (
           <PermissionsTab users={users} loading={usersLoading} onChanged={refreshAfterChange} />
-        )}
-        {tab === "progresso" && (
-          <ProgressTab users={users} progress={progress} loading={usersLoading || progressLoading} />
-        )}
-        {tab === "sugestoes" && (
-          <SuggestionsTab suggestions={suggestions} loading={suggestionsLoading} onChanged={loadSuggestions} />
         )}
         {tab === "historico" && (
           <HistoryTab history={history} loading={historyLoading} onChanged={loadHistory} />
