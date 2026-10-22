@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { quemVeDashboard } from "@/lib/acessoDashboard";
 import { Target, Building2, UserX, Percent } from "lucide-react";
 import {
   getCampaignPerformance,
@@ -17,7 +19,13 @@ import { TopStatesPie } from "@/components/charts/TopStatesPie";
 
 export const dynamic = "force-dynamic";
 
+// Administrador e N3. Quem não pode vai para o painel de indicadores, que é a
+// tela que todo usuário com acesso consegue abrir — e, para quem não tem nem
+// isso, a que explica o que falta.
+
 export default async function DashboardPage() {
+  if (!(await quemVeDashboard())) redirect("/dashboard/indicadores");
+
   const [campaignsBrutas, custosReais, summary, dailyProcessed, contactStatus, missingData, topStates] =
     await Promise.all([
       getCampaignPerformance(),

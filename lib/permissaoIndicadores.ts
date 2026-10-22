@@ -213,3 +213,20 @@ export function podeGravarResolucao(
   if (veTimeTodo(usuario)) return true;
   return usuario.pessoaChave === pessoa;
 }
+
+/**
+ * Quem abre o Dashboard de Prospecção (campanhas, fila, enriquecimento).
+ *
+ * Administrador por definição, e também quem é N3: decidido em 22/10/2026 —
+ * quem responde pelo painel inteiro de uma unidade precisa ver de onde vem o
+ * lead que ele cobra. É o caso do Head de Canais, que não é administrador do
+ * sistema.
+ *
+ * Esta checagem NÃO cabe no middleware: `nivel_painel` não viaja no cookie de
+ * sessão, de propósito — ele é lido do banco a cada requisição para que tirar
+ * acesso valha na hora. Por isso o middleware só exige sessão nessas rotas, e
+ * quem decide é a página (ou a rota de API), com o nível fresco.
+ */
+export function podeVerDashboard(usuario: UsuarioPainel): boolean {
+  return ehAdministrador(usuario.accessLevel) || usuario.nivelPainel === "n3";
+}

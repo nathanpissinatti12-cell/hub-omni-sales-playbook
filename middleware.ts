@@ -77,14 +77,13 @@ export async function middleware(req: NextRequest) {
     const ehPainelIndicadores =
       pathname.startsWith("/dashboard/indicadores") || pathname.startsWith("/api/dashboard/indicadores");
 
-    // Resto do dashboard: só administrador (root e owner).
+    // Resto do dashboard (campanhas, fila, enriquecimento): administrador e
+    // quem é N3. O nível do painel não viaja no cookie — é lido do banco a cada
+    // requisição, para que revogar acesso valha na hora —, e o middleware roda
+    // no Edge, sem banco. Então aqui só se exige sessão, e quem decide é a
+    // página ou a rota, com `quemVeDashboard()`. O bloqueio continua existindo;
+    // só mudou de lugar, para onde o nível pode ser lido fresco.
     if (!ehPainelIndicadores && (pathname.startsWith("/dashboard") || pathname.startsWith("/api/dashboard"))) {
-      if (!ehAdministrador(session.accessLevel)) {
-        if (pathname.startsWith("/api/dashboard")) {
-          return NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 });
-        }
-        return NextResponse.redirect(new URL(rotaInicial(), req.url));
-      }
       return NextResponse.next();
     }
 

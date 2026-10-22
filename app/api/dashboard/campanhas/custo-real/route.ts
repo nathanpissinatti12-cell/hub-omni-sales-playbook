@@ -1,17 +1,18 @@
 import { NextResponse } from "next/server";
-import { ehAdministrador } from "@/lib/acessoSistema";
+import { quemVeDashboard } from "@/lib/acessoDashboard";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { deleteCustoReal, getCustoReal, upsertCustoReal } from "@/db/custoCampanhaRealQueries";
 
 export const dynamic = "force-dynamic";
 
-// O middleware já barra quem não é root em /api/dashboard/*, mas a checagem
-// aqui também existe de propósito, igual em /api/dashboard/indicadores.
+// Desde que o middleware deixou de barrar por nível (o nível do painel não cabe
+// no cookie), esta é a única checagem desta rota — e é a que vale, porque lê o
+// nível do banco a cada chamada.
 async function exigeRoot() {
   const session = await getSiteSession();
   if (!session) return { erro: NextResponse.json({ error: "Não autenticado." }, { status: 401 }) };
-  if (!ehAdministrador(session.accessLevel)) {
-    return { erro: NextResponse.json({ error: "Acesso restrito a administradores." }, { status: 403 }) };
+  if (!(await quemVeDashboard())) {
+    return { erro: NextResponse.json({ error: "Acesso restrito." }, { status: 403 }) };
   }
   return { session };
 }
