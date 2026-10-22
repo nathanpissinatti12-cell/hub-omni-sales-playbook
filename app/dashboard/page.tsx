@@ -49,13 +49,6 @@ export default async function DashboardPage() {
             Dados ao vivo da base de campanhas e enriquecimento de leads (Apollo).
           </p>
         </div>
-        <Link
-          href="/dashboard/indicadores"
-          className="rounded-md px-4 py-2 text-sm font-semibold"
-          style={{ background: "var(--accent)", color: "var(--on-accent)" }}
-        >
-          Painel de Indicadores
-        </Link>
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

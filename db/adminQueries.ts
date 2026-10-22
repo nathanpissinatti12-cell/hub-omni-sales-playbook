@@ -444,3 +444,21 @@ export async function pessoasVinculadas(unidade: string): Promise<string[]> {
   );
   return rows.map((r) => r.pessoa_chave as string);
 }
+
+/**
+ * Quantas pessoas estão vinculadas em cada unidade — o tamanho do N5 que cada
+ * painel vai mostrar. Serve à tela de escolha de unidade, para ela dizer o que
+ * há do outro lado antes de a pessoa clicar.
+ *
+ * Uma consulta só, em vez de uma por unidade: são cinco painéis, e cinco idas
+ * ao banco para montar cinco cartões é desperdício que cresce com o tempo.
+ */
+export async function contagemVinculosPorUnidade(): Promise<Record<string, number>> {
+  const { rows } = await adminPool.query(
+    `SELECT unidade, COUNT(DISTINCT pessoa_chave)::int AS total
+       FROM admin_users
+      WHERE active = TRUE AND unidade IS NOT NULL AND pessoa_chave IS NOT NULL
+      GROUP BY unidade`
+  );
+  return Object.fromEntries(rows.map((r) => [r.unidade as string, r.total as number]));
+}
