@@ -285,29 +285,38 @@ export function closerKpis(mrr: number, forecast: number): Indicador[] {
  * Como o lançamento também carrega a unidade, a mesma pessoa em duas unidades
  * são dois registros independentes.
  */
-export type Pessoa = { chave: string; nome: string; kpis: Indicador[] };
+/**
+ * BDR ou Closer. Existe para o N4 enxergar só o time dele: um supervisor de
+ * BDR não vê a linha de Closer e vice-versa (ver pessoasNoEscopo, em
+ * lib/permissaoIndicadores.ts). É campo obrigatório de propósito — cadastrar
+ * alguém no N5 sem dizer a função deixaria essa pessoa fora da visão dos dois
+ * supervisores, e o erro só apareceria quando alguém reclamasse de não ver.
+ */
+export type Funcao = "bdr" | "closer";
+
+export type Pessoa = { chave: string; nome: string; funcao: Funcao; kpis: Indicador[] };
 
 const MRR_CLOSER = 4853;
 
 /** Closer padrão: meta de MRR do mês e cobertura de forecast de 8x. */
 function closer(chave: string, nome: string): Pessoa {
-  return { chave, nome, kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) };
+  return { chave, nome, funcao: "closer", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) };
 }
 
 function bdr(chave: string, nome: string): Pessoa {
-  return { chave, nome, kpis: BDR_PADRAO };
+  return { chave, nome, funcao: "bdr", kpis: BDR_PADRAO };
 }
 
 export const PESSOAS: Pessoa[] = [
-  { chave: "sara", nome: "Sara Pereira — BDR", kpis: BDR_PADRAO },
-  { chave: "jeferson", nome: "Jeferson Nunes — BDR", kpis: BDR_PADRAO },
+  { chave: "sara", nome: "Sara Pereira — BDR", funcao: "bdr", kpis: BDR_PADRAO },
+  { chave: "jeferson", nome: "Jeferson Nunes — BDR", funcao: "bdr", kpis: BDR_PADRAO },
   // Julia Lopes saiu da empresa em outubro/2026. A linha fica comentada em vez
   // de apagada porque os 9 lançamentos dela (ago/2026) continuam no banco sob as
   // chaves `julia_*`: é o histórico do mês, e ele deve continuar batendo com o
   // que o N4 agregou na época. Descomentar traz tudo de volta.
   // { chave: "julia", nome: "Julia Lopes — BDR", kpis: BDR_PADRAO },
-  { chave: "taemy", nome: "Taemy Mendonça — BDR", kpis: BDR_PADRAO },
-  { chave: "jessica", nome: "Jéssica Alves — BDR (rampagem)", kpis: BDR_RAMPA },
+  { chave: "taemy", nome: "Taemy Mendonça — BDR", funcao: "bdr", kpis: BDR_PADRAO },
+  { chave: "jessica", nome: "Jéssica Alves — BDR (rampagem)", funcao: "bdr", kpis: BDR_RAMPA },
   // João Camilo voltou ao N5 de Cerquilho em 22/10/2026, a pedido do dono do
   // projeto — saiu em 21/10 junto com Gabriel Donadeli e agora precisa da linha
   // individual de novo, para ser vinculado como N5 no /admin. Mesma chave de
@@ -318,6 +327,12 @@ export const PESSOAS: Pessoa[] = [
   // do usuário (ver unidadeComVinculos). Esta linha é o que faz a opção existir
   // na lista "Linha individual no N5".
   closer("joao", "João Camilo — Closer Black"),
+  // Ryan Nakamura e Paulo Infante entraram no N5 de Cerquilho em 22/10/2026,
+  // como Closers (ryan.nakamura@ e paulo.infante@onvox.com.br). Metas de Closer
+  // padrão — a mesma dos demais; quando a meta de cada um for definida, dá para
+  // ajustar por mês na coluna Meta do painel, sem mexer aqui.
+  closer("ryan", "Ryan Nakamura — Closer"),
+  closer("paulo", "Paulo Infante — Closer"),
   // Gabriel Donadeli continua fora do N5: é o Owner do sistema. O resultado de
   // Closer dele segue agregado no N4 (MRR, reuniões, taxas), que é onde é
   // cobrado; o que não existe é a linha individual. Para religar, descomente —
@@ -448,7 +463,7 @@ export const CANAIS_SDR: Indicador[] = [
 ];
 
 export const PESSOAS_PARTNERS: Pessoa[] = [
-  { chave: "alessandra", nome: "Alessandra Thibes — BDR de Canais", kpis: CANAIS_BDR },
+  { chave: "alessandra", nome: "Alessandra Thibes — BDR de Canais", funcao: "bdr", kpis: CANAIS_BDR },
 ];
 
 /** Todos os indicadores de N3 e N4 achatados — usado no seletor de evolução. */

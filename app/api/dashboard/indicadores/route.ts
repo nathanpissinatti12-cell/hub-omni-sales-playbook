@@ -74,7 +74,7 @@ export async function GET(req: Request) {
 
   // A resolução é texto sobre a dificuldade de uma pessoa — filtra pela mesma
   // regra do RMR, que é o documento mais próximo disto.
-  const pessoas = pessoasLegiveis(usuario);
+  const pessoas = pessoasLegiveis(usuario, unidade);
 
   const permitidas = chavesLegiveis(usuario, unidade);
   // Filtrar aqui, e não na tela: o colaborador não pode nem receber o número do

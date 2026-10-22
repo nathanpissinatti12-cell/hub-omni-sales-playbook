@@ -6,7 +6,13 @@ import { listValores } from "@/db/indicadoresQueries";
 import { listRmr } from "@/db/rmrQueries";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { mesesValidos, unidadeComVinculos, unidadePorSlug } from "@/lib/indicadores";
-import { painelLiberado, permissaoDe, pessoasLegiveis, podeAbrirUnidade } from "@/lib/permissaoIndicadores";
+import {
+  painelLiberado,
+  permissaoDe,
+  pessoasLegiveis,
+  podeAbrirUnidade,
+  unidadeNoEscopo,
+} from "@/lib/permissaoIndicadores";
 import { normalizarRmr } from "@/lib/rmr";
 
 export const dynamic = "force-dynamic";
@@ -26,18 +32,22 @@ export default async function RmrPage({ params }: { params: { unidade: string } 
 
   // Mesma lista do painel: o RMR é por pessoa, e pessoa aqui é quem está
   // vinculada a um usuário desta unidade.
-  const unidade = unidadeComVinculos(cadastrada, await pessoasVinculadas(cadastrada.slug));
+  const vinculada = unidadeComVinculos(cadastrada, await pessoasVinculadas(cadastrada.slug));
 
   const session = await getSiteSession();
   if (!session) redirect("/login");
   const usuario = await getUsuarioPainel(session.uid);
 
   if (!usuario || !painelLiberado(usuario)) {
-    redirect(`/dashboard/indicadores/${unidade.slug}`);
+    redirect(`/dashboard/indicadores/${vinculada.slug}`);
   }
-  if (!podeAbrirUnidade(usuario, unidade.slug)) {
+  if (!podeAbrirUnidade(usuario, vinculada.slug)) {
     redirect(`/dashboard/indicadores/${usuario.unidade}`);
   }
+
+  // Mesmo corte por função do painel: o RMR é o diagnóstico da linha individual,
+  // então quem não vê a linha não vê o relatório dela.
+  const unidade = unidadeNoEscopo(usuario, vinculada);
 
   const permissao = permissaoDe(usuario);
   const pessoas = permissao.somentePessoa
