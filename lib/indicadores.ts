@@ -308,16 +308,20 @@ export const PESSOAS: Pessoa[] = [
   // { chave: "julia", nome: "Julia Lopes — BDR", kpis: BDR_PADRAO },
   { chave: "taemy", nome: "Taemy Mendonça — BDR", kpis: BDR_PADRAO },
   { chave: "jessica", nome: "Jéssica Alves — BDR (rampagem)", kpis: BDR_RAMPA },
-  // Os dois Closers saíram do N5 de Cerquilho em 21/10/2026, a pedido do dono
-  // do projeto: João Camilo não tem unidade nem nível vinculados, e Gabriel
-  // Donadeli é o Owner do sistema. Ninguém some do painel por causa disso — o
-  // resultado de Closer continua agregado no N4 (MRR, reuniões, taxas), que é
-  // onde ele é cobrado; o que deixa de existir é a linha individual de cada um.
+  // João Camilo voltou ao N5 de Cerquilho em 22/10/2026, a pedido do dono do
+  // projeto — saiu em 21/10 junto com Gabriel Donadeli e agora precisa da linha
+  // individual de novo, para ser vinculado como N5 no /admin. Mesma chave de
+  // antes (`joao`), então os seis lançamentos de ago/2026 voltam com ele: chave
+  // nova é que começaria o histórico do zero.
   //
-  // Para religar, basta descomentar. Os lançamentos que eles já tinham (seis
-  // valores de cada, em ago/2026) continuam no banco sob as chaves `joao_*` e
-  // `gabriel_*` e reaparecem junto — nada foi apagado.
-  // { chave: "joao", nome: "João Camilo — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
+  // Aparecer aqui não o coloca no painel sozinho: quem decide isso é o vínculo
+  // do usuário (ver unidadeComVinculos). Esta linha é o que faz a opção existir
+  // na lista "Linha individual no N5".
+  closer("joao", "João Camilo — Closer Black"),
+  // Gabriel Donadeli continua fora do N5: é o Owner do sistema. O resultado de
+  // Closer dele segue agregado no N4 (MRR, reuniões, taxas), que é onde é
+  // cobrado; o que não existe é a linha individual. Para religar, descomente —
+  // os lançamentos dele (seis, ago/2026) continuam no banco sob `gabriel_*`.
   // { chave: "gabriel", nome: "Gabriel Donadeli — Closer Black", kpis: closerKpis(MRR_CLOSER, MRR_CLOSER * 8) },
 ];
 
