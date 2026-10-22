@@ -13,7 +13,7 @@
 //     Cada nível vê o seu e os de baixo:
 //     → n3  o painel inteiro — o próprio N3, o N4 e todas as pessoas. Único
 //           que edita meta.
-//     → n4  o N4 e todas as pessoas, SEM o N3. Lança pelo time.
+//     → n4  o N4 e as pessoas DA FUNÇÃO DELE, SEM o N3. Lança pelo time.
 //     → n5  só a própria linha. Nem o N4 agregado: abaixo do N5 não há nada.
 //     → null sem acesso nenhum ao painel.
 //
@@ -30,7 +30,7 @@
 // proteção, porque qualquer pessoa logada chama a API direto.
 
 import { ehAdministrador, ehOwner } from "./acessoSistema";
-import { unidadePorSlug, type Unidade } from "./indicadores";
+import { unidadePorSlug, type Funcao, type Pessoa, type Unidade } from "./indicadores";
 
 export type NivelPainel = "n3" | "n4" | "n5";
 
@@ -84,6 +84,55 @@ export function veTimeTodo(usuario: UsuarioPainel): boolean {
  */
 export function podeTodasUnidades(usuario: UsuarioPainel): boolean {
   return ehAdministrador(usuario.accessLevel);
+}
+
+/**
+ * Função do usuário — lida do eixo do SISTEMA, que é onde ela já existe: quem é
+ * `bdr` supervisiona BDR, quem é `closer` supervisiona Closer.
+ *
+ * null para root e owner: nesses dois o access_level diz administração, não
+ * função, e não há de onde deduzir qual time é o dele. Um N4 root continua
+ * vendo o time inteiro — se a intenção for limitá-lo a uma função, o caminho é
+ * cadastrá-lo como bdr ou closer.
+ */
+export function funcaoDe(usuario: UsuarioPainel): Funcao | null {
+  const nivel = usuario.accessLevel;
+  return nivel === "bdr" || nivel === "closer" ? nivel : null;
+}
+
+/**
+ * Quem do N5 daquela unidade entra na visão do usuário.
+ *
+ * Regra definida pelo dono do projeto em 22/10/2026: supervisor de BDR vê só
+ * BDR, supervisor de Closer vê só Closer. Antes o N4 via o time inteiro, e isso
+ * colocava a linha individual do Closer na tela de quem supervisiona BDR — o
+ * agregado do N4 continua compartilhado, porque ele é o resultado da unidade,
+ * não de uma função.
+ *
+ * Owner e N3 seguem vendo todo mundo: é a visão de quem responde pela unidade
+ * inteira.
+ */
+export function pessoasNoEscopo(usuario: UsuarioPainel, unidade: Unidade): Pessoa[] {
+  if (ehHead(usuario)) return unidade.pessoas;
+  if (usuario.nivelPainel === "n4") {
+    const funcao = funcaoDe(usuario);
+    return funcao ? unidade.pessoas.filter((p) => p.funcao === funcao) : unidade.pessoas;
+  }
+  // n5 (e qualquer nível futuro abaixo dele): só a própria linha.
+  return unidade.pessoas.filter((p) => p.chave === usuario.pessoaChave);
+}
+
+/**
+ * A unidade reduzida ao que aquele usuário alcança — mesmo padrão de
+ * `unidadeComVinculos`, e aplicado logo depois dele.
+ *
+ * Fazer o corte aqui, e não em cada tela, é o que mantém a regra num lugar só:
+ * tudo que deriva de `unidade.pessoas` (as chaves legíveis, o que pode gravar,
+ * o RMR, o seletor de pessoa, o comparativo) passa a respeitar a função sem
+ * precisar saber que ela existe.
+ */
+export function unidadeNoEscopo(usuario: UsuarioPainel, unidade: Unidade): Unidade {
+  return { ...unidade, pessoas: pessoasNoEscopo(usuario, unidade) };
 }
 
 export function permissaoDe(usuario: UsuarioPainel): Permissao {
@@ -144,10 +193,9 @@ export function chavesLegiveis(usuario: UsuarioPainel, unidade: Unidade): Set<st
     }
   }
 
-  const pessoas = veTimeTodo(usuario)
-    ? unidade.pessoas
-    : unidade.pessoas.filter((p) => p.chave === usuario.pessoaChave);
-  for (const pessoa of pessoas) {
+  // Cinto e suspensório: quem chama já entrega a unidade no escopo, mas uma
+  // função de permissão não deve depender disso para falhar fechado.
+  for (const pessoa of pessoasNoEscopo(usuario, unidade)) {
     for (const kpi of pessoa.kpis) permitidas.add(`${pessoa.chave}_${kpi.id}`);
   }
   return permitidas;
@@ -159,12 +207,17 @@ export function chavesLegiveis(usuario: UsuarioPainel, unidade: Unidade): Set<st
  * Mesma fonte que o painel usa, em vez da regra repetida dentro da rota: se
  * amanhã surgir outro nível, muda num lugar só.
  */
-export function pessoasLegiveis(usuario: UsuarioPainel): string[] | null {
+export function pessoasLegiveis(usuario: UsuarioPainel, unidade?: Unidade): string[] | null {
   // Mesma defesa de `chavesLegiveis`: sem acesso ao painel, lista vazia. Com
   // vínculo quebrado — n5 apontando para unidade que não existe — isto devolvia
   // a chave da pessoa mesmo assim.
   if (!painelLiberado(usuario)) return [];
-  if (veTimeTodo(usuario)) return null;
+  // Com a unidade em mãos dá para responder pela função; sem ela, só pelo
+  // nível. Head continua vendo todo mundo nos dois casos.
+  if (ehHead(usuario)) return null;
+  if (veTimeTodo(usuario)) {
+    return unidade ? pessoasNoEscopo(usuario, unidade).map((p) => p.chave) : null;
+  }
   return usuario.pessoaChave ? [usuario.pessoaChave] : [];
 }
 
@@ -189,9 +242,10 @@ export function podeGravar(
   if (args.tipo !== "real") return false;
 
   if (veTimeTodo(usuario)) {
-    // O N4 agregado e qualquer pessoa daquele time.
+    // O N4 agregado — que é da unidade, não de uma função — e as pessoas que o
+    // supervisor enxerga. Lançar por quem ele não vê seria lançar às cegas.
     if (unidade.n4.some((l) => "id" in l && l.id === args.chave)) return true;
-    return unidade.pessoas.some((p) => args.chave.startsWith(`${p.chave}_`));
+    return pessoasNoEscopo(usuario, unidade).some((p) => args.chave.startsWith(`${p.chave}_`));
   }
   return args.chave.startsWith(`${usuario.pessoaChave}_`);
 }
@@ -210,7 +264,7 @@ export function podeGravarResolucao(
 ): boolean {
   if (!podeAbrirUnidade(usuario, unidade.slug)) return false;
   if (!unidade.pessoas.some((p) => p.chave === pessoa)) return false;
-  if (veTimeTodo(usuario)) return true;
+  if (veTimeTodo(usuario)) return pessoasNoEscopo(usuario, unidade).some((p) => p.chave === pessoa);
   return usuario.pessoaChave === pessoa;
 }
 

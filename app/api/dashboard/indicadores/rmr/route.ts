@@ -46,7 +46,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "Sem acesso a esta unidade." }, { status: 403 });
   }
 
-  const relatorios = await listRmr(unidade.slug, pessoasLegiveis(usuario));
+  const relatorios = await listRmr(unidade.slug, pessoasLegiveis(usuario, unidade));
   return NextResponse.json({
     relatorios: relatorios.map((r) => ({ ...r, conteudo: normalizarRmr(r.conteudo) })),
   });
@@ -81,7 +81,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Pessoa não encontrada nesta unidade." }, { status: 400 });
   }
 
-  const permitidas = pessoasLegiveis(usuario);
+  const permitidas = pessoasLegiveis(usuario, unidade);
   const podeEscrever =
     podeAbrirUnidade(usuario, unidade.slug) && (permitidas === null || permitidas.includes(pessoa));
   if (!podeEscrever) {

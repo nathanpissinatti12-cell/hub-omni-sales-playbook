@@ -4,7 +4,12 @@ import { PainelIndicadores } from "@/components/dashboard/indicadores/PainelIndi
 import { getUsuarioPainel, pessoasVinculadas } from "@/db/adminQueries";
 import { getSiteSession } from "@/lib/getSiteSession";
 import { unidadeComVinculos, unidadePorSlug } from "@/lib/indicadores";
-import { painelLiberado, permissaoDe, podeAbrirUnidade } from "@/lib/permissaoIndicadores";
+import {
+  painelLiberado,
+  permissaoDe,
+  podeAbrirUnidade,
+  unidadeNoEscopo,
+} from "@/lib/permissaoIndicadores";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +20,8 @@ export default async function PainelIndicadoresUnidadePage({ params }: { params:
   // Quem aparece no N5 são as pessoas vinculadas a um usuário desta unidade. O
   // cadastro do time continua definindo as metas e os indicadores de cada uma;
   // o vínculo decide só quem entra na tela.
-  const unidade = unidadeComVinculos(cadastrada, await pessoasVinculadas(cadastrada.slug));
-  const semVinculo = cadastrada.pessoas.length > 0 && unidade.pessoas.length === 0;
+  const vinculada = unidadeComVinculos(cadastrada, await pessoasVinculadas(cadastrada.slug));
+  const semVinculo = cadastrada.pessoas.length > 0 && vinculada.pessoas.length === 0;
 
   // O middleware já garantiu que existe sessão; aqui resolvemos O QUE a pessoa
   // vê. O vínculo vem do banco a cada abertura, não do cookie.
@@ -37,9 +42,14 @@ export default async function PainelIndicadoresUnidadePage({ params }: { params:
   }
 
   // Colaborador que tentou outra unidade vai para a dele, em vez de ver erro.
-  if (!podeAbrirUnidade(usuario, unidade.slug)) {
+  if (!podeAbrirUnidade(usuario, vinculada.slug)) {
     redirect(`/dashboard/indicadores/${usuario.unidade}`);
   }
+
+  // E, por último, só quem este usuário alcança: o N4 de BDR não recebe a linha
+  // do Closer, nem o contrário. Corte feito aqui, antes de a tela existir — não
+  // adianta esconder seção se o número chega ao cliente.
+  const unidade = unidadeNoEscopo(usuario, vinculada);
 
   const permissao = permissaoDe(usuario);
   const pessoa = permissao.somentePessoa
