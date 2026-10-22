@@ -333,9 +333,18 @@ export const PESSOAS_TATUI: Pessoa[] = [
   bdr("helena", "Helena — BDR"),
 ];
 
+// Time de Ribeirão completo em 22/10/2026. As chaves de Otavio e Nathalia são as
+// mesmas de antes — trocar a chave começaria o histórico do zero, e só o nome
+// mudou. As novas usam sobrenome onde o primeiro nome já existe em outra unidade
+// (Aline, em Tatuí): a unidade separa os lançamentos no banco, mas chave repetida
+// confunde quem lê a tabela.
 export const PESSOAS_RIBEIRAO: Pessoa[] = [
-  bdr("otavio", "Otavio — BDR"),
   bdr("nathalia", "Nathalia Dadalte — BDR"),
+  bdr("otavio", "Otavio Souza — BDR"),
+  bdr("analli", "Analli Pereira — BDR"),
+  bdr("araujo", "Aline Araujo — BDR"),
+  bdr("penaforte", "Julia Penaforte — BDR"),
+  bdr("isadora", "Luana Isadora — BDR"),
 ];
 
 export const PESSOAS_PARTNERS: Pessoa[] = [bdr("alessandra", "Alessandra Thibes — BDR")];
