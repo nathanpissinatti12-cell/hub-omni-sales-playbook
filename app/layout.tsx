@@ -3,13 +3,11 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import "./globals.css";
-import { MenuOnvox } from "@/components/MenuOnvox";
 import { SiteWidgets } from "@/components/SiteWidgets";
 import { getUsuarioPainel } from "@/db/adminQueries";
-import { UNIDADES } from "@/lib/indicadores";
 import { ehAdministrador } from "@/lib/acessoSistema";
 import { PLAYBOOK_VISIVEL } from "@/lib/playbookVisivel";
-import { ehHead } from "@/lib/permissaoIndicadores";
+import { painelLiberado } from "@/lib/permissaoIndicadores";
 import { SiteLogoutButton } from "@/components/SiteLogoutButton";
 import { SITE_SESSION_COOKIE, readSiteSession } from "@/lib/siteSession";
 
@@ -38,17 +36,14 @@ export const metadata: Metadata = PLAYBOOK_VISIVEL
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const session = await readSiteSession(cookies().get(SITE_SESSION_COOKIE)?.value);
 
-  // Unidades que este usuário pode abrir no Painel de Indicadores: Head vê
-  // todas, colaborador vê só a dele, quem não tem vínculo não vê o menu.
+  // O menu mostra "Painel de Indicadores" para quem tem acesso a ele. Antes
+  // havia um item "Onvox" que abria a lista de unidades aqui dentro; a escolha
+  // passou para a própria página, que é onde dá para explicar o que há em cada
+  // unidade. Esta checagem também estava desatualizada: exigia pessoa vinculada
+  // de todo não-Head, o que deixava o supervisor (N4, que não tem linha
+  // obrigatória) sem o item no menu.
   const usuarioPainel = session ? await getUsuarioPainel(session.uid) : null;
-  const unidadesDoMenu = !usuarioPainel
-    ? []
-    : ehHead(usuarioPainel)
-      ? UNIDADES.map((u) => ({ slug: u.slug, nome: u.nome }))
-      : UNIDADES.filter((u) => u.slug === usuarioPainel.unidade && usuarioPainel.pessoaChave).map((u) => ({
-          slug: u.slug,
-          nome: u.nome,
-        }));
+  const temPainel = usuarioPainel !== null && painelLiberado(usuarioPainel);
 
   return (
     <html lang="pt-BR" className={inter.variable}>
@@ -81,11 +76,19 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 Dashboard
               </Link>
             )}
-            {unidadesDoMenu.length > 0 && <MenuOnvox unidades={unidadesDoMenu} />}
+            {temPainel && (
+              <Link
+                href="/dashboard/indicadores"
+                className="text-sm hover:underline"
+                style={{ color: "var(--text)" }}
+              >
+                Painel de Indicadores
+              </Link>
+            )}
             {/* Admin e Equipamentos são de administrador (root e owner). O
                 menu lista só o que a pessoa consegue abrir; quem não é
-                administrador e digitar a URL cai no /playbook, porque o
-                middleware barra antes de a página existir. */}
+                administrador e digitar a URL é redirecionado pelo middleware,
+                antes de a página existir. */}
             {ehAdministrador(session?.accessLevel) && (
               <>
                 <Link href="/admin" className="text-sm hover:underline" style={{ color: "var(--text)" }}>
