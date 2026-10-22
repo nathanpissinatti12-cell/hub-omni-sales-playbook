@@ -32,46 +32,37 @@ export function PermissionsTab({
     );
   }
 
-  // Owner primeiro e sempre aberto: ele não pertence a unidade nenhuma — vê o
-  // sistema inteiro —, então não cabe dentro de nenhuma seção.
-  const owners = users.filter((u) => u.access_level === "owner");
-  const vinculados = users.filter((u) => u.access_level !== "owner");
+  // Lista lateral + uma seção por vez na área principal. A versão anterior
+  // empilhava as seções abertas e a página ficava longa demais: cada linha é um
+  // formulário de permissão inteiro, não um nome.
+  //
+  // Owner é a primeira da lista e a que abre por padrão: ele não pertence a
+  // unidade nenhuma — vê o sistema inteiro —, então não cabe dentro de uma
+  // unidade, mas também não some.
+  const grupos: { chave: string; titulo: string; gente: AdminUser[] }[] = [];
 
-  const porUnidade = UNIDADES.map((u) => ({
-    chave: u.slug,
-    titulo: u.nome,
-    gente: ordenar(vinculados.filter((v) => v.unidade === u.slug)),
-  })).filter((g) => g.gente.length > 0);
+  const owners = users.filter((u) => u.access_level === "owner");
+  if (owners.length > 0) {
+    grupos.push({ chave: "owner", titulo: "Owner", gente: ordenar(owners) });
+  }
+
+  const vinculados = users.filter((u) => u.access_level !== "owner");
+  for (const u of UNIDADES) {
+    const gente = ordenar(vinculados.filter((v) => v.unidade === u.slug));
+    if (gente.length > 0) grupos.push({ chave: u.slug, titulo: u.nome, gente });
+  }
 
   // Quem não é owner e não tem unidade: ou é um vínculo que ninguém terminou de
-  // fazer, ou alguém que só usa o resto do Hub. Fica no fim, numa seção
-  // própria, em vez de sumir da lista.
+  // fazer, ou alguém que só usa o resto do Hub. Fica no fim da lista, em vez de
+  // sumir.
   const semUnidade = ordenar(
     vinculados.filter((v) => !v.unidade || !UNIDADES.some((u) => u.slug === v.unidade))
   );
+  if (semUnidade.length > 0) {
+    grupos.push({ chave: "sem-unidade", titulo: "Sem unidade", gente: semUnidade });
+  }
 
-  return (
-    <div className="space-y-3">
-      {owners.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-xs font-extrabold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
-            Owner · acesso a tudo, sem unidade
-          </p>
-          {owners.map((user) => (
-            <UserRow key={user.id} user={user} onChanged={onChanged} />
-          ))}
-        </div>
-      )}
-
-      {porUnidade.map((g) => (
-        <Grupo key={g.chave} titulo={g.titulo} gente={g.gente} onChanged={onChanged} />
-      ))}
-
-      {semUnidade.length > 0 && (
-        <Grupo titulo="Sem unidade no painel" gente={semUnidade} onChanged={onChanged} />
-      )}
-    </div>
-  );
+  return <Navegacao grupos={grupos} onChanged={onChanged} />;
 }
 
 /** N3, N4, N5 e por último quem não tem nível; dentro disso, por nome. */
@@ -84,25 +75,9 @@ function ordenar(gente: AdminUser[]): AdminUser[] {
   });
 }
 
-/**
- * Uma unidade, fechada por padrão. Com cinco unidades e perto de vinte pessoas,
- * a lista corrida obrigava a rolar a página inteira para achar alguém — e cada
- * linha aberta é um formulário de permissão, não um nome.
- *
- * O resumo no cabeçalho (quantos, e em que níveis) existe para a maioria das
- * perguntas não precisar abrir nada.
- */
-function Grupo({
-  titulo,
-  gente,
-  onChanged,
-}: {
-  titulo: string;
-  gente: AdminUser[];
-  onChanged: () => void;
-}) {
-  const [aberto, setAberto] = useState(false);
-  const porNivel = ["n3", "n4", "n5"]
+/** "4 pessoas · 1 N4 · 3 N5" — o bastante para não precisar abrir. */
+function resumo(gente: AdminUser[]): string {
+  const niveis = ["n3", "n4", "n5"]
     .map((n) => {
       const quantos = gente.filter((g) => g.nivel_painel === n).length;
       return quantos > 0 ? `${quantos} ${n.toUpperCase()}` : null;
@@ -110,35 +85,75 @@ function Grupo({
     .filter(Boolean)
     .join(" · ");
   const semNivel = gente.filter((g) => !g.nivel_painel).length;
+  return [niveis, semNivel > 0 ? `${semNivel} sem nível` : null].filter(Boolean).join(" · ");
+}
+
+/**
+ * Lista das unidades ao lado, pessoas da selecionada no meio.
+ *
+ * Em telas estreitas a lista vira uma fila de botões em cima, não uma coluna de
+ * 160px espremida ao lado de um formulário — o painel é usado no celular para
+ * conferir acesso.
+ */
+function Navegacao({
+  grupos,
+  onChanged,
+}: {
+  grupos: { chave: string; titulo: string; gente: AdminUser[] }[];
+  onChanged: () => void;
+}) {
+  const [selecionado, setSelecionado] = useState(grupos[0]?.chave ?? "");
+  // Se a unidade selecionada esvaziar (último usuário dela excluído ou movido),
+  // cai na primeira em vez de mostrar área vazia sem explicação.
+  const atual = grupos.find((g) => g.chave === selecionado) ?? grupos[0];
 
   return (
-    <div className="rounded-lg border" style={{ borderColor: "var(--border)" }}>
-      <button
-        type="button"
-        onClick={() => setAberto((v) => !v)}
-        aria-expanded={aberto}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
-      >
-        <span className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold">{titulo}</span>
-          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-            {gente.length} {gente.length === 1 ? "pessoa" : "pessoas"}
-            {porNivel ? ` · ${porNivel}` : ""}
-            {semNivel > 0 ? ` · ${semNivel} sem nível` : ""}
-          </span>
-        </span>
-        <span className="text-xs" style={{ color: "var(--text-muted)" }} aria-hidden="true">
-          {aberto ? "▲" : "▼"}
-        </span>
-      </button>
+    <div className="grid gap-4 sm:grid-cols-[170px_1fr]">
+      <nav className="flex flex-wrap gap-2 sm:flex-col sm:flex-nowrap" aria-label="Unidades">
+        {grupos.map((g) => {
+          const ativo = g.chave === atual?.chave;
+          return (
+            <button
+              key={g.chave}
+              type="button"
+              onClick={() => setSelecionado(g.chave)}
+              aria-current={ativo ? "true" : undefined}
+              className="rounded-md border px-3 py-2 text-left text-xs"
+              style={{
+                borderColor: ativo ? "var(--accent)" : "var(--border)",
+                background: ativo ? "var(--accent)" : "transparent",
+                color: ativo ? "var(--on-accent)" : "var(--text)",
+              }}
+            >
+              <span className="block font-semibold">{g.titulo}</span>
+              <span
+                className="block text-[11px]"
+                style={{ color: ativo ? "var(--on-accent)" : "var(--text-muted)" }}
+              >
+                {g.gente.length} {g.gente.length === 1 ? "pessoa" : "pessoas"}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
 
-      {aberto && (
-        <div className="space-y-3 border-t p-4" style={{ borderColor: "var(--border)" }}>
-          {gente.map((user) => (
-            <UserRow key={user.id} user={user} onChanged={onChanged} />
-          ))}
-        </div>
-      )}
+      <div className="min-w-0 space-y-3">
+        {atual && (
+          <>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+              <b style={{ color: "var(--text)" }}>{atual.titulo}</b>
+              {atual.chave === "owner"
+                ? " · acesso a tudo, sem unidade"
+                : resumo(atual.gente)
+                  ? ` · ${resumo(atual.gente)}`
+                  : ""}
+            </p>
+            {atual.gente.map((user) => (
+              <UserRow key={user.id} user={user} onChanged={onChanged} />
+            ))}
+          </>
+        )}
+      </div>
     </div>
   );
 }
