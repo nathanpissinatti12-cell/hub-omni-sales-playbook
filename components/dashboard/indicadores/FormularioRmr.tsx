@@ -20,6 +20,7 @@ import {
 } from "@/lib/rmr";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
 import { GraficoColunasMensal, RankingMensal, type MesLancado } from "./Graficos";
+import { SeloAtingimento } from "./SeloAtingimento";
 
 /** pendente = há texto não gravado; salvo = o servidor confirmou. */
 type EstadoSalvamento = "limpo" | "pendente" | "salvando" | "salvo" | "erro";
@@ -542,30 +543,17 @@ export function FormularioRmr({
                   <td className="py-2.5 pr-3 text-right tabular-nums" style={{ color: "var(--text-muted)" }}>
                     {l.diferenca || "—"}
                   </td>
-                  {/* Número e veredito juntos na mesma célula, mas em duas
-                      linhas: a cor sozinha não serve a quem imprime em preto e
-                      branco nem a quem não distingue vermelho de verde. */}
-                  <td className="py-2.5 text-right">
-                    {l.atingida === null ? (
-                      <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                        {l.realizado ? "sem meta" : "sem lançamento"}
-                      </span>
-                    ) : (
-                      <>
-                        <b
-                          className="block tabular-nums"
-                          style={{ color: l.atingida ? CORES.ok : CORES.bad }}
-                        >
-                          {l.pct}
-                        </b>
-                        <span
-                          className="block text-[11px]"
-                          style={{ color: l.atingida ? CORES.ok : CORES.bad }}
-                        >
-                          {l.atingida ? "realizada" : "não realizada"}
-                        </span>
-                      </>
-                    )}
+                  {/* O mesmo selo do painel — bolinha e porcentagem —, aqui em
+                      leitura binária: no fechamento não existe "quase". As
+                      palavras "realizada / não realizada" saíram da tela e
+                      continuam no PDF, que é onde a cor não ajuda: papel em
+                      preto e branco, ou quem não distingue verde de vermelho. */}
+                  <td className="py-2.5 text-right font-extrabold">
+                    <SeloAtingimento
+                      atingida={l.atingida}
+                      texto={l.pct}
+                      vazio={l.realizado ? "sem meta" : "sem lançamento"}
+                    />
                   </td>
                 </tr>
                 {aberto === l.indicador && (
