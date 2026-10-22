@@ -32,11 +32,113 @@ export function PermissionsTab({
     );
   }
 
+  // Owner primeiro e sempre aberto: ele não pertence a unidade nenhuma — vê o
+  // sistema inteiro —, então não cabe dentro de nenhuma seção.
+  const owners = users.filter((u) => u.access_level === "owner");
+  const vinculados = users.filter((u) => u.access_level !== "owner");
+
+  const porUnidade = UNIDADES.map((u) => ({
+    chave: u.slug,
+    titulo: u.nome,
+    gente: ordenar(vinculados.filter((v) => v.unidade === u.slug)),
+  })).filter((g) => g.gente.length > 0);
+
+  // Quem não é owner e não tem unidade: ou é um vínculo que ninguém terminou de
+  // fazer, ou alguém que só usa o resto do Hub. Fica no fim, numa seção
+  // própria, em vez de sumir da lista.
+  const semUnidade = ordenar(
+    vinculados.filter((v) => !v.unidade || !UNIDADES.some((u) => u.slug === v.unidade))
+  );
+
   return (
     <div className="space-y-3">
-      {users.map((user) => (
-        <UserRow key={user.id} user={user} onChanged={onChanged} />
+      {owners.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-xs font-extrabold uppercase tracking-wide" style={{ color: "var(--text-muted)" }}>
+            Owner · acesso a tudo, sem unidade
+          </p>
+          {owners.map((user) => (
+            <UserRow key={user.id} user={user} onChanged={onChanged} />
+          ))}
+        </div>
+      )}
+
+      {porUnidade.map((g) => (
+        <Grupo key={g.chave} titulo={g.titulo} gente={g.gente} onChanged={onChanged} />
       ))}
+
+      {semUnidade.length > 0 && (
+        <Grupo titulo="Sem unidade no painel" gente={semUnidade} onChanged={onChanged} />
+      )}
+    </div>
+  );
+}
+
+/** N3, N4, N5 e por último quem não tem nível; dentro disso, por nome. */
+function ordenar(gente: AdminUser[]): AdminUser[] {
+  const ordem: Record<string, number> = { n3: 0, n4: 1, n5: 2 };
+  return [...gente].sort((a, b) => {
+    const na = ordem[a.nivel_painel ?? ""] ?? 3;
+    const nb = ordem[b.nivel_painel ?? ""] ?? 3;
+    return na - nb || a.name.localeCompare(b.name, "pt-BR");
+  });
+}
+
+/**
+ * Uma unidade, fechada por padrão. Com cinco unidades e perto de vinte pessoas,
+ * a lista corrida obrigava a rolar a página inteira para achar alguém — e cada
+ * linha aberta é um formulário de permissão, não um nome.
+ *
+ * O resumo no cabeçalho (quantos, e em que níveis) existe para a maioria das
+ * perguntas não precisar abrir nada.
+ */
+function Grupo({
+  titulo,
+  gente,
+  onChanged,
+}: {
+  titulo: string;
+  gente: AdminUser[];
+  onChanged: () => void;
+}) {
+  const [aberto, setAberto] = useState(false);
+  const porNivel = ["n3", "n4", "n5"]
+    .map((n) => {
+      const quantos = gente.filter((g) => g.nivel_painel === n).length;
+      return quantos > 0 ? `${quantos} ${n.toUpperCase()}` : null;
+    })
+    .filter(Boolean)
+    .join(" · ");
+  const semNivel = gente.filter((g) => !g.nivel_painel).length;
+
+  return (
+    <div className="rounded-lg border" style={{ borderColor: "var(--border)" }}>
+      <button
+        type="button"
+        onClick={() => setAberto((v) => !v)}
+        aria-expanded={aberto}
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+      >
+        <span className="flex items-baseline gap-2">
+          <span className="text-sm font-semibold">{titulo}</span>
+          <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+            {gente.length} {gente.length === 1 ? "pessoa" : "pessoas"}
+            {porNivel ? ` · ${porNivel}` : ""}
+            {semNivel > 0 ? ` · ${semNivel} sem nível` : ""}
+          </span>
+        </span>
+        <span className="text-xs" style={{ color: "var(--text-muted)" }} aria-hidden="true">
+          {aberto ? "▲" : "▼"}
+        </span>
+      </button>
+
+      {aberto && (
+        <div className="space-y-3 border-t p-4" style={{ borderColor: "var(--border)" }}>
+          {gente.map((user) => (
+            <UserRow key={user.id} user={user} onChanged={onChanged} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
