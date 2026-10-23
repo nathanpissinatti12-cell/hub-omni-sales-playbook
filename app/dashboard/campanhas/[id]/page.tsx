@@ -13,9 +13,9 @@ import {
   getCampaignSummary,
 } from "@/db/queries";
 import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
-import { getCustoRealManual } from "@/lib/custoRealManual";
 import { getCustoReal } from "@/db/custoCampanhaRealQueries";
-import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais, DEEPSEEK_CUSTO_USD_POR_CHAMADA } from "@/lib/custoCampanha";
+import { explicaCusto, formataReais, origemDoCusto } from "@/lib/custoCampanha";
+import { custoDaLinha, formataJanela } from "@/lib/custoDaLinha";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
@@ -66,31 +66,20 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
   const originTotal = getCampaignOriginTotal(campaign.nome);
 
   const perf = performance.find((p) => p.id === campaign.id) ?? null;
-  const custoManual = getCustoRealManual(campaign.nome);
-  const custo =
-    perf == null
-      ? null
-      : custoManual
-        ? custoDaCampanhaReal({
-            empresasConsultadas: perf.empresas_consultadas,
-            creditosApolloReais: custoManual.creditosApolloReais,
-            deepseekUsdReais: custoManual.deepseekUsdReais ?? perf.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
-            acertosHunter: perf.acertos_hunter,
-            conferidoEm: custoManual.conferidoEm,
-            cicloApolloNovo: perf.ciclo_apollo_novo,
-          })
-        : custoReal != null
-        ? custoDaCampanhaReal({
-            empresasConsultadas: perf.empresas_consultadas,
-            creditosApolloReais: Number(custoReal.apollo_creditos_reais),
-            deepseekUsdReais: Number(custoReal.deepseek_usd_reais),
-            acertosHunter: perf.acertos_hunter,
-            conferidoEm: custoReal.conferido_em ?? "",
-            cicloApolloNovo: perf.ciclo_apollo_novo,
-          })
-        : perf.custo_conferido
-          ? custoDaCampanha(perf.empresas_consultadas, perf.acertos_hunter, perf.ciclo_apollo_novo, perf.nome)
-          : null;
+  // getCampaignPerformance não enxerga o banco admin, então o custo gravado
+  // pelo formulário desta mesma página é colado aqui antes de calcular —
+  // mesma coisa que aplicaCustoReal faz na listagem.
+  const perfComCustoReal =
+    perf && custoReal
+      ? {
+          ...perf,
+          custo_real_apollo_creditos: Number(custoReal.apollo_creditos_reais),
+          custo_real_deepseek_usd: Number(custoReal.deepseek_usd_reais),
+          custo_real_conferido_em: custoReal.conferido_em,
+        }
+      : perf;
+  const custo = perfComCustoReal ? custoDaLinha(perfComCustoReal) : null;
+  const janela = formataJanela(perf?.rodou_inicio ?? null, perf?.rodou_fim ?? null);
   // Custo por lead que efetivamente subiu na Meetime — não por "empresa
   // enriquecida", que inclui quem nunca virou contato de verdade (sem e-mail
   // válido, sem decisor etc). Ver summary.criados_meetime (rank=1 no desfecho).
@@ -247,13 +236,29 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
             <div>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>Custo total</p>
               <p className="mt-1 text-xl font-semibold" title={explicaCusto(custo)}>
-                {custo.medido ? "" : "~"}
-                {formataReais(custo.totalReais)}
+                {origemDoCusto(custo) === "real" ? "" : "~"}
+                {formataReais(custo.totalReais)}{" "}
+                <span className="text-sm font-normal" style={{ color: "var(--text-muted)" }}>
+                  ({origemDoCusto(custo)})
+                </span>
               </p>
             </div>
             <div>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>Leads criados na Meetime</p>
               <p className="mt-1 text-xl font-semibold">{summary.criados_meetime}</p>
+            </div>
+            <div>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Rodou em</p>
+              <p
+                className="mt-1 text-xl font-semibold"
+                title={
+                  janela
+                    ? "Primeira e última chamada do Gemini na campanha — a janela real de execução do fluxo."
+                    : "A campanha rodou antes do registro de uso do Gemini existir (22/10/2026)."
+                }
+              >
+                {janela ?? "—"}
+              </p>
             </div>
             <div>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>Custo por lead na Meetime</p>

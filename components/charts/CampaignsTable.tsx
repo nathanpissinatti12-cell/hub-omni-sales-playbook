@@ -1,8 +1,8 @@
 import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
-import { custoDaCampanha, custoDaCampanhaReal, explicaCusto, formataReais, DEEPSEEK_CUSTO_USD_POR_CHAMADA } from "@/lib/custoCampanha";
+import { explicaCusto, formataReais, origemDoCusto } from "@/lib/custoCampanha";
+import { custoDaLinha, formataJanela } from "@/lib/custoDaLinha";
 import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
-import { getCustoRealManual } from "@/lib/custoRealManual";
 import { celularesRevelados } from "@/lib/celularesRevelados";
 
 export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
@@ -13,6 +13,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
           <tr className="border-b text-left" style={{ borderColor: "var(--border)" }}>
             <th className="px-3 py-2 font-medium">Campanha</th>
             <th className="px-3 py-2 font-medium">Status</th>
+            <th className="px-3 py-2 font-medium">Rodou em</th>
             <th className="px-3 py-2 font-medium">Encerrada em</th>
             <th className="px-3 py-2 font-medium">Total na fila</th>
             <th className="px-3 py-2 font-medium">Taxa processado</th>
@@ -26,31 +27,11 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
         </thead>
         <tbody>
           {data.map((c) => {
-            const manual = getCustoRealManual(c.nome);
-            const custo = manual
-              ? custoDaCampanhaReal({
-                  empresasConsultadas: c.empresas_consultadas,
-                  creditosApolloReais: manual.creditosApolloReais,
-                  deepseekUsdReais: manual.deepseekUsdReais ?? c.empresas_consultadas * DEEPSEEK_CUSTO_USD_POR_CHAMADA,
-                  acertosHunter: c.acertos_hunter,
-                  conferidoEm: manual.conferidoEm,
-                  cicloApolloNovo: c.ciclo_apollo_novo,
-                })
-              : c.custo_real_apollo_creditos != null && c.custo_real_deepseek_usd != null
-                ? custoDaCampanhaReal({
-                    empresasConsultadas: c.empresas_consultadas,
-                    creditosApolloReais: c.custo_real_apollo_creditos,
-                    deepseekUsdReais: c.custo_real_deepseek_usd,
-                    acertosHunter: c.acertos_hunter,
-                    conferidoEm: c.custo_real_conferido_em ?? "",
-                    cicloApolloNovo: c.ciclo_apollo_novo,
-                  })
-                : c.custo_conferido
-                  ? custoDaCampanha(c.empresas_consultadas, c.acertos_hunter, c.ciclo_apollo_novo, c.nome)
-                  : null;
+            const custo = custoDaLinha(c);
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             const encerrada = encerradaEm(c.nome);
             const revelados = celularesRevelados(c.nome);
+            const janela = formataJanela(c.rodou_inicio, c.rodou_fim);
             const percentRevelado = revelados != null && c.empresas_enriquecidas > 0 ? (revelados / c.empresas_enriquecidas) * 100 : null;
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
@@ -60,6 +41,17 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                 </Link>
               </td>
               <td className="px-3 py-2" style={{ color: "var(--text-muted)" }}>{c.status}</td>
+              <td
+                className="px-3 py-2 whitespace-nowrap"
+                style={{ color: "var(--text-muted)" }}
+                title={
+                  janela
+                    ? "Primeira e última chamada do Gemini na campanha — a janela real de execução do fluxo."
+                    : "A campanha rodou antes do registro de uso do Gemini existir (22/10/2026)."
+                }
+              >
+                {janela ?? "—"}
+              </td>
               <td className="px-3 py-2 whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
                 {encerrada == null ? "—" : formataDataEncerramento(encerrada)}
               </td>
@@ -87,10 +79,13 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                   <span style={{ color: "var(--text-muted)" }}>—</span>
                 ) : (
                   <>
-                    {custo.medido ? "" : "~"}
-                    {formataReais(custo.totalReais)}
+                    {origemDoCusto(custo) === "real" ? "" : "~"}
+                    {formataReais(custo.totalReais)}{" "}
+                    <span className="text-xs" style={{ color: "var(--text-muted)" }}>
+                      ({origemDoCusto(custo)})
+                    </span>
                     <span className="block text-xs" style={{ color: "var(--text-muted)" }}>
-                      ({Math.round(custo.creditosApollo)} cr Apollo{custo.medido ? ", medido" : ""})
+                      {Math.round(custo.creditosApollo)} cr Apollo{custo.medido ? " (real)" : " (estimado)"}
                     </span>
                   </>
                 )}

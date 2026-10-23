@@ -83,6 +83,29 @@ const CUSTO_REAL_MANUAL: Record<
     creditosApolloReais: 1408,
     conferidoEm: "2026-10-05",
   },
+  // 23/10/2026, das 08:31 às 10:19, conta Apollo da Tecnologia: 464 créditos.
+  // A estimativa mostrava 290 (taxa por empresa), ou seja 60% a menos que o
+  // gasto real — por isso o medido entra aqui.
+  //
+  // As três chaves abaixo são a MESMA campanha. O nome é digitado à mão no
+  // fluxo do n8n e aqui não temos como conferir qual grafia foi gravada em
+  // `campanhas.nome`; como a busca é por nome normalizado e exato, errar uma
+  // letra faz o valor medido sumir da tela sem nenhum erro (foi o que
+  // aconteceu com a "ICP - Blip PME"). Cobrimos as grafias plausíveis — a
+  // consulta é por nome da campanha, então nunca somam entre si. Quando a
+  // grafia real for confirmada, apagar as outras duas.
+  "ICP - SalesF": {
+    creditosApolloReais: 464,
+    conferidoEm: "2026-10-23",
+  },
+  "ICP - SalesF / Onvox Part": {
+    creditosApolloReais: 464,
+    conferidoEm: "2026-10-23",
+  },
+  "ICP - SalesF Onvox Part": {
+    creditosApolloReais: 464,
+    conferidoEm: "2026-10-23",
+  },
 };
 
 // O nome da campanha é digitado à mão em cada fluxo do n8n e volta com
