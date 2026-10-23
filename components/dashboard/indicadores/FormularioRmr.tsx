@@ -224,7 +224,16 @@ export function FormularioRmr({
   // não existe nasce com as seções 1 e 2 já preenchidas pelo painel.
   useEffect(() => {
     if (registro) {
-      setDoc(registro.conteudo);
+      // As seções 1 e 2 não são texto da pessoa: são a leitura do painel naquele
+      // mês. Por isso são relidas na abertura, e não restauradas como foram
+      // gravadas — lançamento feito DEPOIS de o relatório existir aparece
+      // sozinho. Antes o documento guardava a foto do dia em que foi aberto, e
+      // bastava alguém lançar mais tarde para a tabela da seção 1 discordar do
+      // gráfico logo abaixo dela, que sempre leu o painel direto.
+      //
+      // O texto escrito continua intacto: o que entra aqui é só o que o painel
+      // já responde sozinho.
+      setDoc({ ...registro.conteudo, resultado: sugestao.resultado, priorizacao: sugestao.priorizacao });
     } else {
       setDoc({
         ...rmrVazio(),
