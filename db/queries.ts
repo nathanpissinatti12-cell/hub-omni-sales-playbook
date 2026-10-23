@@ -2,6 +2,7 @@ import { pool } from "./client";
 import { classifyCnae } from "./cnaeGroups";
 import { tierTelefone } from "@/lib/phoneTier";
 import { APOLLO_INICIO_PLANO_NOVO } from "@/lib/custoCampanha";
+import { getGeminiCustoPorCampanha } from "./geminiCustoQueries";
 
 // fila_processamento.campanha é digitado à mão e diverge de campanhas.nome
 // em maiúsculas/espaçamento (ex.: "ICPs -imobiliaria" vs "ICPS - imobiliaria"),
@@ -16,7 +17,7 @@ import { APOLLO_INICIO_PLANO_NOVO } from "@/lib/custoCampanha";
 // com `WHERE NORMALIZE_NAME(campanha) = $1` devolvia ZERO linhas — era o caso
 // de todas as páginas de detalhe de campanha.
 const NORMALIZE_NAME = (col: string) => `lower(regexp_replace(${col}, '[[:space:]]+', '', 'g'))`;
-const normalizeName = (s: string) => s.toLowerCase().replace(/\s+/g, "");
+export const normalizeName = (s: string) => s.toLowerCase().replace(/\s+/g, "");
 
 export type CampaignPerformanceRow = {
   id: string;
@@ -50,6 +51,18 @@ export type CampaignPerformanceRow = {
   custo_real_apollo_creditos: number | null;
   custo_real_deepseek_usd: number | null;
   custo_real_conferido_em: string | null;
+  /**
+   * Custo do Gemini (busca CNPJ) MEDIDO pra essa campanha, somado de
+   * vw_gemini_custo_campanha. Null = a campanha rodou antes do rastreio
+   * existir (22/10/2026) ou a view está indisponível; nesse caso o custo do
+   * Gemini volta a ser estimado por empresa consultada.
+   */
+  gemini_custo_usd: number | null;
+  /** Chamadas do Gemini que falharam (429 etc) — alerta, não custo. */
+  gemini_falhas: number | null;
+  /** Janela real em que a campanha rodou, pela primeira/última chamada do Gemini. */
+  rodou_inicio: string | null;
+  rodou_fim: string | null;
 };
 
 // `campanhas.criado_em` é "timestamp without time zone" (guarda hora local do
@@ -147,7 +160,14 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
       -- (app/dashboard/page.tsx e app/api/dashboard/campaigns), depois de ler o outro banco.
       NULL::numeric AS custo_real_apollo_creditos,
       NULL::numeric AS custo_real_deepseek_usd,
-      NULL::date AS custo_real_conferido_em
+      NULL::date AS custo_real_conferido_em,
+      -- vw_gemini_custo_campanha vive no mesmo banco, mas é lida à parte
+      -- (SELECT *) porque é mantida fora deste repo e já mudou de forma uma
+      -- vez — ver db/geminiCustoQueries.ts. Preenchidas logo abaixo.
+      NULL::numeric AS gemini_custo_usd,
+      NULL::int AS gemini_falhas,
+      NULL::text AS rodou_inicio,
+      NULL::text AS rodou_fim
     FROM campanhas c
     LEFT JOIN fila_stats f ON f.campanha_norm = ${NORMALIZE_NAME("c.nome")}
     LEFT JOIN empresas_stats e ON e.campanha_id = c.id
@@ -157,7 +177,19 @@ export async function getCampaignPerformance(): Promise<CampaignPerformanceRow[]
   `,
     [CAMPANHA_MARCO_CUSTO, APOLLO_INICIO_PLANO_NOVO]
   );
-  return rows;
+
+  const gemini = await getGeminiCustoPorCampanha();
+  return rows.map((linha: CampaignPerformanceRow) => {
+    const g = gemini.get(normalizeName(linha.nome));
+    if (!g) return linha;
+    return {
+      ...linha,
+      gemini_custo_usd: g.custoUsd,
+      gemini_falhas: g.falhas,
+      rodou_inicio: g.inicio,
+      rodou_fim: g.fim,
+    };
+  });
 }
 
 export type CampaignRow = {
