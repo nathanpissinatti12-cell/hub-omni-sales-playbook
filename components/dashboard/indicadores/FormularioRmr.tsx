@@ -215,12 +215,11 @@ export function FormularioRmr({
       //
       // O texto escrito continua intacto: o que entra aqui é só o que o painel
       // já responde sozinho.
-      setDoc({ ...registro.conteudo, resultado: sugestao.resultado, priorizacao: sugestao.priorizacao });
+      setDoc({ ...registro.conteudo, resultado: sugestao.resultado });
     } else {
       setDoc({
         ...rmrVazio(),
         resultado: sugestao.resultado,
-        priorizacao: sugestao.priorizacao,
         // O enunciado do pior desvio entra nos dois lugares onde ele é cobrado:
         // o problema dos 5 porquês e o desvio do pedido de suporte.
         problema: sugestao.problema,
@@ -268,21 +267,20 @@ export function FormularioRmr({
     setPessoaChave(nova);
   }
 
-  /** Repõe as seções 1 e 2 com os números de agora, sem tocar no texto escrito. */
+  /** Repõe a seção 1 com os números de agora, sem tocar no texto escrito. */
   function recarregarNumeros() {
     // Não sobrescreve texto escrito: o enunciado só entra onde o campo está
     // vazio. Quem reescreveu o problema de propósito não perde a redação.
     registrarMudanca({
       ...doc,
       resultado: sugestao.resultado,
-      priorizacao: sugestao.priorizacao,
       problema: doc.problema.trim() ? doc.problema : sugestao.problema,
       pedido: {
         ...doc.pedido,
         desvio: doc.pedido.desvio.trim() ? doc.pedido.desvio : sugestao.problema,
       },
     });
-    setAviso("Seções 1 e 2 atualizadas com os lançamentos do painel.");
+    setAviso("Seção 1 atualizada com os lançamentos do painel.");
   }
 
   /*
@@ -325,7 +323,9 @@ export function FormularioRmr({
       [],
       ["2. PRIORIZAÇÃO — DESVIO DO CICLO"],
       ["Prioridade", "Indicador com desvio"],
-      ...doc.priorizacao.map((l, i): Celula[] => [i + 1, l.indicador]),
+      ...doc.priorizacao
+        .filter((l) => l.indicador.trim())
+        .map((l, i): Celula[] => [i + 1, l.indicador]),
       [],
       ["3. 5 PORQUÊS — CAMINHO ATÉ A CAUSA RAIZ"],
       ["PROBLEMA:", doc.problema],
@@ -582,22 +582,37 @@ export function FormularioRmr({
 
       {/* ---------------- 2. priorização ---------------- */}
       <Secao titulo="Priorização — o Top 3 desvios do ciclo" numero="2">
-        {doc.priorizacao.length === 0 ? (
-          <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Nenhum indicador abaixo da meta neste mês.
-          </p>
-        ) : (
-          // Só o nome: o tamanho do desvio está na seção 1, logo acima. Aqui a
-          // pergunta é outra — quais foram os três piores, e em que ordem.
-          <ol className="max-w-xl space-y-2.5">
-            {doc.priorizacao.map((l, i) => (
-              <li key={`${l.indicador}-${i}`} className="flex items-baseline gap-x-3 text-sm">
-                <b style={{ color: "var(--text-muted)" }}>{i + 1}.</b>
-                <span className="font-semibold">{l.indicador}</span>
-              </li>
-            ))}
-          </ol>
-        )}
+        <p className="mb-3 text-xs" style={{ color: "var(--text-muted)" }}>
+          As três frentes que este ciclo vai atacar, na ordem em que a reunião começa. O tamanho de
+          cada desvio está na seção 1, acima — aqui a pergunta é qual deles você escolhe.
+        </p>
+        {/* Campo, não lista pronta: quem escolhe a frente assume a escolha. E a
+            ordem da reunião nem sempre é a ordem do desvio — o menor dos três
+            pode ser o que destrava os outros dois. */}
+        <ol className="max-w-xl space-y-2">
+          {doc.priorizacao.map((l, i) => (
+            <li key={i} className="flex items-center gap-x-3">
+              <b className="text-sm" style={{ color: "var(--text-muted)" }}>
+                {i + 1}.
+              </b>
+              <input
+                className={inputCls}
+                style={inputStyle}
+                value={l.indicador}
+                onChange={(e) => {
+                  const lista = doc.priorizacao.map((o, j) =>
+                    j === i ? { ...o, indicador: e.target.value } : o
+                  );
+                  alterar("priorizacao", lista);
+                }}
+                placeholder={
+                  i === 0 ? "Indicador que a reunião ataca primeiro" : "Indicador"
+                }
+                aria-label={`Prioridade ${i + 1}`}
+              />
+            </li>
+          ))}
+        </ol>
       </Secao>
 
       {/* ---------------- 3. 5 porquês ---------------- */}
@@ -910,12 +925,17 @@ function DocumentoImpressao({
           </table>
         </Bloco>
 
-        {doc.priorizacao.length > 0 && (
+        {/* Vaga em branco não vira item numerado no papel: o relatório
+            impresso mostra as frentes escolhidas, não as três linhas do
+            formulário. */}
+        {doc.priorizacao.some((l) => l.indicador.trim()) && (
           <Bloco titulo="2. Priorização — o Top 3 desvios do ciclo">
             <ol style={{ margin: 0, paddingLeft: "6mm" }}>
-              {doc.priorizacao.map((l, i) => (
-                <li key={`${l.indicador}-${i}`}>{l.indicador}</li>
-              ))}
+              {doc.priorizacao
+                .filter((l) => l.indicador.trim())
+                .map((l, i) => (
+                  <li key={i}>{l.indicador}</li>
+                ))}
             </ol>
           </Bloco>
         )}
