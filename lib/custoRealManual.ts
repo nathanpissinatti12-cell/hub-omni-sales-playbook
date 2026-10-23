@@ -87,22 +87,10 @@ const CUSTO_REAL_MANUAL: Record<
   // A estimativa mostrava 290 (taxa por empresa), ou seja 60% a menos que o
   // gasto real — por isso o medido entra aqui.
   //
-  // As três chaves abaixo são a MESMA campanha. O nome é digitado à mão no
-  // fluxo do n8n e aqui não temos como conferir qual grafia foi gravada em
-  // `campanhas.nome`; como a busca é por nome normalizado e exato, errar uma
-  // letra faz o valor medido sumir da tela sem nenhum erro (foi o que
-  // aconteceu com a "ICP - Blip PME"). Cobrimos as grafias plausíveis — a
-  // consulta é por nome da campanha, então nunca somam entre si. Quando a
-  // grafia real for confirmada, apagar as outras duas.
+  // Grafia conferida no dashboard em produção: `campanhas.nome` é exatamente
+  // "ICP - SalesF" (as variantes com "Onvox Part" que estavam aqui por
+  // precaução foram removidas depois de ver o valor aparecer na tela).
   "ICP - SalesF": {
-    creditosApolloReais: 464,
-    conferidoEm: "2026-10-23",
-  },
-  "ICP - SalesF / Onvox Part": {
-    creditosApolloReais: 464,
-    conferidoEm: "2026-10-23",
-  },
-  "ICP - SalesF Onvox Part": {
     creditosApolloReais: 464,
     conferidoEm: "2026-10-23",
   },
