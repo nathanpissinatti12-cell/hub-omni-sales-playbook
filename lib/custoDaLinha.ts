@@ -50,15 +50,15 @@ export function custoDaLinha(c: CampaignPerformanceRow): CustoCampanha | null {
   return null;
 }
 
-/** "23/10/2026 08:31 → 10:19" a partir do início/fim medidos do Gemini. */
-export function formataJanela(inicio: string | null, fim: string | null): string | null {
-  if (!inicio) return null;
-  const [dataI, horaI] = inicio.split(" ");
-  const dia = (d: string) => d.split("-").reverse().join("/");
-  if (!fim) return `${dia(dataI)}${horaI ? ` ${horaI}` : ""}`;
-  const [dataF, horaF] = fim.split(" ");
-  if (dataI === dataF) {
-    return `${dia(dataI)} ${horaI ?? ""}${horaF ? ` → ${horaF}` : ""}`.trim();
-  }
-  return `${dia(dataI)} → ${dia(dataF)}`;
+/**
+ * Só a data, "23/10/2026", a partir do "YYYY-MM-DD HH:MM" que vem da view. A
+ * hora chegou a aparecer na tela e foi tirada a pedido: pra ler o painel o que
+ * importa é o dia em que a campanha rodou e o dia em que terminou.
+ */
+export function formataDia(momento: string | null): string | null {
+  if (!momento) return null;
+  const [data] = momento.split(" ");
+  const partes = data.split("-");
+  if (partes.length !== 3) return data;
+  return partes.reverse().join("/");
 }

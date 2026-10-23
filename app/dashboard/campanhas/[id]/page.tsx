@@ -15,7 +15,7 @@ import {
 import { getCampaignOriginTotal } from "@/lib/campaignOriginTotals";
 import { getCustoReal } from "@/db/custoCampanhaRealQueries";
 import { explicaCusto, formataReais, origemDoCusto } from "@/lib/custoCampanha";
-import { custoDaLinha, formataJanela } from "@/lib/custoDaLinha";
+import { custoDaLinha, formataDia } from "@/lib/custoDaLinha";
 import { RegionChart } from "@/components/charts/RegionChart";
 import { RankedTable } from "@/components/charts/RankedTable";
 import { RankedList } from "@/components/charts/RankedList";
@@ -79,7 +79,8 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
         }
       : perf;
   const custo = perfComCustoReal ? custoDaLinha(perfComCustoReal) : null;
-  const janela = formataJanela(perf?.rodou_inicio ?? null, perf?.rodou_fim ?? null);
+  const rodouEm = formataDia(perf?.rodou_inicio ?? null);
+  const finalizouEm = formataDia(perf?.rodou_fim ?? null);
   // Custo por lead que efetivamente subiu na Meetime — não por "empresa
   // enriquecida", que inclui quem nunca virou contato de verdade (sem e-mail
   // válido, sem decisor etc). Ver summary.criados_meetime (rank=1 no desfecho).
@@ -252,12 +253,25 @@ export default async function CampaignDetailPage({ params }: { params: { id: str
               <p
                 className="mt-1 text-xl font-semibold"
                 title={
-                  janela
-                    ? "Primeira e última chamada do Gemini na campanha — a janela real de execução do fluxo."
+                  rodouEm
+                    ? "Dia da primeira chamada do Gemini na campanha — quando o fluxo começou a rodar."
                     : "A campanha rodou antes do registro de uso do Gemini existir (22/10/2026)."
                 }
               >
-                {janela ?? "—"}
+                {rodouEm ?? "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>Finalizou em</p>
+              <p
+                className="mt-1 text-xl font-semibold"
+                title={
+                  finalizouEm
+                    ? "Dia da última chamada do Gemini na campanha — quando o fluxo terminou."
+                    : "A campanha rodou antes do registro de uso do Gemini existir (22/10/2026)."
+                }
+              >
+                {finalizouEm ?? "—"}
               </p>
             </div>
             <div>

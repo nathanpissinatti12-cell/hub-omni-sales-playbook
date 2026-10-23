@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { CampaignPerformanceRow } from "@/db/queries";
 import { explicaCusto, formataReais, origemDoCusto } from "@/lib/custoCampanha";
-import { custoDaLinha, formataJanela } from "@/lib/custoDaLinha";
+import { custoDaLinha, formataDia } from "@/lib/custoDaLinha";
 import { encerradaEm, formataDataEncerramento } from "@/lib/campanhaEncerrada";
 import { celularesRevelados } from "@/lib/celularesRevelados";
 
@@ -14,6 +14,7 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             <th className="px-3 py-2 font-medium">Campanha</th>
             <th className="px-3 py-2 font-medium">Status</th>
             <th className="px-3 py-2 font-medium">Rodou em</th>
+            <th className="px-3 py-2 font-medium">Finalizou em</th>
             <th className="px-3 py-2 font-medium">Encerrada em</th>
             <th className="px-3 py-2 font-medium">Total na fila</th>
             <th className="px-3 py-2 font-medium">Taxa processado</th>
@@ -31,7 +32,8 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
             const custoPorLead = custo && c.criados_meetime > 0 ? custo.totalReais / c.criados_meetime : null;
             const encerrada = encerradaEm(c.nome);
             const revelados = celularesRevelados(c.nome);
-            const janela = formataJanela(c.rodou_inicio, c.rodou_fim);
+            const rodouEm = formataDia(c.rodou_inicio);
+            const finalizouEm = formataDia(c.rodou_fim);
             const percentRevelado = revelados != null && c.empresas_enriquecidas > 0 ? (revelados / c.empresas_enriquecidas) * 100 : null;
             return (
             <tr key={c.id} className="border-b last:border-0" style={{ borderColor: "var(--border)" }}>
@@ -45,12 +47,23 @@ export function CampaignsTable({ data }: { data: CampaignPerformanceRow[] }) {
                 className="px-3 py-2 whitespace-nowrap"
                 style={{ color: "var(--text-muted)" }}
                 title={
-                  janela
-                    ? "Primeira e última chamada do Gemini na campanha — a janela real de execução do fluxo."
+                  rodouEm
+                    ? "Dia da primeira chamada do Gemini na campanha — quando o fluxo começou a rodar."
                     : "A campanha rodou antes do registro de uso do Gemini existir (22/10/2026)."
                 }
               >
-                {janela ?? "—"}
+                {rodouEm ?? "—"}
+              </td>
+              <td
+                className="px-3 py-2 whitespace-nowrap"
+                style={{ color: "var(--text-muted)" }}
+                title={
+                  finalizouEm
+                    ? "Dia da última chamada do Gemini na campanha — quando o fluxo terminou. Diferente de \"Encerrada em\", que é a data em que a campanha foi dada por encerrada."
+                    : "A campanha rodou antes do registro de uso do Gemini existir (22/10/2026)."
+                }
+              >
+                {finalizouEm ?? "—"}
               </td>
               <td className="px-3 py-2 whitespace-nowrap" style={{ color: "var(--text-muted)" }}>
                 {encerrada == null ? "—" : formataDataEncerramento(encerrada)}
