@@ -1,4 +1,4 @@
-// Seções 1 e 2 do RMR montadas a partir do que já está lançado no painel.
+// Seção 1 do RMR montada a partir do que já está lançado no painel.
 //
 // Na planilha original esses números eram transcritos à mão do painel para o
 // relatório. Transcrição à mão é onde o número começa a divergir de si mesmo:
@@ -7,7 +7,7 @@
 
 import type { Indicador, Pessoa } from "./indicadores";
 import { fmt, iso, num, resolveMeta, status } from "./indicadoresCalc";
-import type { LinhaPriorizacao, LinhaResultado } from "./rmr";
+import type { LinhaResultado } from "./rmr";
 
 /**
  * O RMR é de fechamento: compara com a meta CHEIA do mês, não com a
@@ -28,7 +28,6 @@ function diferenca(real: number, meta: number, formato: Indicador["fmt"]): strin
 
 export type SugestaoRmr = {
   resultado: LinhaResultado[];
-  priorizacao: LinhaPriorizacao[];
   /**
    * O problema já enunciado a partir do desvio nº 1: "Lead SQL — 9 realizado
    * vs. 20 de meta". Existe para amarrar a corrente do método — sem isto, nada
@@ -47,7 +46,7 @@ export function sugestaoDoMes(
 ): SugestaoRmr {
   const { ini, fim } = limitesDoMes(mes);
   const resultado: LinhaResultado[] = [];
-  const candidatos: { linha: LinhaPriorizacao; pct: number; enunciado: string }[] = [];
+  const candidatos: { pct: number; enunciado: string }[] = [];
 
   for (const ind of pessoa.kpis) {
     const chave = `${pessoa.chave}_${ind.id}`;
@@ -74,16 +73,14 @@ export function sugestaoDoMes(
     if (pct !== null && real !== null && base !== null && pct < 100) {
       candidatos.push({
         pct,
-        linha: { indicador: ind.nome },
         enunciado: `${ind.nome} — ${fmt(real, ind.fmt)} realizado vs. ${fmt(base, ind.fmt)} de meta.`,
       });
     }
   }
 
-  // Top 3 pelo maior desvio. É a seção 2 da planilha: o ciclo discute três
-  // frentes, não doze — e a ordem define por onde a reunião começa.
+  // A ordenação continua, agora só para enunciar o problema do pior desvio: a
+  // priorização em si passou a ser escrita por quem preenche o relatório.
   const ordenados = candidatos.sort((a, b) => a.pct - b.pct);
-  const priorizacao = ordenados.slice(0, 3).map((c) => c.linha);
 
-  return { resultado, priorizacao, problema: ordenados[0]?.enunciado ?? "" };
+  return { resultado, problema: ordenados[0]?.enunciado ?? "" };
 }

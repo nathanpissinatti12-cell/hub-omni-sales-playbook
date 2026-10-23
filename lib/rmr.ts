@@ -32,6 +32,20 @@ export type LinhaPriorizacao = {
   indicador: string;
 };
 
+/**
+ * Três vagas, sempre — numeradas de 1 a 3 na tela, como na planilha.
+ *
+ * A lista nasce com as três em branco porque a priorização é ESCRITA: até
+ * 23/10/2026 ela vinha pronta, os três piores desvios da seção 1 em ordem de
+ * atingimento, e o dono do projeto pediu que fosse preenchida. O motivo é o
+ * método: quem escolhe a frente assume a escolha, e a ordem da reunião nem
+ * sempre é a ordem do desvio — um desvio pequeno pode ser o que destrava os
+ * outros dois.
+ */
+export function prioridadesVazias(): LinhaPriorizacao[] {
+  return [{ indicador: "" }, { indicador: "" }, { indicador: "" }];
+}
+
 /** Uma frente do plano de ação. São os 5W2H mais o que a planilha acrescenta. */
 export type LinhaPlano = {
   causa: string;
@@ -138,7 +152,7 @@ export function rmrVazio(): Rmr {
   return {
     narrativa: "",
     resultado: [],
-    priorizacao: [],
+    priorizacao: prioridadesVazias(),
     problema: "",
     porques: ["", "", "", "", ""],
     causaRaiz: "",
@@ -168,6 +182,14 @@ export function normalizarRmr(bruto: unknown): Rmr {
   const porques = Array.isArray(d.porques) ? d.porques.map(texto) : [];
   while (porques.length < 5) porques.push("");
 
+  // Mesmo tratamento dos porquês: documento gravado antes das três vagas
+  // existirem (ou com menos de três) ganha as que faltam, senão a tela
+  // renderizaria menos de três campos.
+  const prioridades = lista<LinhaPriorizacao>(d.priorizacao, (i) => ({
+    indicador: texto(i.indicador),
+  }));
+  while (prioridades.length < 3) prioridades.push({ indicador: "" });
+
   const plano = lista<LinhaPlano>(d.plano, (i) => {
     const linha = linhaPlanoVazia();
     for (const { chave } of COLUNAS_PLANO) linha[chave] = texto(i[chave]) || linha[chave];
@@ -184,9 +206,7 @@ export function normalizarRmr(bruto: unknown): Rmr {
       pct: texto(i.pct),
       atingida: i.atingida === true ? true : i.atingida === false ? false : null,
     })),
-    priorizacao: lista<LinhaPriorizacao>(d.priorizacao, (i) => ({
-      indicador: texto(i.indicador),
-    })),
+    priorizacao: prioridades,
     problema: texto(d.problema),
     porques: porques.slice(0, 5),
     causaRaiz: texto(d.causaRaiz),
@@ -208,11 +228,14 @@ export function normalizarRmr(bruto: unknown): Rmr {
  *
  * Com sete seções é fácil salvar pela metade e não perceber — ainda mais agora
  * que o relatório grava sozinho e não há um "enviar" que faça conferir. Só olha
- * o que a pessoa ESCREVE: resultado e priorização vêm do painel.
+ * o que a pessoa ESCREVE: o resultado vem do painel.
  */
 export function secoesPendentes(r: Rmr): string[] {
   const falta: string[] = [];
   if (!r.narrativa.trim()) falta.push("narrativa do ciclo");
+  // Uma frente já basta: o ciclo que fechou com dois desvios não deve ficar
+  // marcado como pendente por não ter um terceiro para listar.
+  if (r.priorizacao.every((l) => !l.indicador.trim())) falta.push("priorização");
   if (!r.problema.trim()) falta.push("problema");
   // Um porquê respondido já mostra que a pessoa entrou no método; exigir os
   // cinco marcaria como pendente um diagnóstico que fechou no terceiro.
@@ -230,6 +253,7 @@ export function rmrVazioDeFato(r: Rmr): boolean {
   return (
     !r.narrativa.trim() &&
     !r.problema.trim() &&
+    r.priorizacao.every((l) => !l.indicador.trim()) &&
     !r.causaRaiz.trim() &&
     !r.mensagem.trim() &&
     r.porques.every((p) => !p.trim()) &&
