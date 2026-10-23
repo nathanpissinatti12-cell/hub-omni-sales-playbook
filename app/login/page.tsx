@@ -1,11 +1,19 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { rotaInicial } from "@/lib/playbookVisivel";
 
+/**
+ * Para onde ir depois de entrar. Só caminho interno: o `?next=` chega pela URL,
+ * então sem esta checagem bastaria um link com `?next=https://outro.site` para o
+ * login legítimo terminar fora do Hub.
+ */
+function destinoDepoisDoLogin(next: string | null): string {
+  return next && next.startsWith("/") && !next.startsWith("//") ? next : rotaInicial();
+}
+
 function LoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -13,26 +21,46 @@ function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    // Lê do FORMULÁRIO, não do estado. Senha preenchida pelo gerenciador do
+    // navegador nem sempre dispara `onChange`: o campo mostra o texto e o estado
+    // continua vazio, e era isso que deixava o botão desabilitado no primeiro
+    // clique — ele não fazia nada, a pessoa clicava de novo e aí entrava.
+    const dados = new FormData(e.currentTarget);
+    const emailEnviado = String(dados.get("email") ?? "").trim();
+    const senhaEnviada = String(dados.get("password") ?? "");
+    if (!emailEnviado || !senhaEnviada) {
+      setError("Informe e-mail e senha.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     try {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, remember }),
+        body: JSON.stringify({ email: emailEnviado, password: senhaEnviada, remember }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         setError(data.error || "Não foi possível entrar.");
+        setLoading(false);
         return;
       }
-      router.push(searchParams.get("next") || rotaInicial());
-      router.refresh();
+      // Navegação completa, e não `router.push`: o App Router guarda em cache a
+      // versão da rota de destino que ele buscou ANTES do login — que é o
+      // redirecionamento de volta para esta tela. O push caía nessa cópia em
+      // cache e o `router.refresh()`, que vinha depois, só a limpava para o
+      // clique seguinte. Recarregar a página inteira faz o servidor montar o
+      // destino já com o cookie de sessão.
+      //
+      // `loading` fica ligado de propósito: a página está saindo, e desligar
+      // devolveria o botão por um instante.
+      window.location.assign(destinoDepoisDoLogin(searchParams.get("next")));
     } catch {
       setError("Erro de conexão. Tente novamente.");
-    } finally {
       setLoading(false);
     }
   }
@@ -60,7 +88,9 @@ function LoginForm() {
           </label>
           <input
             id="email"
+            name="email"
             type="email"
+            autoComplete="username"
             autoFocus
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -75,7 +105,9 @@ function LoginForm() {
           </label>
           <input
             id="password"
+            name="password"
             type="password"
+            autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-md border bg-transparent px-3 py-2 text-sm outline-none"
@@ -101,7 +133,7 @@ function LoginForm() {
 
         <button
           type="submit"
-          disabled={loading || !email || !password}
+          disabled={loading}
           className="w-full rounded-md px-3 py-2 text-sm font-semibold disabled:opacity-50"
           style={{ background: "var(--accent)", color: "var(--on-accent)" }}
         >
