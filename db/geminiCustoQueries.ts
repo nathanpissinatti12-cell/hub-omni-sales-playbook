@@ -21,19 +21,32 @@ export type GeminiCustoCampanha = {
   fim: string | null;
 };
 
-/**
- * `timestamp without time zone` volta do pg como Date já montada na hora local
- * (os getters locais devolvem exatamente o que está gravado, em qualquer
- * servidor); `timestamptz` volta como instante e os getters dão a hora do
- * servidor, que na Vercel é UTC. Como só exibimos, formatamos com os getters
- * locais e aceitamos o deslocamento no segundo caso.
- */
+// `inicio`/`fim` da view são `timestamptz`: o pg entrega o instante certo, e
+// formatar com os getters locais imprime no fuso do SERVIDOR — que na Vercel é
+// UTC. Foi o que aconteceu na estreia: a ICP - SalesF rodou das 08:31 às 10:19
+// e a tela mostrou 11:31 → 13:19, exatamente 3h adiantado. O painel é lido por
+// um time no Brasil, então a hora é fixada em America/Sao_Paulo em vez de
+// depender de onde o processo roda (em dev, na máquina do Brasil, dá o mesmo
+// resultado — o bug só aparece em produção).
+const FUSO_PAINEL = "America/Sao_Paulo";
+
+const FORMATO_MOMENTO = new Intl.DateTimeFormat("sv-SE", {
+  timeZone: FUSO_PAINEL,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+});
+
 function formataMomento(valor: unknown): string | null {
   if (valor == null) return null;
   if (typeof valor === "string") return valor;
   if (!(valor instanceof Date) || Number.isNaN(valor.getTime())) return null;
-  const d = (n: number) => String(n).padStart(2, "0");
-  return `${valor.getFullYear()}-${d(valor.getMonth() + 1)}-${d(valor.getDate())} ${d(valor.getHours())}:${d(valor.getMinutes())}`;
+  // o locale "sv-SE" é o truque padrão pra sair em "YYYY-MM-DD HH:MM", que é o
+  // formato que formataJanela espera e que ordena como string.
+  return FORMATO_MOMENTO.format(valor).replace(" ", " ").replace(",", "");
 }
 
 function numeroOuNull(valor: unknown): number | null {
