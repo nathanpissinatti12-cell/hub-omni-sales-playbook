@@ -9,6 +9,7 @@ import { gerarXlsx, type Aba, type Celula } from "@/lib/planilhaXlsx";
 import {
   COLUNAS_PLANO,
   EXEMPLOS_PORQUES,
+  MAX_PORQUES,
   STATUS_PLANO,
   dataBr,
   secoesPendentes,
@@ -649,6 +650,19 @@ export function FormularioRmr({
               />
             </div>
           ))}
+          {/* Cinco é o piso do método, não o teto: às vezes a corrente só fecha
+              no sexto. O campo novo nasce vazio e não é cobrado — quem parou no
+              quinto não vê diferença, e vazio nenhum vai para o PDF. */}
+          {doc.porques.length < MAX_PORQUES && (
+            <button
+              type="button"
+              onClick={() => alterar("porques", [...doc.porques, ""])}
+              className="ml-[6.5rem] text-xs font-semibold hover:underline"
+              style={{ color: "var(--accent)" }}
+            >
+              + Por quê? {doc.porques.length + 1}
+            </button>
+          )}
         </div>
       </Secao>
 
