@@ -19,7 +19,7 @@ import {
   type Rmr,
 } from "@/lib/rmr";
 import { sugestaoDoMes } from "@/lib/rmrSugestao";
-import { GraficoColunasMensal, RankingMensal, type MesLancado } from "./Graficos";
+import { GraficoColunasMensal } from "./Graficos";
 import { SeloAtingimento } from "./SeloAtingimento";
 
 /** pendente = há texto não gravado; salvo = o servidor confirmou. */
@@ -111,24 +111,6 @@ export function FormularioRmr({
           return { rotulo: rotuloMes(m), real, pct: status(real, metaDoMesCorrente, ind.dir).pct };
         }),
     [meses, mes, pessoaChave, reaisPorMes, metasPorMes]
-  );
-
-  /**
-   * Todos os meses COM lançamento, de todos os ciclos. "Últimos anos" é o
-   * recorte pedido, então aqui não filtra por ano: a lista é ordenada por valor,
-   * não por tempo, e dois anos de dados enriquecem o ranking em vez de poluir.
-   */
-  const mesesLancados = useCallback(
-    (ind: Indicador): MesLancado[] => {
-      const chave = `${pessoaChave}_${ind.id}`;
-      const out: MesLancado[] = [];
-      for (const m of meses) {
-        const v = num((reaisPorMes[m] ?? {})[chave]);
-        if (v !== null) out.push({ mes: rotuloMes(m), valor: v });
-      }
-      return out;
-    },
-    [meses, pessoaChave, reaisPorMes]
   );
 
   /**
@@ -224,7 +206,16 @@ export function FormularioRmr({
   // não existe nasce com as seções 1 e 2 já preenchidas pelo painel.
   useEffect(() => {
     if (registro) {
-      setDoc(registro.conteudo);
+      // As seções 1 e 2 não são texto da pessoa: são a leitura do painel naquele
+      // mês. Por isso são relidas na abertura, e não restauradas como foram
+      // gravadas — lançamento feito DEPOIS de o relatório existir aparece
+      // sozinho. Antes o documento guardava a foto do dia em que foi aberto, e
+      // bastava alguém lançar mais tarde para a tabela da seção 1 discordar do
+      // gráfico logo abaixo dela, que sempre leu o painel direto.
+      //
+      // O texto escrito continua intacto: o que entra aqui é só o que o painel
+      // já responde sozinho.
+      setDoc({ ...registro.conteudo, resultado: sugestao.resultado, priorizacao: sugestao.priorizacao });
     } else {
       setDoc({
         ...rmrVazio(),
@@ -565,33 +556,17 @@ export function FormularioRmr({
                       >
                         {l.indicador} — mês a mês
                       </span>
-                      {/* Os dois juntos porque respondem perguntas diferentes: a
-                          linha mostra o caminho no tempo, o ranking mostra onde
-                          cada mês ficou em relação à meta da época. */}
+                      {/* Só o mês a mês: o ranking "todos os meses, do maior
+                          para o menor" saiu da tela a pedido. O componente
+                          continua em Graficos.tsx. */}
                       {(() => {
                         const ind = pessoa.kpis.find((k) => k.nome === l.indicador) ?? pessoa.kpis[0];
                         return (
-                          <>
-                            <GraficoColunasMensal
-                              serie={colunasDoAno(ind)}
-                              meta={metaDoMes(ind)}
-                              formato={ind.fmt}
-                            />
-                            <span
-                              className="mb-1 mt-4 block text-[10px] font-bold uppercase tracking-wide"
-                              style={{ color: "var(--text-muted)" }}
-                            >
-                              Todos os meses, do maior para o menor
-                            </span>
-                            <RankingMensal
-                              pontos={mesesLancados(ind)}
-                              meta={metaDoMes(ind)}
-                              formato={ind.fmt}
-                              dir={ind.dir}
-                              rotuloMeta={`meta de ${rotuloMes(mes)}`}
-                              destaque={rotuloMes(mes)}
-                            />
-                          </>
+                          <GraficoColunasMensal
+                            serie={colunasDoAno(ind)}
+                            meta={metaDoMes(ind)}
+                            formato={ind.fmt}
+                          />
                         );
                       })()}
                     </td>

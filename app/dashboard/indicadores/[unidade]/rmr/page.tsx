@@ -71,7 +71,7 @@ export default async function RmrPage({ params }: { params: { unidade: string } 
   const [valores, relatorios] = await Promise.all([
     listValores(unidade.slug),
     // Mesma função da API, para a página não ter a sua própria versão da regra.
-    listRmr(unidade.slug, pessoasLegiveis(usuario)),
+    listRmr(unidade.slug, pessoasLegiveis(usuario, unidade)),
   ]);
 
   // Os lançamentos chegam como lista; o formulário precisa deles por mês, no

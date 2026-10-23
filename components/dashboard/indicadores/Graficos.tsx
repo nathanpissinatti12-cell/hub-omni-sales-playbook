@@ -202,6 +202,9 @@ export type MesLancado = { mes: string; valor: number };
  * Cada linha diz de que mês é, de propósito. Ordenar só por valor perderia o
  * tempo; com o rótulo, dá para ver o ranking E se os meses recentes estão no
  * topo ou no fim.
+ *
+ * FORA DA TELA desde 23/10/2026, a pedido: o RMR abre só o mês a mês. Mantido
+ * inteiro porque voltar a mostrá-lo é uma linha de JSX.
  */
 export function RankingMensal({
   pontos,
