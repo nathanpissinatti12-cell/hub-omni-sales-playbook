@@ -69,7 +69,11 @@ export type Rmr = {
   priorizacao: LinhaPriorizacao[];
   /** "Negociações iniciadas — 13 realizadas vs. 32 de meta." */
   problema: string;
-  /** Exatamente cinco, na ordem. Vazio no fim é normal: nem todo caso chega ao 5. */
+  /**
+   * Cinco é o piso, não o teto: a tela sempre mostra cinco e permite acrescentar
+   * do sexto em diante, até MAX_PORQUES. Vazio no fim é normal — nem todo caso
+   * chega ao quinto, e "5 porquês" é o nome do método, não um limite de linhas.
+   */
   porques: string[];
   causaRaiz: string;
   acionavel: boolean;
@@ -123,6 +127,12 @@ export const STATUS_PLANO = ["Não iniciada", "Em andamento", "Concluída", "Can
  * E o quinto termina em dúvida de propósito: nem todo caso fecha no quinto
  * porquê, e dizer "ainda preciso validar" é resposta melhor que inventar causa.
  */
+/**
+ * Teto de porquês. Existe só para o documento não crescer sem limite num
+ * clique acidental repetido — quem precisa de dez níveis já saiu do método.
+ */
+export const MAX_PORQUES = 10;
+
 export const EXEMPLOS_PORQUES: string[] = [
   "Porque tive muitas reuniões na agenda e sobrou pouco tempo para prospectar.",
   "Porque o tempo que sobrou foi consumido por follow-up das oportunidades em andamento.",
@@ -208,7 +218,7 @@ export function normalizarRmr(bruto: unknown): Rmr {
     })),
     priorizacao: prioridades,
     problema: texto(d.problema),
-    porques: porques.slice(0, 5),
+    porques: porques.slice(0, MAX_PORQUES),
     causaRaiz: texto(d.causaRaiz),
     acionavel: d.acionavel === true,
     precisaSuporte: d.precisaSuporte === true,
